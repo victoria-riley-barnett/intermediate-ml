@@ -1,0 +1,9 @@
+# Answers: Architectures, and where each one came from
+
+1. Weights are fitted by training; thresholds and the count in 1943 were set by hand. 1958 is the first row where a weight changes in response to error. The 1960 row (LMS) is the same idea with a squared-error loss.
+2. IDEA adds a mechanism. APPLICATION spends mechanisms that already exist on a changed input. 2012 (AlexNet) and 2020 (AlphaFold 2) are the two APPLICATION rows on the 2012 to 2022 plate.
+3. Amari (1967) published a multilayer pattern classifier trained by stochastic gradient. So the accurate statement is that the procedure that became standard for setting hidden weights, backpropagation, was not yet widely used or known to the field in 1969; it is not that nothing could be done. Reverse-mode differentiation was published by Linnainmaa (1970) and applied to networks by Werbos (1974), before the 1986 paper.
+4. Input: a row of 512 numbers. Output: 10 scores, turned into probabilities by a softmax. The weight matrices are 512 by 256, 256 by 256 and 256 by 10. Each layer owns a weight matrix; the ReLU and softmax own none. The network has no way to know order or length, because the input is one fixed-width row.
+5. The recurrent cell reuses the same three weight matrices at every step, so length costs no extra parameters. The price: steps must run one after another, and the gradient to the first step passes through one product of the recurrent weight per step.
+6. Each row of attention weights sums to one, so an output is a weighted average of values and cannot exceed the largest value mixed. Scores grow with the square of the length, so doubling the input quadruples the work and memory (the 2017 row's own cost line).
+7. Attention is blind to the order of positions: reorder the positions and every mixture reorders. Order must be supplied from outside the block, which is one of the things the encoder chapter adds.

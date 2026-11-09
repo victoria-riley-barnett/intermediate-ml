@@ -1,0 +1,7 @@
+# Answers: chapter 8
+
+1. Any pair that are reorderings of each other, for example `SxTx` and `TxSx`, is also confused: the counts are the same. A pair a counting reader can tell apart is any two strings of different length, for example `SxxT` and `SxxxT`, because the count of `x` differs. It can then answer length questions, but not order.
+2. The four highest slots, 9 to 12, only held pads, because the longest training string has eight symbols. Those weights never received a useful signal and keep their starting values, so they are leftover random numbers.
+3. The 0.78 averages two groups. About 57% of longer strings keep both markers inside slots 1 to 8 and are answered at 1.00. About 43% put a marker in slots 9 to 12 and are answered at 0.48, which is guessing. The reader is perfect on one question and guessing on another.
+4. Left padding moves nearly every marker into slots 9 to 12, which training never filled (91% of strings do this). A one-slot shift keeps most markers in the low slots (only 6% of strings move a marker out of slots 1 to 8), so the weights that read them were trained.
+5. Change the convention first. The spread shows the runs disagree, which points to a convention never tested rather than a lack of data. Retraining with more data assumes the missing thing is examples; changing and testing the padding assumes the missing thing is agreement between how training and use arrange the input. The fixed-limit failure of the flattened reader, by contrast, did not improve with more data.

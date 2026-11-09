@@ -135,7 +135,7 @@ def summary():
         else:
             title = h1_of(CHAPTERS / f"{stem}.md")
             lines.append(f"- [{label} · {title}](chapters/{stem}.md)")
-    lines += ["", "---", "", "[All figures](figures.md)"]
+    lines += ["", "# Back matter", "", "- [Answers](answers.md)", "- [All figures](figures.md)"]
     return "\n".join(lines) + "\n"
 
 
@@ -156,6 +156,26 @@ def title_page():
         "whether it changed the block or the input. Every later chapter is a place "
         "on that map.\n\n" + "\n".join(rows) + "\n"
     )
+
+
+def answers_page():
+    """Back matter: every chapter's answers, in book order, from code/<stem>/answers.md."""
+    out = ["# Answers", "",
+           "Answers to the questions at the end of each chapter. Try the questions first: "
+           "a question whose answer you have already read no longer tests anything.", ""]
+    for label, stem in PARTS:
+        if stem is None:
+            continue
+        f = HERE / "code" / stem / "answers.md"
+        if not f.exists():
+            continue
+        title = h1_of(CHAPTERS / f"{stem}.md")
+        body = f.read_text().strip().splitlines()
+        if body and body[0].startswith("# "):
+            body = body[1:]
+        body = [("#" + l) if l.startswith("#") else l for l in body]  # demote headings
+        out += [f"## {label} · [{title}](chapters/{stem}.md)", ""] + body + [""]
+    return "\n".join(out) + "\n"
 
 
 def figure_index(used):
@@ -228,6 +248,7 @@ def main(argv):
     (SRC / "SUMMARY.md").write_text(summary())
     (SRC / "index.md").write_text(title_page())
     (SRC / "figures.md").write_text(figure_index(used))
+    (SRC / "answers.md").write_text(answers_page())
     shutil.copytree(FIGURES, SRC / "figures")
     shutil.copytree(FIGURES / "fonts", work / "figures" / "fonts")
     shutil.copytree(STYLE, work / "style")
