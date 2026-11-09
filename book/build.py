@@ -169,7 +169,7 @@ def figure_index(used):
     return "\n".join(lines) + "\n"
 
 
-def book_toml(base):
+def book_toml(base, out):
     return f"""[book]
 title = "CSC 411"
 authors = ["Victoria Barnett"]
@@ -178,7 +178,7 @@ src = "_src"
 description = "Intermediate Machine Learning for Interdisciplinary Data Scientists"
 
 [build]
-build-dir = "out"
+build-dir = "{out}"
 create-missing = false
 
 [output.html]
@@ -210,21 +210,30 @@ def mdbook():
 
 
 def main(argv):
+    global SRC, OUT
+    import tempfile
     base = "/"
     for a in argv:
         if a.startswith("--base="):
             base = a.split("=", 1)[1]
+        if a.startswith("--out="):
+            OUT = pathlib.Path(a.split("=", 1)[1]).resolve()
+    # each build gets its own work dir, so two builds can run at once
+    work = pathlib.Path(tempfile.mkdtemp(prefix="book-"))
+    SRC = work / "_src"
     if not base.endswith("/"):
         base += "/"
-    for d in (SRC, OUT):
-        shutil.rmtree(d, ignore_errors=True)
+    shutil.rmtree(OUT, ignore_errors=True)
     used = copy_chapters()
     (SRC / "SUMMARY.md").write_text(summary())
     (SRC / "index.md").write_text(title_page())
     (SRC / "figures.md").write_text(figure_index(used))
     shutil.copytree(FIGURES, SRC / "figures")
-    (HERE / "book.toml").write_text(book_toml(base))
-    subprocess.run([mdbook(), "build", str(HERE)], check=True)
+    shutil.copytree(FIGURES / "fonts", work / "figures" / "fonts")
+    shutil.copytree(STYLE, work / "style")
+    (work / "book.toml").write_text(book_toml(base, OUT))
+    subprocess.run([mdbook(), "build", str(work)], check=True)
+    shutil.rmtree(work, ignore_errors=True)
     # mdBook rewrites .md links only inside the pages it renders; the plates
     # link back to chapters as .html already, so nothing else to fix.
     print(f"built {OUT}  ({len(used)} figures inline)")
