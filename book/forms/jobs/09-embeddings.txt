@@ -1,0 +1,15 @@
+Read /home/user/intermediate-ml/book/FORM.md, then the reference instance /home/user/intermediate-ml/book/forms/02-autodifferentiation.toml. Write ONE file: /home/user/intermediate-ml/book/forms/09-embeddings.toml. You may also edit files in /home/user/intermediate-ml/book/code/09-embeddings/ (trim prints, fix answers.md numbering, remove class-time wording). Touch nothing else.
+
+The author found the previous chapters had far too much model-written prose. This is a light mining pass: the form, the plates and the code carry the chapter; prose fields are short and, for quotes, copied from her delivered material. When in doubt, leave a field out.
+
+number = "9"
+title = "Giving tokens meaningful numbers"
+gist = "Embeddings: a table and a head, a similarity map, and the catch."
+Delivered sources: /home/user/src411/411/weeks/week09_embedding/ (lecture.md, lab.md, instructor/, run_log.json if present). week09_embedding
+Course frame register: /home/user/src411/411/curriculum.toml (corrected by /home/user/src411/411/admin/BOOK.md).
+Timeline row: 2013: a token given a vector fitted to its neighbours (lineage-b-2012-2022)
+Plates to place: every {{figure ...}} line currently in /home/user/intermediate-ml/book/chapters/09-embeddings.md.
+Existing verified code: /home/user/intermediate-ml/book/code/09-embeddings/ (scripts and answers.md). Reuse them; do not invent new numbers.
+
+
+Finish by building as FORM.md says and reply with: rendered word count of prose fields (estimate), the steps' claims, and anything you left out.

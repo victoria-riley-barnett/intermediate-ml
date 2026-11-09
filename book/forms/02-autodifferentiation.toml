@@ -1,0 +1,91 @@
+# Chapter form. Every prose field is mined from the delivered course, with its
+# source; nothing here is new narrative. See book/FORM.md.
+
+number = "2"
+title = "Autodifferentiation"
+gist = "Loss, direction, the update, learning rate; mean squared versus mean absolute error."
+
+[timeline]
+row = "1958: a weight moves by the error times that weight's own input."
+plate = "lineage-a-1943-1997"
+
+[frame]   # the course's own frame: representation -> transformation -> evidence
+question = "What can this week's model learn from the selected representation?"
+data = "Forty points generated from y = 3x + 7 with noise added, so the right answer is known."
+representation = "parameters, predictions, errors, and loss"
+transformation = "w <- w - lr * dloss/dw, repeated"
+evidence = "loss decreases for the right reason and gradients agree"
+path = "one full batch kept visible before introducing minibatches"
+source = "CSC 411 week 2"
+
+[[steps]]
+claim = "The loss turns forty errors into one number."
+quote = "Forty numbers are hard to compare against another forty and impossible to search with, so they have to be reduced to one. That single number is the loss, and the convention is that smaller means better."
+source = "week 2 lab, What the loss measures"
+figure = "eq-mse"
+
+[[steps]]
+claim = "Every point on the loss curve is a whole model."
+quote = "Every point on this curve represents an entire model, one particular choice of w, scored against all the data points at once."
+source = "week 2 lab, The loss as a function of the weight"
+
+[[steps]]
+claim = "The derivative gives the direction; the minus sign takes the step downhill."
+quote = "The derivative points in the direction the loss increases, so subtracting it moves in the direction the loss decreases."
+source = "week 2 lab, One step, and then many"
+figure = "gradient-descent"
+
+[[steps]]
+claim = "Gradient descent is that step, repeated."
+quote = "Running that line repeatedly is gradient descent, and it is the algorithm the rest of this book is built on."
+source = "week 2 lab, One step, and then many"
+figure = "loop-gradient-descent"
+
+[[steps]]
+claim = "PyTorch records the operations and walks them back into .grad."
+figure = "code-gd"
+
+[[steps]]
+claim = "The learning rate is a choice, and it fails two recognizable ways."
+quote = "There is no formula that produces the right learning rate. It depends on the scale of the data. The honest procedure is to try a value, look at the loss curve, and adjust."
+source = "week 2 lab, The learning rate"
+
+[[steps]]
+claim = "The loss is where you say what 'wrong' means."
+quote = "Making squared error as small as possible against a set of numbers lands you on their mean. Making absolute error as small as possible against the same numbers lands you on their median."
+source = "week 2 lab, Choosing a loss"
+
+[[steps]]
+claim = "One weight's gradient is the error times the input it multiplies."
+figure = "eq-weight-gradient"
+
+[[code]]
+label = "One step by hand, in pure Python"
+file = "02-autodifferentiation/one_step.py"
+credit = "Adapted from SmolML core/value.py, utils/losses, utils/optimizers (MIT)"
+output = """loss 6.2568   dL/dw -31.284
+w after one step: 2.9128"""
+note = "The same numbers as the mean squared error plate."
+
+[[code]]
+label = "The loop, three learning rates, and a loop that forgets to clear .grad"
+file = "02-autodifferentiation/loop.py"
+
+[[code]]
+label = "Mean or median: what each loss chooses"
+file = "02-autodifferentiation/mean_median.py"
+
+[[questions]]
+q = "Fitting the line involves four tensors: x, y, w and b. Which two does the procedure change, and which two are given?"
+[[questions]]
+q = "A step is w = w - lr * w.grad, and w.grad is negative. What happens to w, and why does the minus sign produce that?"
+[[questions]]
+q = "A loss curve falls smoothly and is still falling at step 60, having gone from about 35 to about 31. What should change?"
+[[questions]]
+q = "In the oversized-learning-rate run the loss grows on every step. Describe what one step does to the weight, using the word overshoot and naming what is overshot."
+[[questions]]
+q = "One added point out of forty-one pulls the squared-error line towards it and leaves the absolute-error line nearly still. Explain why from the way each loss adds up its errors."
+
+[next]
+missing = "A derivative for anything deeper than one layer."
+chapter = "03-backpropagation"

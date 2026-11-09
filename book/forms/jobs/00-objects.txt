@@ -1,0 +1,15 @@
+Read /home/user/intermediate-ml/book/FORM.md, then the reference instance /home/user/intermediate-ml/book/forms/02-autodifferentiation.toml. Write ONE file: /home/user/intermediate-ml/book/forms/00-objects.toml. You may also edit files in /home/user/intermediate-ml/book/code/00-objects/ (trim prints, fix answers.md numbering, remove class-time wording). Touch nothing else.
+
+The author found the previous chapters had far too much model-written prose. This is a light mining pass: the form, the plates and the code carry the chapter; prose fields are short and, for quotes, copied from her delivered material. When in doubt, leave a field out.
+
+number = "0"
+title = "Objects, and the shape of the work"
+gist = "Data, model, evaluate. A rule you cannot write down, and classes as the way to hold it."
+Delivered sources: /home/user/src411/411/weeks/week00_oop/ (lecture.md, lab.md, instructor/, run_log.json if present). week00_oop
+Course frame register: /home/user/src411/411/curriculum.toml (corrected by /home/user/src411/411/admin/BOOK.md).
+Timeline row: (omit [timeline]: chapter 0 is the shape of all the work)
+Plates to place: every {{figure ...}} line currently in /home/user/intermediate-ml/book/chapters/00-objects.md.
+Existing verified code: /home/user/intermediate-ml/book/code/00-objects/ (scripts and answers.md). Reuse them; do not invent new numbers.
+
+
+Finish by building as FORM.md says and reply with: rendered word count of prose fields (estimate), the steps' claims, and anything you left out.

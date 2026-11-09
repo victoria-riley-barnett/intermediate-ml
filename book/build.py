@@ -26,6 +26,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tomllib
 
 HERE = pathlib.Path(__file__).resolve().parent
 CHAPTERS = HERE / "chapters"
@@ -54,15 +55,76 @@ PARTS = [
     ("10", "10-whole-sequences"),
     ("11", "11-attention"),
     ("12", "12-encoder"),
-    ("Your project", None),
-    ("A", "project-a-new-data"),
-    ("B", "project-b-reporting"),
 ]
+
+FORMS = HERE / "forms"
+CODE = HERE / "code"
+
+
+def run_script(rel):
+    """Run a pure-Python example and return its real output."""
+    path = CODE / rel
+    r = subprocess.run([sys.executable, path.name], cwd=path.parent,
+                       capture_output=True, text=True, timeout=120)
+    if r.returncode != 0:
+        raise SystemExit(f"code/{rel} failed:\n{r.stderr}")
+    return r.stdout.rstrip()
+
+
+def render_form(stem):
+    """A chapter form (forms/<stem>.toml) rendered to Markdown. The form holds
+    the course's own frame and mined lines; the renderer adds no prose."""
+    f = tomllib.loads((FORMS / f"{stem}.toml").read_text())
+    out = [f"# {f['title']}", "", f"*{f['gist']}*", ""]
+    tl = f.get("timeline")
+    if tl:
+        link = f" [See the timeline](architectures.md#fig-{tl['plate']})." if tl.get("plate") else ""
+        out += [f"> **On the timeline.** {tl['row']}{link}", ""]
+    fr = f.get("frame")
+    if fr:
+        out += ["| | |", "|---|---|"]
+        for key, label in (("data", "Data"), ("representation", "Representation"),
+                           ("transformation", "Transformation"), ("evidence", "Evidence")):
+            if fr.get(key):
+                out.append(f"| **{label}** | {fr[key]} |")
+        out.append("")
+    for i, s in enumerate(f.get("steps", []), 1):
+        out += [f"## {i}. {s['claim']}", ""]
+        body = s.get("text") or s.get("quote")
+        if body:
+            out += [body, ""]
+        if s.get("figure"):
+            out += [f"{{{{figure {s['figure']}}}}}", ""]
+    if f.get("code"):
+        out += ["## In code", ""]
+        for c in f["code"]:
+            src = (CODE / c["file"]).read_text().rstrip()
+            src = "\n".join(l for l in src.splitlines()
+                            if not l.startswith("import sys; sys.path"))
+            out += [f"### {c['label']}", ""]
+            if c.get("credit"):
+                out += [f"<small>{c['credit']}</small>", ""]
+            out += ["```python", src, "```", "", "Output:", "", "```text", run_script(c["file"]), "```", ""]
+            if c.get("note"):
+                out += [c["note"], ""]
+    if f.get("questions"):
+        out += ["## Questions", ""]
+        out += [f"{i}. {q['q']}" for i, q in enumerate(f["questions"], 1)]
+        out += ["", "Answers are at the [back of the book](../answers.md).", ""]
+    nx = f.get("next")
+    if nx:
+        title = h1_of(CHAPTERS / f"{nx['chapter']}.md") if (CHAPTERS / f"{nx['chapter']}.md").exists() else nx['chapter']
+        out += ["## Still missing", "", f"{nx['missing']} → [{title}]({nx['chapter']}.md)", ""]
+    return "\n".join(out)
+
 
 FIGURE_LINE = re.compile(r"^\{\{figure ([\w-]+)\}\}\s*$", re.M)
 
 
 def h1_of(path):
+    form = FORMS / f"{path.stem}.toml"
+    if form.exists():
+        return tomllib.loads(form.read_text())["title"]
     for line in path.read_text().splitlines():
         if line.startswith("# "):
             return line[2:].strip()
@@ -119,7 +181,10 @@ def copy_chapters():
         if stem is None:
             continue
         path = CHAPTERS / f"{stem}.md"
-        text = path.read_text()
+        if (FORMS / f"{stem}.toml").exists():
+            text = render_form(stem)
+        else:
+            text = path.read_text()
         for slug in FIGURE_LINE.findall(text):
             used.setdefault(slug, []).append((label, stem))
         text = FIGURE_LINE.sub(lambda m: figure_block(m.group(1)), text)
