@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One weight's gradient</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+
+
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/02-autodifferentiation.html">&larr; The machine computes the derivative</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="code-gd.html">&larr; Six steps down a parabola</a>
+</nav>
+<!-- book-nav:end -->
+
+
+
+    <p class="eyebrow">Core equation · backpropagation</p>
+    <h1>One weight's gradient</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 612" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-weight-gradient-title eq-weight-gradient-desc">
+        <title id="eq-weight-gradient-title">One weight's gradient</title>
+        <desc id="eq-weight-gradient-desc">One weight's gradient: dL/dw equals delta times x, shown on a single layer with three inputs and one output. The weights are 1, 5, 2, the inputs 2, 0, 3, and the target 5. The layer's output is z = 1 times 2 plus 5 times 0 plus 2 times 3, which is 2 plus 0 plus 6 = 8. The error is delta = 8 minus 5 = 3, and half the squared error is 3 squared over 2 = 4.5. The gradient is then delta times each input: 3 times 2 = 6, 3 times 0 = 0, 3 times 3 = 9, so dL/dw is 6, 0, 9. The second input is zero, so the second weight adds nothing to the output and receives gradient zero: it stays at 5, although it is the largest of the three weights. The zero is about this input, not about the weight being useless: if that input is zero in every example the weight never moves.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520" dy="0">∂L/∂w</tspan><tspan dy="0"> = δ · x</tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">δ is one number, x is three — three separate products</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">SYMBOL</tspan></text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">NAME</tspan></text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WHAT IT IS</tspan></text>
+        <text x="940" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">IN THE EXAMPLE</tspan></text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">∂L/∂w</tspan></text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">gradient of the loss</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">vector, 3 numbers — how fast L rises per unit of one weight, the others held fixed</text>
+        <text x="940" y="246" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(6, 0, 9)</tspan></text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">δ</tspan></text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">error at the output</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number, not a vector — how fast L rises per unit of the output; here z − t</text>
+        <text x="940" y="272" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">3</tspan></text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">x</tspan></text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the input</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">vector, 3 numbers — the inputs entering the layer; weight i multiplies input i</text>
+        <text x="940" y="298" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(2, 0, 3)</tspan></text>
+        <line x1="120" y1="320" x2="1160" y2="320" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="354" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WORKED · L = (z − t)²/2, z = w·x · 3 INPUTS → 1 OUTPUT, ONE EXAMPLE · w = (1, 5, 2), x = (2, 0, 3), t = 5</tspan></text>
+        <text x="120" y="397" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">z = w·x = 1×2 + 5×0 + 2×3 = 2 + 0 + 6 = 8</tspan></text>
+        <text x="120" y="429" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">δ = z − t = 8 − 5 = 3</tspan></text>
+        <text x="440" y="429" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">L = 3²/2 = 4.5</tspan></text>
+        <text x="120" y="461" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">∂L/∂w = δ·x = </tspan><tspan dy="0">3 × (2, 0, 3)</tspan></text>
+        <text x="120" y="493" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">= (</tspan><tspan dy="0">3×2, </tspan><tspan fill="#bf4520" dy="0">3×0</tspan><tspan dy="0">, 3×3) = (6, 0, 9)</tspan></text>
+        <rect x="108" y="470" width="268" height="32" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="120" y="566" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">x</tspan><tspan font-size="9" dy="4">i</tspan><tspan dy="-4"> = 0 → ∂L/∂w</tspan><tspan font-size="9" dy="4">i</tspan><tspan dy="-4"> = δ · 0 = 0, for any δ — a weight fed only zeros never moves</tspan></text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

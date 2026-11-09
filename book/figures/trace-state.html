@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A name holds one value at a time</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 1280px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/00-objects.html">&larr; Objects, and the shape of the work</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="code-object.html">The count outlives the call that changed it &rarr;</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">Week 00 &#183; objects</p>
+    <h1>A name holds one value at a time</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 930" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="trace-state-title trace-state-desc">
+        <title id="trace-state-title">A name holds one value at a time</title>
+        <desc id="trace-state-desc">Seven steps of a seven-line Python program, drawn as a vertical spine: the line that ran on the left; on the right the two fields of the dict that rec names, rec['n'] and rec['state'], and the name total; and the value the step wrote marked in accent. Step 1 binds rec to {'n': 12, 'state': 'ok'}; step 2 binds total to 0; step 3 tests rec['n'] &gt; 10, true; step 4 adds rec['n'] to total, 12; step 5 replaces rec['n'] with 7; step 6 tests again, false, so the loop body runs once; step 7 replaces rec['state'] with 'low'. Six values were written, three of them replacing a value already there: total 0 to 12, rec['n'] 12 to 7, rec['state'] 'ok' to 'low'; the other three are first bindings, the whole dict at step 1 and total at step 2. The program's print, boxed below the spine, wrote {'n': 7, 'state': 'low'} 12 - step 7's three values, and nothing about the six steps before it. The key gives the run, the three names, the snippet with each line's step number, and the marks. The figure draws only the names a reader can see: not frames, references, opcodes, or the dict's table.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="128" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">STEP</text>
+        <text x="176" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">OPERATION</text>
+        <text x="754" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle" letter-spacing="0.10em">rec['n']</text>
+        <text x="914" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle" letter-spacing="0.10em">rec['state']</text>
+        <text x="1074" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle" letter-spacing="0.10em">total</text>
+        <line x1="120" y1="60" x2="1160" y2="60" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <line x1="140" y1="68" x2="140" y2="382" stroke="rgba(45,49,66,0.2)" stroke-width="1.2"/>
+        <text x="128" y="96" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">1</text>
+        <text x="176" y="92" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">rec = {'n': 12, 'state': 'ok'}</text>
+        <rect x="680" y="71" width="148" height="30" rx="4" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="754" y="93" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">12</text>
+        <rect x="840" y="71" width="148" height="30" rx="4" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="914" y="93" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">'ok'</text>
+        <text x="1074" y="93" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">—</text>
+        <text x="128" y="142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">2</text>
+        <text x="176" y="138" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">total = 0</text>
+        <text x="754" y="139" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <text x="914" y="139" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">'ok'</text>
+        <rect x="1000" y="117" width="148" height="30" rx="4" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="1074" y="139" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">0</text>
+        <text x="128" y="188" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">3</text>
+        <text x="176" y="184" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">while rec['n'] &gt; 10:</text>
+        <text x="340" y="184" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">True</text>
+        <text x="754" y="185" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <text x="914" y="185" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">'ok'</text>
+        <text x="1074" y="185" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <text x="128" y="234" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">4</text>
+        <text x="204.8" y="230" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">    total = total + rec['n']</text>
+        <text x="754" y="231" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <text x="914" y="231" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">'ok'</text>
+        <rect x="1000" y="209" width="148" height="30" rx="4" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="1074" y="231" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">12</text>
+        <text x="128" y="280" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">5</text>
+        <text x="204.8" y="276" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">    rec['n'] = rec['n'] - 5</text>
+        <rect x="680" y="255" width="148" height="30" rx="4" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="754" y="277" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">7</text>
+        <text x="914" y="277" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">'ok'</text>
+        <text x="1074" y="277" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <text x="128" y="326" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">6</text>
+        <text x="176" y="322" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">while rec['n'] &gt; 10:</text>
+        <text x="340" y="322" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">False</text>
+        <text x="754" y="323" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">7</text>
+        <text x="914" y="323" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">'ok'</text>
+        <text x="1074" y="323" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <text x="128" y="372" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">7</text>
+        <text x="176" y="368" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">rec['state'] = 'low'</text>
+        <text x="754" y="369" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">7</text>
+        <rect x="840" y="347" width="148" height="30" rx="4" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="914" y="369" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">'low'</text>
+        <text x="1074" y="369" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <rect x="620" y="432" width="540" height="74" rx="4" fill="#f5f5f5" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="636" y="452" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">THE ANSWER</text>
+        <text x="724" y="452" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">print(rec, total)</text>
+        <text x="636" y="480" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">{'n': 7, 'state': 'low'} 12</text>
+        <text x="636" y="499" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">three values: what step 7 left &#183; nothing from steps 1 to 6</text>
+        <text x="120" y="426" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">7 steps &#183; 6 writes &#183; 3 of them replacements &#183; 2 tests</text>
+        <text x="120" y="528" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the operation column copies the snippet &#183; the three names are read after each line</text>
+        <text x="120" y="546" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the boxed line is stdout, copied exactly &#183; not drawn: frames, references, opcodes, the dict's table</text>
+        <line x1="120" y1="554" x2="1160" y2="554" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <line x1="120" y1="602" x2="1160" y2="602" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="626" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">NAME</text>
+        <text x="248" y="626" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">WHAT THE COLUMN HOLDS</text>
+        <text x="120" y="652" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">rec</text>
+        <text x="248" y="652" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a dict of 2 fields; bound at step 1, never rebound</text>
+        <text x="120" y="678" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">rec['n']</text>
+        <text x="248" y="678" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">an int inside it; line 5 replaces it</text>
+        <text x="676" y="652" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">rec['state']</text>
+        <text x="804" y="652" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a str inside it; line 6 replaces it</text>
+        <text x="676" y="678" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">total</text>
+        <text x="804" y="678" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">an int; line 4 replaces it</text>
+        <line x1="640" y1="602" x2="640" y2="678" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <line x1="120" y1="758" x2="1160" y2="758" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="782" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">MARKS</text>
+        <rect x="120" y="799" width="34" height="14" rx="3" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="190" y="810" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the value this step wrote: a first binding or a replacement</text>
+        <text x="520" y="810" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">—</text>
+        <text x="590" y="810" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">not bound: the name holds nothing yet</text>
+        <text x="816" y="810" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">True</text>
+        <text x="890" y="810" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the test's answer; no value changed</text>
+        <rect x="120" y="823" width="34" height="14" rx="3" fill="#f5f5f5" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="190" y="834" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the answer: what print wrote at the end</text>
+        <text x="520" y="834" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">'ok'</text>
+        <text x="590" y="834" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a str keeps its quotes; an int has none</text>
+        <text x="820" y="834" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"># step 4</text>
+        <text x="890" y="834" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a comment added here; not in the snippet</text>
+        <rect x="120" y="847" width="34" height="14" rx="3" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="190" y="858" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">step 1 writes the whole dict, so both fields are boxed</text>
+        <text x="520" y="858" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">6</text>
+        <text x="590" y="858" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the order the lines ran; step 6 ran line 3 again</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosine similarity</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+
+
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/09-embeddings.html">&larr; Giving Tokens Meaningful Numbers</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="embedding.html">&larr; An embedding lookup</a><span class="sep">/</span><a href="plot-similarity.html">Similarity over two coordinates can disagree with similarity over all eight &rarr;</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">Core equation · linear algebra</p>
+    <h1>Cosine similarity</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 628" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-cosine-similarity-title eq-cosine-similarity-desc">
+        <title id="eq-cosine-similarity-title">Cosine similarity</title>
+        <desc id="eq-cosine-similarity-desc">The cosine similarity of two vectors of two integers, with the notation table that reads it. The vectors are (3, 4) and (4, 3). Their dot product is 24 and each is 5 long, so the cosine is 24 over 25, which is 0.96. The angle is not needed: the number is the agreement with the lengths divided out. A zero vector breaks the rule because it has no direction to compare.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520">cos θ</tspan><tspan> = (a · b) / (|a| |b|)</tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">the top counts agreement; the lengths cancel size</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">SYMBOL</text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">NAME</text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WHAT IT IS</text>
+        <text x="940" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">IN THE EXAMPLE</text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a</text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">vector a</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">vector — the first list of n numbers, in order</text>
+        <text x="940" y="246" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">(3, 4)</text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">b</text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">vector b</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">vector — the second list, exactly the same length n</text>
+        <text x="940" y="272" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">(4, 3)</text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">|a|</text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">length of a</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — the size of a on its own</text>
+        <text x="940" y="298" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">5</text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">|b|</text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">length of b</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — the same recipe applied to b</text>
+        <text x="940" y="324" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">5</text>
+        <text x="120" y="350" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cos θ</text>
+        <text x="200" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">cosine of the angle</text>
+        <text x="380" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number in [−1, 1] — how closely the directions agree; 1 same, −1 opposite</text>
+        <text x="940" y="350" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">0.96</text>
+        <line x1="120" y1="372" x2="1160" y2="372" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="406" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WORKED · n = 2, INTEGER ENTRIES</text>
+        <rect x="168" y="418" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="177.0" y="431" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <rect x="186" y="418" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="195.0" y="431" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="120" y="431" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a</text>
+        <rect x="168" y="444" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="177.0" y="457" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <rect x="186" y="444" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="195.0" y="457" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <text x="120" y="457" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">b</text>
+        <rect x="168" y="470" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="177.0" y="483" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <rect x="186" y="470" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="195.0" y="483" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">12</text>
+        <text x="120" y="483" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">a·b</text>
+        <text x="177.0" y="509" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">1</text>
+        <text x="195.0" y="509" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">2</text>
+        <text x="560" y="431" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a·b = 3 × 4 + 4 × 3 = 12 + 12 = <tspan>24</tspan></text>
+        <text x="560" y="457" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">|a| = √(3² + 4²) = √25 = <tspan>5</tspan></text>
+        <text x="560" y="483" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">|b| = √(4² + 3²) = √25 = <tspan>5</tspan></text>
+        <text x="560" y="550" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cos θ = 24 / (5 × 5) = 24 / 25 = <tspan font-weight="500">0.96</tspan></text>
+        <rect x="548" y="534" width="612" height="26" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="120" y="586" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">|a| = 0 breaks it: a = (0, 0) divides by zero, and a zero vector has no direction</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

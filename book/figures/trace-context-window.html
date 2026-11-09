@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The target residue is never in its own context</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 1280px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/09-embeddings.html">&larr; Giving Tokens Meaningful Numbers</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="embedding.html">An embedding lookup &rarr;</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">WEEK 09 &#183; EMBEDDING</p>
+    <h1>The target residue is never in its own context</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 1190" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="trace-context-window-title trace-context-window-desc">
+        <title id="trace-context-window-title">The target residue is never in its own context</title>
+        <desc id="trace-context-window-desc">A window of 7 residue slots for one prediction. The centre slot, id 7, is marked held out and is not looked up; the 6 neighbours around it are ids 0, 9, 17, 2, 8, 5, which are looked up as 6 rows of 8 numbers in a table of 20 rows. The rows are A [2, 0, 0, 0, 0, 0, 0, 0], L [1, 1, 0, 0, 0, 0, 0, 0], V [0, 2, 0, 0, 0, 0, 0, 0], D [2, 0, 0, 0, 0, 0, 0, 0], K [1, 1, 0, 0, 0, 0, 0, 0], G [0, 2, 0, 0, 0, 0, 0, 0]. Added column by column the 8 columns total 6, 6, 0, 0, 0, 0, 0, 0; divided by 6 that is the pooled row [1, 1, 0, 0, 0, 0, 0, 0], which is the same for any order of the 6 rows - the mean keeps no record of which neighbour sat where, and that blindness is what attention-worked repairs. A linear head gives the target score ln 4 = 1.386 and the other 19 scores 0, so softmax gives the target p = 4/23 = 0.174 and each other residue 1/23 = 0.043, 20 values summing to 1; the denominator 23 is the sum of the exponentials, not a vocabulary size. The rows are the week-09 lecture's illustrative table, chosen for arithmetic and not trained, and the pooled row is used for one prediction rather than as a description of a residue. The key gives the model, the four operations, the Pytorch calls and the symbols.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="28" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">THE WINDOW</text>
+        <text x="1160" y="28" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">K = 3 neighbours either side · the centre held out</text>
+        <text x="156.0" y="50" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">t−3</text>
+        <rect x="120" y="60" width="72" height="68" rx="4" fill="#f5f5f5" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="156.0" y="100" fill="#2d3142" font-size="20" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">A</text>
+        <text x="156.0" y="117" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">id 0</text>
+        <text x="238.0" y="50" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">t−2</text>
+        <rect x="202" y="60" width="72" height="68" rx="4" fill="#f5f5f5" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="238.0" y="100" fill="#2d3142" font-size="20" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">L</text>
+        <text x="238.0" y="117" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">id 9</text>
+        <text x="320.0" y="50" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">t−1</text>
+        <rect x="284" y="60" width="72" height="68" rx="4" fill="#f5f5f5" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="320.0" y="100" fill="#2d3142" font-size="20" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">V</text>
+        <text x="320.0" y="117" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">id 17</text>
+        <text x="402.0" y="50" fill="#bf4520" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">t</text>
+        <rect x="366" y="60" width="72" height="68" rx="4" fill="#ffffff" stroke="#bf4520" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="402.0" y="100" fill="#bf4520" font-size="20" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">I</text>
+        <text x="402.0" y="117" fill="#bf4520" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">id 7</text>
+        <text x="484.0" y="50" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">t+1</text>
+        <rect x="448" y="60" width="72" height="68" rx="4" fill="#f5f5f5" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="484.0" y="100" fill="#2d3142" font-size="20" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">D</text>
+        <text x="484.0" y="117" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">id 2</text>
+        <text x="566.0" y="50" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">t+2</text>
+        <rect x="530" y="60" width="72" height="68" rx="4" fill="#f5f5f5" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="566.0" y="100" fill="#2d3142" font-size="20" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">K</text>
+        <text x="566.0" y="117" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">id 8</text>
+        <text x="648.0" y="50" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">t+3</text>
+        <rect x="612" y="60" width="72" height="68" rx="4" fill="#f5f5f5" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="648.0" y="100" fill="#2d3142" font-size="20" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">G</text>
+        <text x="648.0" y="117" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">id 5</text>
+        <text x="402.0" y="148" fill="#bf4520" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">held out</text>
+        <text x="402.0" y="163" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">not looked up: the residue to predict</text>
+        <text x="716" y="76" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">THE TARGET</text>
+        <text x="716" y="102" fill="#2d3142" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">id 7 · I</text>
+        <text x="716" y="126" fill="#4f5d75" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">id 7 is not among the 6 context ids</text>
+        <text x="716" y="148" fill="#4f5d75" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">so every row below is a neighbour's row:</text>
+        <text x="716" y="164" fill="#4f5d75" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">evidence about the context, not the answer.</text>
+        <text x="120" y="188" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">7 slots · 6 looked up · 1 held out · 6 rows × 8 numbers · 20 scores</text>
+        <line x1="120" y1="204" x2="1160" y2="204" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="228" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">SIX ROWS, ONE PER NEIGHBOUR</text>
+        <text x="1160" y="228" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">d = 8 numbers each</text>
+        <text x="120" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">SLOT</text>
+        <text x="176" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">RESIDUE</text>
+        <text x="268" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">ID</text>
+        <text x="364.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">1</text>
+        <text x="424.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">2</text>
+        <text x="484.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">3</text>
+        <text x="544.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">4</text>
+        <text x="604.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">5</text>
+        <text x="664.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">6</text>
+        <text x="724.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">7</text>
+        <text x="784.0" y="252" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">8</text>
+        <text x="120" y="283" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">t−3</text>
+        <text x="176" y="284" fill="#2d3142" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">A</text>
+        <text x="268" y="283" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">0</text>
+        <rect x="336" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="364.0" y="283" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">2</text>
+        <rect x="396" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="424.0" y="283" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="456" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="484.0" y="283" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="516" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="544.0" y="283" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="576" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="604.0" y="283" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="636" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="283" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="696" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="724.0" y="283" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="756" y="264" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="784.0" y="283" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="120" y="319" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">t−2</text>
+        <text x="176" y="320" fill="#2d3142" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">L</text>
+        <text x="268" y="319" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">9</text>
+        <rect x="336" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="364.0" y="319" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">1</text>
+        <rect x="396" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="424.0" y="319" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">1</text>
+        <rect x="456" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="484.0" y="319" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="516" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="544.0" y="319" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="576" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="604.0" y="319" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="636" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="319" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="696" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="724.0" y="319" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="756" y="300" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="784.0" y="319" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="120" y="355" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">t−1</text>
+        <text x="176" y="356" fill="#2d3142" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">V</text>
+        <text x="268" y="355" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">17</text>
+        <rect x="336" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="364.0" y="355" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="396" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="424.0" y="355" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">2</text>
+        <rect x="456" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="484.0" y="355" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="516" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="544.0" y="355" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="576" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="604.0" y="355" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="636" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="355" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="696" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="724.0" y="355" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="756" y="336" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="784.0" y="355" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="120" y="391" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">t+1</text>
+        <text x="176" y="392" fill="#2d3142" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">D</text>
+        <text x="268" y="391" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">2</text>
+        <rect x="336" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="364.0" y="391" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">2</text>
+        <rect x="396" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="424.0" y="391" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="456" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="484.0" y="391" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="516" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="544.0" y="391" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="576" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="604.0" y="391" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="636" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="391" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="696" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="724.0" y="391" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="756" y="372" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="784.0" y="391" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="120" y="427" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">t+2</text>
+        <text x="176" y="428" fill="#2d3142" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">K</text>
+        <text x="268" y="427" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">8</text>
+        <rect x="336" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="364.0" y="427" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">1</text>
+        <rect x="396" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="424.0" y="427" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">1</text>
+        <rect x="456" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="484.0" y="427" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="516" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="544.0" y="427" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="576" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="604.0" y="427" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="636" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="427" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="696" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="724.0" y="427" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="756" y="408" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="784.0" y="427" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="120" y="463" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">t+3</text>
+        <text x="176" y="464" fill="#2d3142" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">G</text>
+        <text x="268" y="463" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">5</text>
+        <rect x="336" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="364.0" y="463" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="396" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="424.0" y="463" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">2</text>
+        <rect x="456" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="484.0" y="463" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="516" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="544.0" y="463" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="576" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="604.0" y="463" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="636" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="463" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="696" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="724.0" y="463" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="756" y="444" width="56" height="30" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="784.0" y="463" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <line x1="120" y1="490" x2="812" y2="490" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="517" fill="#4f5d75" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">sum</text>
+        <text x="176" y="517" fill="#5a6580" font-size="10" font-family="'Geist', system-ui, sans-serif" text-anchor="start">6 values, added</text>
+        <rect x="336" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="364.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">6</text>
+        <rect x="396" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="424.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">6</text>
+        <rect x="456" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="484.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="516" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="544.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="576" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="604.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="636" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="696" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="724.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <rect x="756" y="498" width="56" height="30" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="784.0" y="517" fill="#4f5d75" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="120" y="555" fill="#bf4520" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">÷ 6</text>
+        <text x="176" y="555" fill="#bf4520" font-size="10" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the pooled row</text>
+        <rect x="336" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="364.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">1</text>
+        <rect x="396" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="424.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">1</text>
+        <rect x="456" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.0"/>
+        <text x="484.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">0</text>
+        <rect x="516" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.0"/>
+        <text x="544.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">0</text>
+        <rect x="576" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.0"/>
+        <text x="604.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">0</text>
+        <rect x="636" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.0"/>
+        <text x="664.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">0</text>
+        <rect x="696" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.0"/>
+        <text x="724.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">0</text>
+        <rect x="756" y="536" width="56" height="30" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.0"/>
+        <text x="784.0" y="555" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">0</text>
+        <text x="846" y="360" fill="#4f5d75" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the mean adds each row once and never records</text>
+        <text x="846" y="378" fill="#4f5d75" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">where it sat: the same 6 rows reversed, or</text>
+        <text x="846" y="396" fill="#4f5d75" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the two ends swapped, average to this same row.</text>
+        <text x="846" y="414" fill="#2d3142" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">that blindness is what attention-worked repairs.</text>
+        <text x="846" y="432" fill="#4f5d75" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">and the pooled row is used for one prediction,</text>
+        <text x="846" y="450" fill="#4f5d75" font-size="10.5" font-family="'Geist', system-ui, sans-serif" text-anchor="start">not as a map of what a residue is.</text>
+        <line x1="120" y1="606" x2="1160" y2="606" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="630" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">THE HEAD: 8 NUMBERS → 20 SCORES</text>
+        <text x="1160" y="630" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">one score per residue in the vocabulary</text>
+        <text x="144.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">A</text>
+        <rect x="120" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="144.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="196.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">C</text>
+        <rect x="172" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="196.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="248.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">D</text>
+        <rect x="224" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="248.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="300.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">E</text>
+        <rect x="276" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="300.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="352.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">F</text>
+        <rect x="328" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="352.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="404.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">G</text>
+        <rect x="380" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="404.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="456.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">H</text>
+        <rect x="432" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="456.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="508.0" y="656" fill="#bf4520" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">I</text>
+        <rect x="484" y="664" width="48" height="34" rx="2" fill="rgba(191,69,32,0.10)" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="508.0" y="685" fill="#bf4520" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" font-weight="500">1.386</text>
+        <text x="560.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">K</text>
+        <rect x="536" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="560.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="612.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">L</text>
+        <rect x="588" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="612.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="664.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">M</text>
+        <rect x="640" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="664.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="716.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+        <rect x="692" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="716.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="768.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">P</text>
+        <rect x="744" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="768.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="820.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Q</text>
+        <rect x="796" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="820.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="872.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">R</text>
+        <rect x="848" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="872.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="924.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">S</text>
+        <rect x="900" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="924.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="976.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">T</text>
+        <rect x="952" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="976.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="1028.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">V</text>
+        <rect x="1004" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="1028.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="1080.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">W</text>
+        <rect x="1056" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="1080.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="1132.0" y="656" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Y</text>
+        <rect x="1108" y="664" width="48" height="34" rx="2" fill="#ffffff" stroke="rgba(45,49,66,0.10)" stroke-width="1.0"/>
+        <text x="1132.0" y="685" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0</text>
+        <text x="120" y="722" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">softmax → p(I) = 4/23 ≈ 0.174 · each of the other 19 = 1/23 ≈ 0.043 · 4/23 + 19 × 1/23 = 1</text>
+        <text x="120" y="740" fill="#5a6580" font-size="10" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the denominator 23 = 4 + 19 × 1 is the sum of 20 exponentials; it is not a vocabulary size</text>
+        <text x="120" y="766" fill="#5a6580" font-size="10" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the 6 rows are the week-09 lecture's illustrative table, set by hand for arithmetic, not trained; the other 14 rows are all zero and not drawn</text>
+        <text x="120" y="782" fill="#5a6580" font-size="10" font-family="'Geist', system-ui, sans-serif" text-anchor="start">not drawn: the head's 180 weights and biases, the batch axis, the update that follows this prediction</text>
+        <line x1="120" y1="830" x2="1160" y2="830" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="854" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">MODEL</text>
+        <text x="208" y="854" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">vocab = 20 · d = 8 · K = 3 either side · window = 7 slots · 6 rows per prediction · head: 8 → 20</text>
+        <line x1="120" y1="878" x2="1160" y2="878" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+        <text x="120" y="902" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">TERM</text>
+        <text x="248" y="902" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">EQUATION</text>
+        <text x="120" y="928" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">lookup</text>
+        <text x="248" y="928" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">rows = E[ids] → (6, 8)</text>
+        <text x="120" y="954" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">mean</text>
+        <text x="248" y="954" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">pooled = rows.mean(axis=0) → (8,)</text>
+        <text x="120" y="980" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">head</text>
+        <text x="248" y="980" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">scores = W · pooled + b → (20,)</text>
+        <text x="120" y="1006" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" font-weight="500">softmax</text>
+        <text x="248" y="1006" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">p = softmax(scores); sums to 1</text>
+        <line x1="780" y1="878" x2="780" y2="1018" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="812" y="902" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">PYTORCH</text>
+        <text x="812" y="928" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">table  = nn.Embedding(20, 8)</text>
+        <text x="1004" y="928" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start"># E: (20, 8)</text>
+        <text x="812" y="943" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">head   = nn.Linear(8, 20)</text>
+        <text x="1004" y="943" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start"># d → scores</text>
+        <text x="812" y="958" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">rows   = table(ids)</text>
+        <text x="1004" y="958" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start"># (6, 8)</text>
+        <text x="812" y="973" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">pooled = rows.mean(dim=0)</text>
+        <text x="1004" y="973" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start"># (8,)</text>
+        <text x="812" y="988" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">scores = head(pooled)</text>
+        <text x="1004" y="988" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start"># (20,)</text>
+        <text x="812" y="1003" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start"># ids: the 6 neighbours, never t</text>
+        <line x1="120" y1="1034" x2="1160" y2="1034" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+        <text x="120" y="1058" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.14em">SYMBOLS</text>
+        <text x="120" y="1084" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">t</text>
+        <text x="194" y="1084" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the held-out centre position</text>
+        <text x="470" y="1084" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">K</text>
+        <text x="544" y="1084" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">neighbours either side, 3</text>
+        <text x="820" y="1084" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">ids</text>
+        <text x="894" y="1084" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the 6 neighbour ids; t is not one</text>
+        <text x="120" y="1108" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">E</text>
+        <text x="194" y="1108" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the table: 20 rows of d, learned</text>
+        <text x="470" y="1108" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">d</text>
+        <text x="544" y="1108" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">numbers in a row, 8</text>
+        <text x="820" y="1108" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">rows</text>
+        <text x="894" y="1108" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the 6 looked-up rows, (6, 8)</text>
+        <text x="120" y="1132" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">pooled</text>
+        <text x="194" y="1132" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">their mean, one row; order is lost</text>
+        <text x="470" y="1132" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">scores</text>
+        <text x="544" y="1132" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">20 numbers, one per residue</text>
+        <text x="820" y="1132" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">W, b</text>
+        <text x="894" y="1132" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">head weights (20×8), bias (20)</text>
+        <text x="120" y="1156" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">p</text>
+        <text x="194" y="1156" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">softmax of scores; 20 values, sum 1</text>
+        <text x="470" y="1156" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">p(I)</text>
+        <text x="544" y="1156" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">the target's probability, 4/23</text>
+        <text x="820" y="1156" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="start">vocab</text>
+        <text x="894" y="1156" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif" text-anchor="start">how many residues exist; 20</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

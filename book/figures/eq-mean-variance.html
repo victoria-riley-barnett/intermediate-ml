@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mean and variance</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+
+
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/01-linear-analysis.html">&larr; What ML is, and what this course does with it</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="eq-dot-product.html">&larr; Dot product</a><span class="sep">/</span><a href="split-train-only.html">The same split, a mean that saw the held-out rows &rarr;</a>
+</nav>
+<!-- book-nav:end -->
+
+
+
+    <p class="eyebrow">Core equation · feature standardisation</p>
+    <h1>Mean and variance</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 710" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mean-var-title mean-var-desc">
+        <title id="mean-var-title">Mean and variance</title>
+        <desc id="mean-var-desc">The mean of n values is their total divided by n; the variance is the mean of the squared distances from that mean. Five symbol rows give the mean, the count, the sum, one value and the variance. The worked instance standardises one feature of four values, 3, 3, 7, 7: they total 20, so the mean is 5; the deviations are minus 2, minus 2, 2, 2 and their squares 4, 4, 4, 4, totalling 16; the variance is 16 divided by 4, which is 4, and its square root is 2, so the standard scores are minus 1, minus 1, 1, 1, and 5 plus 2 times each returns the original value. A constant feature has variance 0, so the rescale divides 0 by 0; the usual fix sets the spread to 1 and every score to 0.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+                <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520">μ</tspan> = (1/n)Σ x<tspan dy="8" font-size="20">i</tspan><tspan dy="-8"> , </tspan><tspan fill="#bf4520">σ</tspan><tspan dy="-9" font-size="18">2</tspan><tspan dy="9"></tspan> = (1/n)Σ (x<tspan dy="8" font-size="20">i</tspan><tspan dy="-8"> − μ)</tspan><tspan dy="-9" font-size="18">2</tspan><tspan dy="9"></tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">compute μ first; the second line reuses it</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">SYMBOL</text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">NAME</text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WHAT IT IS</text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">μ</text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">mean</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number — the centre of one feature's values</text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">n</text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">count</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a count — how many values the feature has</text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">Σ</text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">sum</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a loop — add the term after it, once for each value</text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">x<tspan dy="4" font-size="10">i</tspan><tspan dy="-4"></tspan></text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">one value</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number — one entry; the subscript i says which</text>
+        <text x="120" y="350" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">σ<tspan dy="-4" font-size="9">2</tspan><tspan dy="4"></tspan></text>
+        <text x="200" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">variance</text>
+        <text x="380" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number — the mean squared distance to μ; σ is its square root</text>
+        <line x1="120" y1="372" x2="1160" y2="372" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="120" y="406" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WORKED · ONE FEATURE, n = 4 · RECENTRE, AVERAGE THE SQUARES, RESCALE</text>
+        <text x="128" y="428" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">1 · THE VALUES</text>
+        <text x="128" y="446" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">x<tspan dy="3" font-size="8">i</tspan><tspan dy="-3"></tspan></text>
+        <rect x="128" y="456" width="18" height="72" fill="none" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="128" y1="474" x2="146" y2="474" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="128" y1="492" x2="146" y2="492" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="128" y1="510" x2="146" y2="510" stroke="#4f5d75" stroke-width="1.0"/>
+        <text x="137.0" y="469" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <text x="137.0" y="487" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <text x="137.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">7</text>
+        <text x="137.0" y="523" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">7</text>
+        <rect x="125.5" y="454" width="23" height="22" rx="2" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="388" y="428" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">2 · DEVIATIONS</text>
+        <text x="388" y="446" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">x<tspan dy="3" font-size="8">i</tspan><tspan dy="-3"> − μ</tspan></text>
+        <rect x="388" y="456" width="18" height="72" fill="none" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="388" y1="474" x2="406" y2="474" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="388" y1="492" x2="406" y2="492" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="388" y1="510" x2="406" y2="510" stroke="#4f5d75" stroke-width="1.0"/>
+        <text x="397.0" y="469" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−2</text>
+        <text x="397.0" y="487" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−2</text>
+        <text x="397.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="397.0" y="523" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <rect x="385.5" y="454" width="23" height="22" rx="2" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="648" y="428" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">3 · SQUARED</text>
+        <text x="648" y="446" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">(x<tspan dy="3" font-size="8">i</tspan><tspan dy="-3"> − μ)²</tspan></text>
+        <rect x="648" y="456" width="18" height="72" fill="none" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="648" y1="474" x2="666" y2="474" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="648" y1="492" x2="666" y2="492" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="648" y1="510" x2="666" y2="510" stroke="#4f5d75" stroke-width="1.0"/>
+        <text x="657.0" y="469" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="657.0" y="487" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="657.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="657.0" y="523" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <rect x="645.5" y="454" width="23" height="22" rx="2" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="908" y="428" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">4 · STANDARD SCORES</text>
+        <text x="908" y="446" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">z = (x<tspan dy="3" font-size="8">i</tspan><tspan dy="-3"> − μ)/σ</tspan></text>
+        <rect x="908" y="456" width="18" height="72" fill="none" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="908" y1="474" x2="926" y2="474" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="908" y1="492" x2="926" y2="492" stroke="#4f5d75" stroke-width="1.0"/>
+        <line x1="908" y1="510" x2="926" y2="510" stroke="#4f5d75" stroke-width="1.0"/>
+        <text x="917.0" y="469" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <text x="917.0" y="487" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <text x="917.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="917.0" y="523" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="900" y="448" width="34" height="88" rx="2" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="154" y="469" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520">i = 1</text>
+        <text x="128" y="552" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">3 + 3 + 7 + 7 = 20</text>
+        <text x="128" y="576" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">4 values, so divide by 4</text>
+        <text x="128" y="600" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">μ = 20 / 4 = <tspan fill="#bf4520">5</tspan></text>
+        <text x="388" y="552" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">3 − 5 = −2  (twice)</text>
+        <text x="388" y="576" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">7 − 5 = 2  (twice)</text>
+        <text x="388" y="600" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">(−2) + (−2) + 2 + 2 = 0</text>
+        <text x="648" y="552" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">(−2)² + (−2)² + (2)² + (2)²</text>
+        <text x="648" y="576" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">= 4 + 4 + 4 + 4 = 16</text>
+        <text x="648" y="600" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">σ² = 16 / 4 = <tspan fill="#bf4520">4</tspan>,  σ = 2</text>
+        <text x="908" y="552" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">−2 / 2 = −1  (twice)</text>
+        <text x="908" y="576" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">2 / 2 = 1  (twice)</text>
+        <text x="908" y="600" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">back: 5 + 2(−1) = 3, 5 + 2(1) = 7</text>
+        <text x="120" y="664" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">constant feature: σ² = 0, so (x<tspan dy="4" font-size="9">i</tspan><tspan dy="-4"> − μ)/σ = 0/0 — undefined; the usual fix is σ := 1, giving z = 0</tspan></text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

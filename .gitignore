@@ -1,0 +1,6 @@
+.tools/
+book/out/
+book/_src/
+book/book.toml
+__pycache__/
+.DS_Store

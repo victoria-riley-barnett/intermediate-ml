@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three ways to a fixed width</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+
+
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/10-whole-sequences.html">&larr; Why Whole Sequences Are Hard</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="eq-conv-window.html">&larr; One convolution position</a>
+</nav>
+<!-- book-nav:end -->
+
+
+
+    <p class="eyebrow">Week 10 &middot; three reductions to fixed width</p>
+    <h1>The same 48 positions, three ways to a fixed width</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ctr-title ctr-desc">
+        <title id="ctr-title">Three reductions of one 48-position string to a fixed width, and what each cannot carry</title>
+        <desc id="ctr-desc">Three panels hold one task. Each string holds 48 positions over four bases. The strings hold motif W and motif C in the two blocks. Motif W holds the bases G G G T G C in sequence. Motif C holds the bases T T T G T A in sequence. The label is the order of the two motifs. W comes first, or C comes first. The two classes hold the same bases and the same two motifs. Each panel draws two rows of 48 cells. A tall solid cell holds a motif W base. A short cell holds a motif C base. A grey cell holds one uniform random background base. The top row puts motif W at positions 4 to 9 and motif C at 38 to 43. The bottom row puts motif C at 4 to 9 and motif W at 38 to 43. Panel one averages the 48 positions. Each row gives four numbers, one for each base. The four numbers are A 0.167, C 0.208, G 0.271, T 0.354. The two rows give the same four numbers. Panel two flattens the string to 192 numbers. The two vectors differ in 24 of the 192 numbers. All 24 sit inside the 12 slots that hold a motif. Panel three slides a 6-wide filter per motif along the string. The filter gives a match count at each of the 43 starts. The reduction keeps the largest match count. Both rows give 6 and 6. The peak sits at start 4 in the top row and at start 38 in the bottom row. The maximum does not move. Softmax regression reads each reduced vector. All three panels use one loss, one optimiser and one seed. Only the reduction differs. The fit uses 1500 strings and the score uses 4000 strings. Chance is 0.5 in every cell. The average gives 0.4783 on the delivered slots and 0.4925 on the other quarters. The flatten gives 1.0000 and 0.4903. The window gives 0.5000 and 0.5000. The window bank holds the two motifs themselves. That bank is the best case for the window reduction. More filters cannot help. A maximum over positions does not depend on the place of the pattern.</desc>
+        <rect width="1280" height="700" fill="#f5f5f5"/>
+        <text x="120.0" y="62.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">AVERAGE THE ROWS</text>
+        <rect x="172.00" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="177.35" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="182.70" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="188.05" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="193.40" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="198.75" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="204.10" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="209.45" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="214.80" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="220.15" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="225.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="230.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="238.70" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="244.05" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="249.40" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="254.75" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="260.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="265.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="270.80" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="276.15" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="281.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="286.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="292.20" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="297.55" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="305.40" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="310.75" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="316.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="321.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="326.80" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="332.15" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="337.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="342.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="348.20" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="353.55" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="358.90" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="364.25" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="372.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="377.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="382.80" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="388.15" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="393.50" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="398.85" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="404.20" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="409.55" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="414.90" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="420.25" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="425.60" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="430.95" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <line x1="237.15" y1="65.0" x2="237.15" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="303.85" y1="65.0" x2="303.85" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="370.55" y1="65.0" x2="370.55" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <text x="162.0" y="79.5" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">W &#8230; C</text>
+        <rect x="172.00" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="177.35" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="182.70" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="188.05" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="193.40" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="198.75" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="204.10" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="209.45" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="214.80" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="220.15" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="225.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="230.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="238.70" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="244.05" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="249.40" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="254.75" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="260.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="265.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="270.80" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="276.15" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="281.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="286.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="292.20" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="297.55" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="305.40" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="310.75" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="316.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="321.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="326.80" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="332.15" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="337.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="342.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="348.20" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="353.55" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="358.90" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="364.25" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="372.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="377.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="382.80" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="388.15" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="393.50" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="398.85" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="404.20" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="409.55" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="414.90" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="420.25" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="425.60" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="430.95" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <line x1="237.15" y1="83.0" x2="237.15" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="303.85" y1="83.0" x2="303.85" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="370.55" y1="83.0" x2="370.55" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <text x="162.0" y="97.5" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">C &#8230; W</text>
+        <line x1="120.0" y1="110.0" x2="436.0" y2="110.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120.0" y="124.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.12em">MEAN OF THE 48 POSITIONS</text>
+        <text x="172.0" y="152.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">A 0.167</text>
+        <text x="238.0" y="152.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">C 0.208</text>
+        <text x="304.0" y="152.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">G 0.271</text>
+        <text x="370.0" y="152.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">T 0.354</text>
+        <text x="172.0" y="174.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">A 0.167</text>
+        <text x="238.0" y="174.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">C 0.208</text>
+        <text x="304.0" y="174.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">G 0.271</text>
+        <text x="370.0" y="174.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">T 0.354</text>
+        <line x1="120.0" y1="206.0" x2="436.0" y2="206.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120.0" y="222.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the swap leaves all four numbers unchanged:</text>
+        <text x="120.0" y="236.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">nothing in them can carry an order</text>
+        <text x="120.0" y="258.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.12em">HELD-OUT ACCURACY</text>
+        <text x="436.0" y="258.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.12em">chance 0.50</text>
+        <text x="120.0" y="280.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">on the delivered slots</text>
+        <text x="436.0" y="281.0" font-size="17" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.48</text>
+        <text x="120.0" y="302.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">on the other two quarters</text>
+        <text x="436.0" y="303.0" font-size="17" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.49</text>
+        <text x="480.0" y="62.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">FLATTEN THE STRING</text>
+        <rect x="532.00" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="537.35" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="542.70" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="548.05" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="553.40" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="558.75" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="564.10" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="569.45" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="574.80" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="580.15" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="585.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="590.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="598.70" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="604.05" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="609.40" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="614.75" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="620.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="625.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="630.80" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="636.15" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="641.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="646.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="652.20" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="657.55" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="665.40" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="670.75" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="676.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="681.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="686.80" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="692.15" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="697.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="702.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="708.20" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="713.55" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="718.90" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="724.25" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="732.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="737.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="742.80" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="748.15" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="753.50" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="758.85" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="764.20" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="769.55" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="774.90" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="780.25" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="785.60" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="790.95" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <line x1="597.15" y1="65.0" x2="597.15" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="663.85" y1="65.0" x2="663.85" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="730.55" y1="65.0" x2="730.55" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <rect x="551.90" y="68.5" width="34.2" height="15.0" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <rect x="741.30" y="73.5" width="34.2" height="10.0" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="522.0" y="79.5" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">W &#8230; C</text>
+        <rect x="532.00" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="537.35" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="542.70" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="548.05" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="553.40" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="558.75" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="564.10" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="569.45" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="574.80" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="580.15" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="585.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="590.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="598.70" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="604.05" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="609.40" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="614.75" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="620.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="625.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="630.80" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="636.15" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="641.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="646.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="652.20" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="657.55" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="665.40" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="670.75" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="676.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="681.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="686.80" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="692.15" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="697.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="702.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="708.20" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="713.55" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="718.90" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="724.25" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="732.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="737.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="742.80" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="748.15" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="753.50" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="758.85" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="764.20" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="769.55" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="774.90" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="780.25" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="785.60" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="790.95" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <line x1="597.15" y1="83.0" x2="597.15" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="663.85" y1="83.0" x2="663.85" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="730.55" y1="83.0" x2="730.55" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <rect x="741.30" y="86.5" width="34.2" height="15.0" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <rect x="551.90" y="91.5" width="34.2" height="10.0" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="522.0" y="97.5" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">C &#8230; W</text>
+        <line x1="480.0" y1="110.0" x2="796.0" y2="110.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="480.0" y="124.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.12em">THE 48 x 4 NUMBERS, IN ORDER</text>
+        <text x="532.0" y="152.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">4&#8211;9 GGGTGC</text>
+        <text x="664.0" y="152.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">38&#8211;43 TTTGTA</text>
+        <text x="532.0" y="174.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">4&#8211;9 TTTGTA</text>
+        <text x="664.0" y="174.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">38&#8211;43 GGGTGC</text>
+        <line x1="480.0" y1="206.0" x2="796.0" y2="206.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="480.0" y="222.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the swap moves 12 of the 48 slots:</text>
+        <text x="480.0" y="236.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">order is a slot index, and the fit fixes the index</text>
+        <text x="480.0" y="258.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.12em">HELD-OUT ACCURACY</text>
+        <text x="796.0" y="258.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.12em">chance 0.50</text>
+        <text x="480.0" y="280.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">on the delivered slots</text>
+        <text x="796.0" y="281.0" font-size="17" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">1.00</text>
+        <text x="480.0" y="302.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">on the other two quarters</text>
+        <text x="796.0" y="303.0" font-size="17" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.49</text>
+        <text x="840.0" y="62.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">SLIDE A WINDOW</text>
+        <rect x="892.00" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="897.35" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="902.70" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="908.05" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="913.40" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="918.75" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="924.10" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="929.45" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="934.80" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="940.15" y="70.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="945.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="950.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="958.70" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="964.05" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="969.40" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="974.75" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="980.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="985.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="990.80" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="996.15" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1001.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1006.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1012.20" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1017.55" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1025.40" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1030.75" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1036.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1041.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1046.80" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1052.15" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1057.50" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1062.85" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1068.20" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1073.55" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1078.90" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1084.25" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1092.10" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1097.45" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1102.80" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="1108.15" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="1113.50" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="1118.85" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="1124.20" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="1129.55" y="75.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="1134.90" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1140.25" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1145.60" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1150.95" y="70.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <line x1="957.15" y1="65.0" x2="957.15" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="1023.85" y1="65.0" x2="1023.85" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="1090.55" y1="65.0" x2="1090.55" y2="87.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <text x="882.0" y="79.5" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">W &#8230; C</text>
+        <rect x="892.00" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="897.35" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="902.70" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="908.05" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="913.40" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="918.75" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="924.10" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="929.45" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="934.80" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="940.15" y="93.0" width="4.5" height="7.0" fill="#2d3142"/>
+        <rect x="945.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="950.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="958.70" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="964.05" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="969.40" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="974.75" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="980.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="985.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="990.80" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="996.15" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1001.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1006.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1012.20" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1017.55" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1025.40" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1030.75" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1036.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1041.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1046.80" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1052.15" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1057.50" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1062.85" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1068.20" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1073.55" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1078.90" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1084.25" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1092.10" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1097.45" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1102.80" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="1108.15" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="1113.50" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="1118.85" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="1124.20" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="1129.55" y="88.0" width="4.5" height="12.0" fill="#2d3142"/>
+        <rect x="1134.90" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1140.25" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1145.60" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <rect x="1150.95" y="88.0" width="4.5" height="12.0" fill="#d5d5db"/>
+        <line x1="957.15" y1="83.0" x2="957.15" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="1023.85" y1="83.0" x2="1023.85" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <line x1="1090.55" y1="83.0" x2="1090.55" y2="105.0" stroke="rgba(45,49,66,0.28)" stroke-width="0.8"/>
+        <text x="882.0" y="97.5" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">C &#8230; W</text>
+        <line x1="840.0" y1="110.0" x2="1156.0" y2="110.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="840.0" y="124.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.12em">MAX OF THE 43 WINDOW MATCH COUNTS</text>
+        <line x1="892.0" y1="176.0" x2="1156.0" y2="176.0" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
+        <line x1="892.0" y1="140.0" x2="1156.0" y2="140.0" stroke="rgba(45,49,66,0.3)" stroke-width="1"/>
+        <text x="886.0" y="143.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">6</text>
+        <text x="886.0" y="176.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">0</text>
+        <polyline points="894.25,170.00 899.60,170.00 904.95,164.00 910.30,164.00 915.65,140.00 921.00,158.00 926.35,164.00 931.70,170.00 937.05,158.00 942.40,176.00 947.75,164.00 953.10,170.00 960.95,164.00 966.30,164.00 971.65,164.00 977.00,164.00 982.35,170.00 987.70,164.00 993.05,170.00 998.40,158.00 1003.75,176.00 1009.10,164.00 1014.45,164.00 1019.80,158.00 1027.65,170.00 1033.00,158.00 1038.35,176.00 1043.70,176.00 1049.05,170.00 1054.40,164.00 1059.75,176.00 1065.10,164.00 1070.45,170.00 1075.80,158.00 1081.15,164.00 1086.50,164.00 1094.35,170.00 1099.70,164.00 1105.05,176.00 1110.40,158.00 1115.75,170.00 1121.10,164.00 1126.45,170.00" fill="none" stroke="#2d3142" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="915.6" y="134.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">W filter, top row</text>
+        <polyline points="894.25,176.00 899.60,170.00 904.95,170.00 910.30,164.00 915.65,176.00 921.00,158.00 926.35,170.00 931.70,170.00 937.05,164.00 942.40,176.00 947.75,164.00 953.10,170.00 960.95,164.00 966.30,164.00 971.65,164.00 977.00,164.00 982.35,170.00 987.70,164.00 993.05,170.00 998.40,158.00 1003.75,176.00 1009.10,164.00 1014.45,164.00 1019.80,158.00 1027.65,170.00 1033.00,158.00 1038.35,176.00 1043.70,176.00 1049.05,170.00 1054.40,164.00 1059.75,176.00 1065.10,164.00 1070.45,170.00 1075.80,158.00 1081.15,158.00 1086.50,164.00 1094.35,164.00 1099.70,164.00 1105.05,140.00 1110.40,158.00 1115.75,164.00 1121.10,164.00 1126.45,164.00" fill="none" stroke="#bf4520" stroke-width="1.5" stroke-dasharray="4 3" stroke-linejoin="round"/>
+        <text x="1156.0" y="134.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="end">W filter, bottom row</text>
+        <text x="892.0" y="196.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">both strings: filter W 6 &#183; filter C 6</text>
+        <line x1="840.0" y1="206.0" x2="1156.0" y2="206.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="840.0" y="222.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the peak moves, the maximum does not:</text>
+        <text x="840.0" y="236.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">nothing here can carry a place, so no order</text>
+        <text x="840.0" y="258.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.12em">HELD-OUT ACCURACY</text>
+        <text x="1156.0" y="258.0" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.12em">chance 0.50</text>
+        <text x="840.0" y="280.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">on the delivered slots</text>
+        <text x="1156.0" y="281.0" font-size="17" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.50</text>
+        <text x="840.0" y="302.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">on the other two quarters</text>
+        <text x="1156.0" y="303.0" font-size="17" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.50</text>
+        <line x1="120.0" y1="348.0" x2="1160.0" y2="348.0" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="120.0" y="328.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">mean: never where. flatten: where, but only in the slots it saw. window: whether, never in what order.</text>
+        <line x1="120.0" y1="372.0" x2="1160.0" y2="372.0" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="120.0" y="396.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MODEL</text>
+        <text x="208.0" y="396.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">1500 strings fitted, 4000 held out &#183; 48 positions, 4 bases &#183; one W (GGGTGC) and one C (TTTGTA) per string</text>
+        <text x="208.0" y="412.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">W at 4&#8211;9, C at 38&#8211;43, or swapped &#183; other quarters: 16&#8211;21, 26&#8211;31 &#183; seed 10 &#183; identical in all three panels</text>
+        <line x1="120.0" y1="428.0" x2="1160.0" y2="428.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120.0" y="452.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MARKS</text>
+        <rect x="206" y="442" width="12" height="12" fill="#d5d5db"/>
+        <text x="226.0" y="452.0" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a background base</text>
+        <rect x="356" y="442" width="12" height="12" fill="#2d3142"/>
+        <text x="376.0" y="452.0" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">motif W</text>
+        <rect x="440" y="447.0" width="12" height="7.0" fill="#2d3142"/>
+        <text x="460.0" y="452.0" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">motif C</text>
+        <rect x="530" y="440.5" width="15" height="15" fill="none" stroke="#bf4520" stroke-width="1.4"/>
+        <text x="554.0" y="452.0" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a slot the swap changes</text>
+        <line x1="120.0" y1="470.0" x2="1160.0" y2="470.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120.0" y="494.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">SYMBOLS</text>
+        <text x="120.0" y="520.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">mean</text>
+        <text x="198.0" y="520.0" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one number per base: its count &#247; 48</text>
+        <text x="470.0" y="520.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">max</text>
+        <text x="548.0" y="520.0" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the largest of the 43 window responses</text>
+        <text x="120.0" y="544.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">flatten</text>
+        <text x="198.0" y="544.0" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">48 positions &#215; 4 bases, in order</text>
+        <text x="470.0" y="544.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">W, C</text>
+        <text x="548.0" y="544.0" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the two planted 6-mers</text>
+        <text x="120.0" y="568.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">window</text>
+        <text x="198.0" y="568.0" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a 6-wide filter per motif, slid along</text>
+        <text x="470.0" y="568.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.50</text>
+        <text x="548.0" y="568.0" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">chance, and the two classes hold equal counts</text>
+        <line x1="120.0" y1="592.0" x2="740.0" y2="592.0" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120.0" y="614.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the week 8 recurrent reader is not here, because it does not reduce.</text>
+        <text x="120.0" y="629.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">attention in week 11 is the fourth, and it reduces nothing.</text>
+        <text x="120.0" y="650.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the strings are synthetic, and each holds one W and one C.</text>
+        <text x="120.0" y="665.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the window filters are the motifs themselves, the best case for that reduction.</text>
+        <line x1="800" y1="434" x2="800" y2="662" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="832.0" y="452.0" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">PYTORCH</text>
+        <text x="832.0" y="476.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"># x is (n, 4, 48), one-hot</text>
+        <text x="832.0" y="491.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">x.mean(1)</text>
+        <text x="1020.0" y="491.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># average the rows</text>
+        <text x="832.0" y="506.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">x.flatten(1)</text>
+        <text x="1020.0" y="506.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># flatten</text>
+        <text x="832.0" y="521.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">F.conv1d(x, motifs)</text>
+        <text x="1020.0" y="521.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># slide a window</text>
+        <text x="832.0" y="536.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">F.max_pool1d(h, h.size(-1))</text>
+        <text x="1020.0" y="536.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># keep the maximum</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

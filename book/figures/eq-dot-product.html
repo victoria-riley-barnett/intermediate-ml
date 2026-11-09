@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dot product</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+
+
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/01-linear-analysis.html">&larr; What ML is, and what this course does with it</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="eq-matrix-multiply.html">&larr; Matrix multiply</a><span class="sep">/</span><a href="eq-mean-variance.html">Mean and variance &rarr;</a><span class="sep">/</span><span>also in <a href="../chapters/11-attention.html">chapter 11</a></span>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">Core equation · linear algebra</p>
+    <h1>Dot product</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 598" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-dot-product-title eq-dot-product-desc">
+        <title id="eq-dot-product-title">Dot product</title>
+        <desc id="eq-dot-product-desc">The dot product of two vectors of four integers, with the notation table that reads it. The two vectors are given as (2, 1, -3, 4) and (3, -2, 1, 1). Entries pair position by position: 2 times 3 is 6, 1 times -2 is -2, -3 times 1 is -3, 4 times 1 is 4. Those four products add to a single number, 5. The sum is undefined when the lists are not the same length: with the second vector only three long, the fourth term has no partner.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520">a</tspan><tspan> · </tspan><tspan fill="#bf4520">b</tspan><tspan> = Σ</tspan><tspan font-size="19" dy="7">i</tspan><tspan dy="-7"> a</tspan><tspan font-size="19" dy="7">i</tspan><tspan dy="-7"> b</tspan><tspan font-size="19" dy="7">i</tspan></text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">SYMBOL</text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">NAME</text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WHAT IT IS</text>
+        <text x="940" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">IN THE EXAMPLE</text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a, b</text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the two vectors</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">each a list of n numbers, in order — the inputs</text>
+        <text x="940" y="246" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">(2,1,−3,4) · (3,−2,1,1)</text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">·</text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">dot product</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">multiply the entries that sit in matching positions</text>
+        <text x="940" y="272" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">6 + (−2) + (−3) + 4</text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">Σ</text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">sum</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">add those products into one number</text>
+        <text x="940" y="298" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">5</text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a<tspan font-size="11" dy="4">i</tspan><tspan dy="-4">, b</tspan><tspan font-size="11" dy="4">i</tspan></text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">entries at i</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the a entry and the b entry at one position</text>
+        <text x="940" y="324" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">i = 3: −3 and 1</text>
+        <line x1="120" y1="346" x2="1160" y2="346" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="380" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WORKED · n = 4, INTEGER ENTRIES · FOUR PRODUCTS, ONE NUMBER OUT</text>
+        <rect x="168" y="392" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="177.0" y="405" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <rect x="186" y="392" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="195.0" y="405" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="204" y="392" width="18" height="18" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="213.0" y="405" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−3</text>
+        <rect x="222" y="392" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="405" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="120" y="405" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a</text>
+        <rect x="168" y="418" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="177.0" y="431" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <rect x="186" y="418" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="195.0" y="431" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−2</text>
+        <rect x="204" y="418" width="18" height="18" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="213.0" y="431" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="222" y="418" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="431" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="120" y="431" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">b</text>
+        <rect x="168" y="444" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="177.0" y="457" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">6</text>
+        <rect x="186" y="444" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="195.0" y="457" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−2</text>
+        <rect x="204" y="444" width="18" height="18" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="213.0" y="457" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−3</text>
+        <rect x="222" y="444" width="18" height="18" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="457" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="120" y="457" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">a·b</text>
+        <text x="177.0" y="478" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">1</text>
+        <text x="195.0" y="478" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">2</text>
+        <text x="213.0" y="478" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">3</text>
+        <text x="231.0" y="478" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">4</text>
+        <text x="560" y="405" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a<tspan font-size="10" dy="4">1</tspan><tspan dy="-4">·b</tspan><tspan font-size="10" dy="4">1</tspan><tspan dy="-4"> = </tspan><tspan>2 × 3 = </tspan><tspan>6</tspan></text>
+        <text x="560" y="431" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a<tspan font-size="10" dy="4">2</tspan><tspan dy="-4">·b</tspan><tspan font-size="10" dy="4">2</tspan><tspan dy="-4"> = </tspan><tspan>1 × −2 = </tspan><tspan>−2</tspan></text>
+        <text x="560" y="457" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520">a<tspan font-size="10" dy="4">3</tspan><tspan dy="-4">·b</tspan><tspan font-size="10" dy="4">3</tspan><tspan dy="-4"> = </tspan><tspan>−3 × 1 = </tspan><tspan>−3</tspan></text>
+        <text x="560" y="483" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a<tspan font-size="10" dy="4">4</tspan><tspan dy="-4">·b</tspan><tspan font-size="10" dy="4">4</tspan><tspan dy="-4"> = </tspan><tspan>4 × 1 = </tspan><tspan>4</tspan></text>
+        <text x="560" y="512" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a·b = <tspan>6 + (−2) + (−3) + 4</tspan><tspan> = </tspan><tspan font-weight="500">5</tspan></text>
+        <rect x="548" y="496" width="612" height="26" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="120" y="552" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">n must match: with b only 3 long, the term i = 4 has no partner and <tspan>Σ</tspan><tspan dy="4" font-size="9">i</tspan><tspan dy="-4"> is undefined</tspan></text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

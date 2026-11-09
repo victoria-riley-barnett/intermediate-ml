@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One held-out number, two baselines, two verdicts</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/project-a-new-data.html">&larr; The method on data the course did not choose</a><span class="sep">/</span><a href="../figures.html">all figures</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">Week 14 &middot; Project clinic</p>
+    <h1>One held-out number, two baselines, two verdicts</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 874" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="compare-baseline-first-title compare-baseline-first-desc">
+        <title id="compare-baseline-first-title">One held-out accuracy read against two baselines: 0.3208, 0.9783 and 0.9646 on the same 876 genes</title>
+        <desc id="compare-baseline-first-desc">Three rules on the same 876 held-out genes from a 4,380-row human gene artifact in 7 families. Column A is the null rule, which names the commonest training family (6, transcription factor) for every gene and fits nothing: 281 of 876 genes named right, accuracy 0.3208. Column B is the model the week-06 lab delivers, 9-letter counts into MultinomialNB with alpha = 0.1, fitted on 3,504 training rows: 857 of 876 right, accuracy 0.9783, which is 576 genes more than the null rule. Column C is the same model with one variable moved: each training gene is fitted twice, as itself and as its reverse complement, so the fit sees 7,008 rows but the held-out rows, the 229,996 columns and alpha are unchanged: 845 of 876 right, accuracy 0.9646. Read against A, C is 564 genes ahead; read against B, C is 12 genes behind. Said as errors the same three counts are 595, 19 and 31 genes of 876 named wrong. The 229,996 columns are learned from the training rows only. The family counts are uneven, so the null rule scores 0.3208 rather than one seventh. The key states the data, the marks, the source, the symbols and the scikit-learn calls; the difference of 12 genes is not tested for repeatability and no split other than this one is drawn.</desc>
+        <rect width="1280" height="874" fill="#f5f5f5"/>
+        <text x="120" y="52" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">THREE RULES ON THE SAME 876 HELD-OUT GENES</text>
+        <text x="1160" y="52" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">ACCURACY = GENES NAMED RIGHT &#247; 876</text>
+        <text x="120" y="76" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">A &#183; BASELINE 1 &#183; CHOSEN FIRST</text>
+        <text x="440" y="124" font-size="40" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.3208</text>
+        <text x="440" y="146" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">HELD-OUT ACCURACY</text>
+        <text x="120" y="178" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">595 of 876 genes named wrong</text>
+        <text x="120" y="204" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the null rule: the commonest family every time</text>
+        <text x="120" y="220" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">family 6, transcription factor, no fit</text>
+        <text x="480" y="76" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">B &#183; BASELINE 2 &#183; THE LABS&#8217; MODEL</text>
+        <text x="800" y="124" font-size="40" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.9783</text>
+        <text x="800" y="146" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">HELD-OUT ACCURACY</text>
+        <text x="480" y="178" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">19 of 876 genes named wrong</text>
+        <text x="480" y="204" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">a fit on 9-letter counts:</text>
+        <text x="480" y="220" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">MultinomialNB, alpha = 0.1</text>
+        <text x="840" y="76" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">C &#183; THE ONE CHANGE, AGAINST BOTH</text>
+        <text x="1160" y="124" font-size="40" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.9646</text>
+        <text x="1160" y="146" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">HELD-OUT ACCURACY</text>
+        <text x="840" y="178" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">31 of 876 genes named wrong</text>
+        <text x="840" y="204" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the same fit on doubled rows:</text>
+        <text x="840" y="220" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">each gene and its reverse complement</text>
+        <line x1="120" y1="246" x2="1160" y2="246" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="266" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">&#916; OVER A</text>
+        <text x="440" y="288" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.0000</text>
+        <text x="440" y="306" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">the column subtracted from</text>
+        <text x="800" y="288" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">+0.6575</text>
+        <text x="800" y="306" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">+576 genes named right</text>
+        <text x="1160" y="288" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">+0.6438</text>
+        <text x="1160" y="306" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">+564 genes named right</text>
+        <text x="120" y="334" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">THE VARIABLE SINCE A</text>
+        <text x="120" y="356" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">none: it is the reference</text>
+        <text x="480" y="356" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">a model is fitted at all</text>
+        <text x="840" y="356" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the training rows, doubled</text>
+        <line x1="120" y1="382" x2="1160" y2="382" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="406" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">HELD FIXED IN ALL THREE</text>
+        <text x="300" y="406" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the same 876 held-out rows &#183; the same 229,996 nine-letter columns &#183; alpha = 0.1 &#183; the same 3,504 training genes</text>
+        <text x="120" y="438" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">C AGAINST B</text>
+        <text x="300" y="440" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" font-weight="500">&#8722;0.0137</text>
+        <text x="400" y="438" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">+12 genes named wrong of 876 &#183; the change is one variable: the 3,504 fitted genes, each entered twice</text>
+        <text x="120" y="466" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">which number counts as an improvement depends on which column is called the baseline; a project that names none has not made a claim</text>
+        <line x1="120" y1="514" x2="1160" y2="514" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="120" y="538" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MODEL</text>
+        <text x="208" y="538" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">n = 4,380 human gene sequences, 7 families &#183; 876 held out (20%) by a permutation seeded 42 &#183; 3,504 training rows</text>
+        <text x="208" y="554" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">9-letter counts, 229,996 columns learned on the training rows &#183; MultinomialNB alpha = 0.1</text>
+        <line x1="120" y1="578" x2="1160" y2="578" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="602" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MARKS</text>
+        <line x1="206" y1="606" x2="234" y2="606" stroke="#bf4520" stroke-width="2.4"/>
+        <text x="244" y="606" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the delta that goes the other way</text>
+        <text x="560" y="606" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">0.0000</text>
+        <text x="612" y="606" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the reference column: zero is a value, not a gap</text>
+        <line x1="120" y1="626" x2="1160" y2="626" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="650" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SOURCE</text>
+        <text x="208" y="650" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">week06 gene_family_data/human_data.txt &#183; 4,380 human gene records, classes 0&#8211;6 &#183; the course artifact, fetched 2026-09-29</text>
+        <line x1="120" y1="674" x2="1160" y2="674" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="698" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SYMBOLS</text>
+        <text x="120" y="724" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">&#916;</text>
+        <text x="248" y="724" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">this column minus column A</text>
+        <text x="120" y="750" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">held-out</text>
+        <text x="248" y="750" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the 876 genes never fitted on</text>
+        <text x="120" y="776" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">9-letter</text>
+        <text x="248" y="776" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">9 letters of DNA: one column</text>
+        <text x="460" y="724" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">alpha</text>
+        <text x="607" y="724" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">smoothing; 0.1 in every column</text>
+        <text x="460" y="750" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">reverse complement</text>
+        <text x="607" y="750" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the same gene, other strand</text>
+        <text x="460" y="776" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">null rule</text>
+        <text x="607" y="776" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one answer for every gene</text>
+        <line x1="780" y1="680" x2="780" y2="806" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="812" y="698" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SCIKIT-LEARN</text>
+        <text x="800" y="716" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cv = CountVectorizer(</text>
+        <text x="800" y="730" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" xml:space="preserve">    ngram_range=(4, 4))</text>
+        <text x="1000" y="730" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># 9 letters per column</text>
+        <text x="800" y="744" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">X = cv.fit_transform(texts)</text>
+        <text x="1000" y="744" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># training rows only</text>
+        <text x="800" y="758" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">clf = MultinomialNB(alpha=0.1)</text>
+        <text x="1000" y="758" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># the labs’ setting</text>
+        <text x="800" y="772" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">y_hat = clf.predict(X_test)</text>
+        <text x="1000" y="772" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># 876 held-out genes</text>
+        <text x="800" y="786" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">X_rc = cv.transform(rc)</text>
+        <text x="1000" y="786" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># the one change</text>
+        <text x="800" y="800" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">accuracy_score(y_test, y_hat)</text>
+        <text x="1000" y="800" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># 0.9783 vs 0.9646</text>
+        <text x="120" y="814" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">real data, two real fits, one split &#183; the 12-gene difference is named, not tested: a second split is not drawn</text>
+        <text x="120" y="832" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the split is numpy&#8217;s permutation seeded 42, not sklearn&#8217;s train_test_split, so these 876 rows are not the week-06 lab&#8217;s; the lab also learns its columns on all 4,380</text>
+      </svg>
+    </div>
+  <style>
+  .fig-sources {
+    font: 400 12px/1.6 'Geist', system-ui, sans-serif;
+    color: #4f5d75; max-width: 1216px;
+    padding: 10px 0 48px; margin-top: 6px;
+    border-top: 1px solid #cfcfd6;
+  }
+  .fig-sources b {
+    display: block; font: 500 10px/1.6 'Geist', system-ui, sans-serif;
+    letter-spacing: .11em; text-transform: uppercase; color: #5a6580;
+    padding-bottom: 4px;
+  }
+  .fig-sources a { color: #bf4520; text-decoration: none; }
+  .fig-sources a:hover { text-decoration: underline; }
+  .fig-sources p { margin: 0 0 5px; }
+  .fig-sources-wrap { padding: 0 64px; }
+  .fig-sources code {
+    font: 400 11px/1.5 'Geist Mono', ui-monospace, monospace;
+    color: #2d3142;
+  }
+</style>
+<!-- fig-sources:start -->
+<footer class="fig-sources">
+<b>Sources</b>
+<p>Gene-family corpus: <code>sequence\tclass</code>, 4,380 human / 1,682 chimp / 820 dog sequences in seven RefSeq gene families, mirrored from <code>raahuldatta/DNA-Sequencing-using-Machine-Learning-and-Deep-Learning-Algorithms</code> and fetched 2026-09-29. The mirror's licence is unverified: see SOURCES.md.</p></footer>
+<!-- fig-sources:end -->
+</div>
+</body>
+</html>

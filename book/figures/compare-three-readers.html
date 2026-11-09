@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Right inside the frame, at chance outside it</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/08-fixed-size-inputs.html">&larr; What a fixed-size input can and cannot learn</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="recurrent.html">&larr; A recurrent network</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">Week 08 &middot; What a fixed-size input cannot learn</p>
+    <h1>Right inside the frame, at chance outside it</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 944" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="compare-three-readers-title compare-three-readers-desc">
+        <title id="compare-three-readers-title">Three readers of the same strings, scored on five tests</title>
+        <desc id="compare-three-readers-desc">A score table: three readers of a string down the rows, five tests across the columns. Each cell is the share of strings answered right, averaged over ten runs from different starting points, with the spread beside it: 4 000 training strings in the first column and 2 000 held-out strings in each of the other four. The task is the delivered one: a string holds exactly one S and one T and the rest x, and the answer is whether S comes before T. The five tests are the training strings; new strings of the training lengths; new strings longer than any training string; the same held-out strings padded on the left; and the same held-out strings shifted one slot. Guessing scores 0.50. The counting reader scores 0.57, 0.52, 0.50, 0.52, 0.52. Its four held-out cells sit at chance, because SxxT and TxxS have identical counts, and the last three repeat one number because place does not enter its features at all. The flattened reader scores 1.00, 1.00, 0.78, 0.36, 0.95. It reads twelve slots and nothing else, so a string of the training lengths arrives whole and a longer one arrives cut short. The two marked cells are the tests that move a marker into slots 9 to 12 for at least one string in five: 43% on the longer strings and 91% when the strings are padded on the left. The mark is a stated convention, not a score cut: on the one-slot shift only 6% of the strings move a marker out of slots 1 to 8 and 0.37 of those are answered right, so that cell is drawn but not marked. Its 0.78 is not partial credit: 0.571 of the longer strings keep both markers inside slots 1 to 8 and are answered right there, 0.429 put a marker in slots 9 to 12 and are answered at 0.48. The recurrent reader scores 1.00, 1.00, 1.00, 0.76, 0.91, with spreads of 0.21 and 0.18 on the two position tests. The key states the sizes, the marks, the source, the symbols and the library calls.</desc>
+        <rect width="1280" height="944" fill="#f5f5f5"/>
+        <text x="120" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">THREE READERS, THE SAME TRAINING STRINGS</text>
+        <text x="1160" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">ONE CELL = THE SHARE ANSWERED RIGHT</text>
+        <text x="360" y="72" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">TRAINING</text>
+        <text x="360" y="86" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">STRINGS</text>
+        <text x="520" y="72" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">NEW, SAME</text>
+        <text x="520" y="86" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">LENGTHS</text>
+        <text x="680" y="72" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">NEW,</text>
+        <text x="680" y="86" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">LONGER</text>
+        <text x="840" y="72" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">SAME STRINGS,</text>
+        <text x="840" y="86" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">PADDED LEFT</text>
+        <text x="1000" y="72" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">SAME STRINGS,</text>
+        <text x="1000" y="86" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.12em">SHIFTED ONE SLOT</text>
+        <line x1="120" y1="104" x2="1160" y2="104" stroke="rgba(45,49,66,0.3)" stroke-width="1"/>
+        <text x="120" y="138" font-size="15" font-family="'Geist', system-ui, sans-serif" fill="#2d3142" font-weight="600">counts</text>
+        <text x="120" y="160" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">how many of each symbol, order dropped</text>
+        <text x="120" y="176" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">SxxT and TxxS have the same counts</text>
+        <text x="360" y="162" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.57</text>
+        <text x="360" y="182" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.00</text>
+        <text x="520" y="162" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.52</text>
+        <text x="520" y="182" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.01</text>
+        <text x="680" y="162" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.50</text>
+        <text x="680" y="182" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.01</text>
+        <text x="840" y="162" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.52</text>
+        <text x="840" y="182" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.01</text>
+        <text x="1000" y="162" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.52</text>
+        <text x="1000" y="182" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.01</text>
+        <line x1="120" y1="208" x2="1160" y2="208" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="242" font-size="15" font-family="'Geist', system-ui, sans-serif" fill="#2d3142" font-weight="600">flattened</text>
+        <text x="120" y="264" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one symbol per slot, then a hidden layer</text>
+        <text x="120" y="280" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">slots 9–12 never held a symbol</text>
+        <text x="360" y="266" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">1.00</text>
+        <text x="360" y="286" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.00</text>
+        <text x="360" y="302" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">all in frame</text>
+        <text x="520" y="266" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">1.00</text>
+        <text x="520" y="286" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.00</text>
+        <text x="520" y="302" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">all in frame</text>
+        <rect x="662" y="252" width="9" height="9" fill="#bf4520"/>
+        <text x="680" y="266" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" font-weight="500">0.78</text>
+        <text x="680" y="286" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.01</text>
+        <text x="680" y="302" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520">43% out of frame</text>
+        <rect x="822" y="252" width="9" height="9" fill="#bf4520"/>
+        <text x="840" y="266" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" font-weight="500">0.36</text>
+        <text x="840" y="286" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.05</text>
+        <text x="840" y="302" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520">91% out of frame</text>
+        <text x="1000" y="266" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.95</text>
+        <text x="1000" y="286" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.05</text>
+        <text x="1000" y="302" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">6% out of frame</text>
+        <line x1="120" y1="312" x2="1160" y2="312" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="346" font-size="15" font-family="'Geist', system-ui, sans-serif" fill="#2d3142" font-weight="600">recurrent</text>
+        <text x="120" y="368" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one weight set applied at every step</text>
+        <text x="120" y="384" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">finds the last real slot from the mask</text>
+        <text x="360" y="370" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">1.00</text>
+        <text x="360" y="390" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.00</text>
+        <text x="520" y="370" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">1.00</text>
+        <text x="520" y="390" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.00</text>
+        <text x="680" y="370" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">1.00</text>
+        <text x="680" y="390" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.00</text>
+        <text x="840" y="370" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.76</text>
+        <text x="840" y="390" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.21</text>
+        <text x="1000" y="370" font-size="27" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">0.91</text>
+        <text x="1000" y="390" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">&plusmn; 0.18</text>
+        <line x1="120" y1="416" x2="1160" y2="416" stroke="rgba(45,49,66,0.3)" stroke-width="1"/>
+        <text x="120" y="444" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">0.78 = 0.571 &middot; 1.00 + 0.429 &middot; 0.48</text>
+        <text x="470" y="444" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">0.571 of the longer strings keep both markers in slots 1–8 and are answered there; the rest are answered at chance</text>
+        <text x="120" y="476" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SIGNATURE</text>
+        <text x="232" y="476" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">counts</text>
+        <text x="352" y="476" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">at chance on held-out strings: the counts do not carry the order</text>
+        <text x="232" y="498" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">flattened</text>
+        <text x="352" y="498" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">1.00 on strings of the training lengths; chance once a marker leaves slots 1–8</text>
+        <text x="232" y="520" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">recurrent</text>
+        <text x="352" y="520" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">1.00 on longer strings; its two position columns vary across runs</text>
+        <line x1="120" y1="584" x2="1160" y2="584" stroke="rgba(45,49,66,0.3)" stroke-width="1"/>
+        <text x="120" y="604" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">MODEL</text>
+        <text x="208" y="604" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">9 symbols, 0 = pad &middot; T = 12 slots &middot; one hidden layer of 64 units</text>
+        <text x="208" y="620" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">4 000 training strings, lengths 4–8 &middot; 2 000 per test</text>
+        <text x="208" y="636" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">Adam 2e-3, batches of 64, 60 epochs &middot; mean (sd) over 10 seeds &middot; data seed 42</text>
+        <text x="120" y="672" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">MARKS</text>
+        <rect x="208" y="663" width="9" height="9" fill="#bf4520"/>
+        <text x="226" y="672" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">marked cell: one string in five or more leaves slots 1–8, and those are answered at chance</text>
+        <text x="208" y="694" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">&plusmn;</text>
+        <text x="226" y="694" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one standard deviation over the runs</text>
+        <text x="120" y="728" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SOURCE</text>
+        <text x="208" y="728" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">the delivered week-08 run: weeks/week08_sequence_failure/run_log.json</text>
+        <text x="208" y="744" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">the same reads, models and budget, recomputed by tools/compare-three-readers.py</text>
+        <text x="120" y="780" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SYMBOLS</text>
+        <text x="120" y="804" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">T</text>
+        <text x="190" y="804" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">slots in the fixed input, 12</text>
+        <text x="470" y="804" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">chance</text>
+        <text x="560" y="804" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">0.50: the two answers are balanced</text>
+        <text x="120" y="826" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">pad</text>
+        <text x="190" y="826" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">symbol 0; fills the unused slots</text>
+        <text x="470" y="826" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">in frame</text>
+        <text x="560" y="826" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">both markers in slots 1–8</text>
+        <text x="120" y="848" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">&plusmn;</text>
+        <text x="190" y="848" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one standard deviation across runs</text>
+        <text x="470" y="848" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">out of frame</text>
+        <text x="560" y="848" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a marker in slots 9–12</text>
+        <line x1="120" y1="862" x2="740" y2="862" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="880" font-size="10" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">the recurrent reader is not one of week 10’s three reductions — it is the one that does not reduce,</text>
+        <text x="120" y="896" font-size="10" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">and week 11 is where attention generalises it</text>
+        <line x1="780" y1="604" x2="780" y2="896" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="800" y="604" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">PYTORCH</text>
+        <text x="800" y="632" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" xml:space="preserve">nn.Embedding(9, 8)</text>
+        <text x="1010" y="632" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" xml:space="preserve"># one vector per symbol</text>
+        <text x="800" y="652" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" xml:space="preserve">nn.Flatten(), nn.Linear(96, 64)</text>
+        <text x="1010" y="652" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" xml:space="preserve"># flattened: 12 slots × 8</text>
+        <text x="800" y="672" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" xml:space="preserve">nn.Linear(9, 64)</text>
+        <text x="1010" y="672" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" xml:space="preserve"># counts: one number each</text>
+        <text x="800" y="692" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" xml:space="preserve">nn.GRU(8, 64, batch_first=True)</text>
+        <text x="1010" y="692" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" xml:space="preserve"># recurrent: every step</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

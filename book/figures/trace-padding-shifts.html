@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Padding decides which slot each symbol lands in</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/08-fixed-size-inputs.html">&larr; What a fixed-size input can and cannot learn</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="recurrent.html">A recurrent network &rarr;</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">WEEK 08 · SEQUENCE FAILURE</p>
+    <h1>Padding decides which slot each symbol lands in</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 872" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="trace-padding-shifts-title trace-padding-shifts-desc">
+        <title id="trace-padding-shifts-title">Padding decides which slot each symbol lands in</title>
+        <desc id="trace-padding-shifts-desc">3 rows of 12 slots. Every row holds the same read, SxxT: the same 4 characters in the same order. The first row is padded on the right, S in slot 1, x in slots 2 and 3, T in slot 4; the second on the left, S in slot 9, x in slots 10 and 11, T in slot 12; the third is shifted one slot, S in slot 2, x in slots 3 and 4, T in slot 5. Under the cell that holds a character each row prints the 1-based slot that character occupies, joined by a short accent tick; the pad slots print no number. The characters keep their order and their spacing, T being 3 slots after S in every row, so the rows differ only in which slots the characters land in, and a reader that indexes by position receives three different arrangements of one read. The figure draws geometry only: no row is marked as the correct one, and no score appears, so it makes no claim that a model fails and none about why.</desc>
+        <rect x="0" y="0" width="1280" height="872" fill="#f5f5f5"/>
+        <text x="120" y="44" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start" letter-spacing="0.14em">PADDING</text>
+        <text x="336" y="44" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">SLOT</text>
+        <text x="374.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">1</text>
+        <text x="442.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">2</text>
+        <text x="510.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">3</text>
+        <text x="578.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">4</text>
+        <text x="646.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">5</text>
+        <text x="714.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">6</text>
+        <text x="782.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">7</text>
+        <text x="850.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">8</text>
+        <text x="918.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">9</text>
+        <text x="986.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">10</text>
+        <text x="1054.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">11</text>
+        <text x="1122.0" y="44" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">12</text>
+        <line x1="120" y1="60" x2="1160" y2="60" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="102" font-size="16" font-family="'Geist', system-ui, sans-serif" fill="#2d3142" text-anchor="start" font-weight="600">padded right</text>
+        <text x="120" y="118" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start">demo.right</text>
+        <rect x="344" y="84" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="374.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle" font-weight="500">S</text>
+        <line x1="374.0" y1="128" x2="374.0" y2="136" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="374.0" y="152" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">1</text>
+        <rect x="412" y="84" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="442.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">x</text>
+        <line x1="442.0" y1="128" x2="442.0" y2="136" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="442.0" y="152" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">2</text>
+        <rect x="480" y="84" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="510.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">x</text>
+        <line x1="510.0" y1="128" x2="510.0" y2="136" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="510.0" y="152" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">3</text>
+        <rect x="548" y="84" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="578.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle" font-weight="500">T</text>
+        <line x1="578.0" y1="128" x2="578.0" y2="136" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="578.0" y="152" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">4</text>
+        <rect x="616" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="646.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="684" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="714.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="752" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="782.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="820" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="850.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="888" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="918.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="956" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="986.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="1024" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="1054.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="1092" y="84" width="60" height="44" fill="#eaeaee"/>
+        <text x="1122.0" y="111.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <text x="120" y="194" font-size="16" font-family="'Geist', system-ui, sans-serif" fill="#2d3142" text-anchor="start" font-weight="600">padded left</text>
+        <text x="120" y="210" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start">demo.left</text>
+        <rect x="344" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="374.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="412" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="442.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="480" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="510.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="548" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="578.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="616" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="646.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="684" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="714.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="752" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="782.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="820" y="176" width="60" height="44" fill="#eaeaee"/>
+        <text x="850.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="888" y="176" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="918.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle" font-weight="500">S</text>
+        <line x1="918.0" y1="220" x2="918.0" y2="228" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="918.0" y="244" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">9</text>
+        <rect x="956" y="176" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="986.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">x</text>
+        <line x1="986.0" y1="220" x2="986.0" y2="228" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="986.0" y="244" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">10</text>
+        <rect x="1024" y="176" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="1054.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">x</text>
+        <line x1="1054.0" y1="220" x2="1054.0" y2="228" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="1054.0" y="244" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">11</text>
+        <rect x="1092" y="176" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="1122.0" y="203.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle" font-weight="500">T</text>
+        <line x1="1122.0" y1="220" x2="1122.0" y2="228" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="1122.0" y="244" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">12</text>
+        <text x="120" y="286" font-size="16" font-family="'Geist', system-ui, sans-serif" fill="#2d3142" text-anchor="start" font-weight="600">shifted one</text>
+        <text x="120" y="302" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start">demo.shift1</text>
+        <rect x="344" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="374.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="412" y="268" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="442.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle" font-weight="500">S</text>
+        <line x1="442.0" y1="312" x2="442.0" y2="320" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="442.0" y="336" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">2</text>
+        <rect x="480" y="268" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="510.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">x</text>
+        <line x1="510.0" y1="312" x2="510.0" y2="320" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="510.0" y="336" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">3</text>
+        <rect x="548" y="268" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="578.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">x</text>
+        <line x1="578.0" y1="312" x2="578.0" y2="320" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="578.0" y="336" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">4</text>
+        <rect x="616" y="268" width="60" height="44" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="646.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle" font-weight="500">T</text>
+        <line x1="646.0" y1="312" x2="646.0" y2="320" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="646.0" y="336" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">5</text>
+        <rect x="684" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="714.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="752" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="782.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="820" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="850.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="888" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="918.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="956" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="986.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="1024" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="1054.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <rect x="1092" y="268" width="60" height="44" fill="#eaeaee"/>
+        <text x="1122.0" y="295.0" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <text x="120" y="380" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="start">3 rows · 12 slots · 4 characters · 8 pads in each row · T is 3 slots after S in every row</text>
+        <text x="120" y="410" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="start">the same 4 characters in the same order at the same width · S's slot differs in all 3 rows</text>
+        <text x="120" y="440" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start">each row string is read from the run log when this figure is generated · a dot is the log's pad, x its filler</text>
+        <text x="120" y="458" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start">not drawn: the integer ids behind each letter, the mask array, the batch's other rows,</text>
+        <text x="120" y="476" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start">what a model does with a pad slot, and the scores</text>
+        <line x1="120" y1="512" x2="1160" y2="512" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="536" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="start" font-weight="500">RUN</text>
+        <text x="208" y="536" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="start">411/weeks/week08_sequence_failure/run_log.json · illustrations.demo · config.t_max = 12 · read = SxxT</text>
+        <line x1="120" y1="560" x2="1160" y2="560" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+        <text x="120" y="584" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start" letter-spacing="0.14em">TERM</text>
+        <text x="248" y="584" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start" letter-spacing="0.14em">WHAT IT IS</text>
+        <text x="120" y="610" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="start" font-weight="500">slot</text>
+        <text x="248" y="610" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">one of the fixed positions in a row; slot 1 is on the left</text>
+        <text x="120" y="636" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="start" font-weight="500">S, T</text>
+        <text x="248" y="636" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">the two markers the read carries, one each</text>
+        <text x="120" y="662" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="start" font-weight="500">'x'</text>
+        <text x="248" y="662" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">filler; not a marker</text>
+        <text x="120" y="688" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="start" font-weight="500">'.'</text>
+        <text x="248" y="688" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">pad; a slot the read does not fill</text>
+        <line x1="120" y1="716" x2="1160" y2="716" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+        <text x="120" y="740" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="start" letter-spacing="0.14em">MARKS</text>
+        <rect x="120" y="758" width="34" height="16" fill="#ffffff" stroke="rgba(45,49,66,0.20)" stroke-width="1.0"/>
+        <text x="137" y="770" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle" font-weight="500">S</text>
+        <text x="190" y="770" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">a slot holding a character of the read</text>
+        <rect x="520" y="758" width="34" height="16" fill="#eaeaee"/>
+        <text x="537" y="770" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <text x="590" y="770" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">a pad: no character of the read is in that slot</text>
+        <line x1="137" y1="796" x2="137" y2="803" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="137" y="814" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle" font-weight="500">1</text>
+        <text x="190" y="814" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">the slot that character occupies, written under its cell</text>
+        <rect x="520" y="790" width="34" height="16" fill="#eaeaee"/>
+        <text x="537" y="798" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">.</text>
+        <text x="590" y="814" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75" text-anchor="start">a pad gets no number: only the read's characters are indexed</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

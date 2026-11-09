@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scaled dot product</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/11-attention.html">&larr; Attention</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="attention-worked.html">&larr; One attention head, by hand</a><span class="sep">/</span><a href="arch-mask.html">A mask removes terms from one average &rarr;</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">Week 11 · Attention</p>
+    <h1>Scaled dot product</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 784" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-scaled-dot-product-title eq-scaled-dot-product-desc">
+        <title id="eq-scaled-dot-product-title">Scaled dot product</title>
+        <desc id="eq-scaled-dot-product-desc">The scaled dot product: A = softmax(q K transpose over the square root of d) times V, worked on one query against three keys of width four. The query is (1, 2, 1, 1); the keys are k1 = (1, 1, -1, -1), k2 = (1, 1, 1, -1), k3 = (1, 1, 1, 1). Each score is a dot product of four terms, written term by term: 1 times 1 plus 2 times 1 plus 1 times minus 1 plus 1 times minus 1, which is 1, for key 1; 1 times 1 plus 2 times 1 plus 1 times 1 plus 1 times minus 1, which is 3, for key 2; 1 times 1 plus 2 times 1 plus 1 times 1 plus 1 times 1, which is 5, for key 3. The values are v1 = (1, 0, 2, 0), v2 = (0, 2, 0, 1), v3 = (2, 0, 0, 1). The width is d = 4, so the divisor is √4 = 2 and the divided scores are (0.5, 1.5, 2.5): the same three keys in the same order, because dividing by a positive number cannot reorder them. The scores as summed give weights (0.016, 0.117, 0.867); the divided scores give (0.090, 0.245, 0.665). Their entropy, minus the sum of p ln p, is 0.441 for the summed scores and 0.833 for the divided ones, where a row that put a third of the weight on each key would be ln 3 = 1.099: the ranking is unchanged and the row is flatter. The layer uses the divided weights, so the output row is 0.090 times (1, 0, 2, 0) plus 0.245 times (0, 2, 0, 1) plus 0.665 times (2, 0, 0, 1), which is (1.42, 0.49, 0.18, 0.91). Weights are printed to three decimals, the divided scores and the output components are exact at one and two decimals; the sums on the page are sums of the printed digits. The division is dimensional rather than empirical: over d independent entries of unit variance the dot product's mean square is exactly d, so its typical size is the square root of d and the divided score's typical size is one whatever the width. Nothing here is a claim about accuracy, and no training result is drawn.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520" dy="0">A</tspan><tspan dy="0"> = softmax(q K</tspan><tspan font-size="19" dy="-11">T</tspan><tspan dy="11"> / √d) · V</tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">softmax runs along the row: over keys, not over d</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">SYMBOL</tspan></text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">NAME</tspan></text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WHAT IT IS</tspan></text>
+        <text x="940" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">IN THE EXAMPLE</tspan></text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">q, K</tspan></text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the query and the keys</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">grids — q is one row of d numbers, K is T rows of d; one score per pair</text>
+        <text x="940" y="246" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">d = 4, T = 3</tspan></text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">q K</tspan><tspan font-size="9" dy="-6">T</tspan></text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the scores</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">T numbers — one dot product of d terms per key, before the division</text>
+        <text x="940" y="272" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(1, 3, 5)</tspan></text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">√d</tspan></text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the divisor</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number — the root of the row width; d = 4 gives 2</text>
+        <text x="940" y="298" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">2</tspan></text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">softmax</tspan></text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the weights</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">T numbers, each at least 0, adding to 1 — how much of each value is used</text>
+        <text x="940" y="324" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(0.090, 0.245, 0.665)</tspan></text>
+        <text x="120" y="350" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">V, A</tspan></text>
+        <text x="200" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the values, and the output</text>
+        <text x="380" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">grids — V is T rows of d; A is their weighted average, one row of d</text>
+        <text x="940" y="350" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(1.42, 0.49, 0.18, 0.91)</tspan></text>
+        <line x1="120" y1="372" x2="1160" y2="372" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="406" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WORKED · ONE QUERY, T = 3 KEYS, WIDTH d = 4 · FROM THE ENTRIES TO THE OUTPUT, EVERY NUMBER IS PRINTED</tspan></text>
+        <text x="120" y="434" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">THE QUERY AND THE THREE KEYS · d ENTRIES EACH</tspan></text>
+        <text x="120" y="464" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">q</tspan></text>
+        <rect x="156" y="448" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="171.0" y="463" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="186" y="448" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="201.0" y="463" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <rect x="216" y="448" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="231.0" y="463" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="246" y="448" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="261.0" y="463" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="120" y="490" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">k</tspan><tspan font-size="9" dy="4">1</tspan></text>
+        <rect x="156" y="474" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="171.0" y="489" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="186" y="474" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="201.0" y="489" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="216" y="474" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="231.0" y="489" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <rect x="246" y="474" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="261.0" y="489" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <text x="120" y="516" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">k</tspan><tspan font-size="9" dy="4">2</tspan></text>
+        <rect x="156" y="500" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="171.0" y="515" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="186" y="500" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="201.0" y="515" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="216" y="500" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="231.0" y="515" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="246" y="500" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="261.0" y="515" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <text x="120" y="542" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">k</tspan><tspan font-size="9" dy="4">3</tspan></text>
+        <rect x="156" y="526" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="171.0" y="541" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="186" y="526" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="201.0" y="541" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="216" y="526" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="231.0" y="541" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="246" y="526" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/><text x="261.0" y="541" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="171.0" y="562" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle"><tspan dy="0">1</tspan></text>
+        <text x="201.0" y="562" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle"><tspan dy="0">2</tspan></text>
+        <text x="231.0" y="562" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle"><tspan dy="0">3</tspan></text>
+        <text x="261.0" y="562" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle"><tspan dy="0">4</tspan></text>
+        <text x="300" y="490" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">q·k</tspan><tspan font-size="8" dy="3">1</tspan><tspan dy="-3"> = </tspan><tspan dy="0">1·1 + 2·1 + 1·(−1) + 1·(−1)</tspan><tspan dy="0"> = 1</tspan></text>
+        <text x="300" y="516" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">q·k</tspan><tspan font-size="8" dy="3">2</tspan><tspan dy="-3"> = </tspan><tspan dy="0">1·1 + 2·1 + 1·1 + 1·(−1)</tspan><tspan dy="0"> = 3</tspan></text>
+        <text x="300" y="542" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">q·k</tspan><tspan font-size="8" dy="3">3</tspan><tspan dy="-3"> = </tspan><tspan dy="0">1·1 + 2·1 + 1·1 + 1·1</tspan><tspan dy="0"> = 5</tspan></text>
+        <text x="600" y="458" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">THE SCORES, UNDIVIDED</tspan></text>
+        <text x="600" y="480" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">s = q K</tspan><tspan font-size="9" dy="-4">T</tspan><tspan dy="4"> = </tspan><tspan dy="0">(1, 3, 5)</tspan></text>
+        <text x="600" y="502" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">e</tspan><tspan font-size="9" dy="-4">s</tspan><tspan dy="4"> = </tspan><tspan dy="0">(2.718, 20.086, 148.413)</tspan></text>
+        <text x="600" y="524" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">Σ = </tspan><tspan dy="0">171.217</tspan></text>
+        <text x="600" y="548" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">p = e</tspan><tspan font-size="9" dy="-4">s</tspan><tspan dy="4"> / </tspan><tspan dy="0">171.217</tspan></text>
+        <rect x="637" y="556" width="58" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="666.0" y="571" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0.016</text>
+        <rect x="703" y="556" width="58" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="732.0" y="571" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0.117</text>
+        <rect x="769" y="556" width="58" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="798.0" y="571" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0.867</text>
+        <text x="600" y="600" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"><tspan dy="0">key 3 carries the largest weight</tspan></text>
+        <text x="600" y="622" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">−Σ p ln p = 0.066 + 0.251 + 0.124</tspan></text>
+        <text x="600" y="642" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">= 0.441 · a flat row is ln 3 = 1.099</tspan></text>
+        <text x="880" y="458" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" letter-spacing="0.14em"><tspan dy="0">THE SCORES ÷ √d = ÷ 2</tspan></text>
+        <text x="880" y="480" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">s / √d = </tspan><tspan dy="0">(0.5, 1.5, 2.5)</tspan></text>
+        <text x="880" y="502" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">e</tspan><tspan font-size="9" dy="-4">(s/√d)</tspan><tspan dy="4"> = </tspan><tspan dy="0">(1.649, 4.482, 12.182)</tspan></text>
+        <text x="880" y="524" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">Σ = </tspan><tspan dy="0">18.313</tspan></text>
+        <text x="880" y="548" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">p = e</tspan><tspan font-size="9" dy="-4">(s/√d)</tspan><tspan dy="4"> / </tspan><tspan dy="0">18.313</tspan></text>
+        <rect x="917" y="556" width="58" height="22" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="946.0" y="571" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">0.090</text>
+        <rect x="983" y="556" width="58" height="22" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="1012.0" y="571" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">0.245</text>
+        <rect x="1049" y="556" width="58" height="22" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="1078.0" y="571" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">0.665</text>
+        <text x="880" y="600" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"><tspan dy="0">key 3 carries the largest weight</tspan></text>
+        <text x="880" y="622" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">−Σ p ln p = 0.217 + 0.345 + 0.271</tspan></text>
+        <text x="880" y="642" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">= 0.833 · a flat row is ln 3 = 1.099</tspan></text>
+        <text x="120" y="668" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">THE OUTPUT · THE DIVIDED WEIGHTS AVERAGE THE THREE VALUE ROWS</tspan></text>
+        <text x="120" y="692" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">A = </tspan><tspan dy="0">0.090·(1, 0, 2, 0) + 0.245·(0, 2, 0, 1) + 0.665·(2, 0, 0, 1)</tspan></text>
+        <text x="120" y="716" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">  = (</tspan><tspan dy="0">0.090+0.000+1.330, 0.000+0.490+0.000, 0.180+0.000+0.000, 0.000+0.245+0.665</tspan><tspan dy="0">) = </tspan><tspan fill="#bf4520" dy="0">(1.42, 0.49, 0.18, 0.91)</tspan></text>
+        <text x="120" y="752" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"><tspan dy="0">d independent unit-variance terms make q·k of typical size √d, so ÷√d fixes the scale at 1 for every width</tspan></text>
+      </svg>
+    </div>
+  <style>
+  .fig-sources {
+    font: 400 12px/1.6 'Geist', system-ui, sans-serif;
+    color: #4f5d75; max-width: 1216px;
+    padding: 10px 0 48px; margin-top: 6px;
+    border-top: 1px solid #cfcfd6;
+  }
+  .fig-sources b {
+    display: block; font: 500 10px/1.6 'Geist', system-ui, sans-serif;
+    letter-spacing: .11em; text-transform: uppercase; color: #5a6580;
+    padding-bottom: 4px;
+  }
+  .fig-sources a { color: #bf4520; text-decoration: none; }
+  .fig-sources a:hover { text-decoration: underline; }
+  .fig-sources p { margin: 0 0 5px; }
+  .fig-sources-wrap { padding: 0 64px; }
+  .fig-sources code {
+    font: 400 11px/1.5 'Geist Mono', ui-monospace, monospace;
+    color: #2d3142;
+  }
+</style>
+<!-- fig-sources:start -->
+<footer class="fig-sources">
+<b>Sources</b>
+<p>Vaswani et al. (2017). Attention is all you need. arXiv:1706.03762</p></footer>
+<!-- fig-sources:end -->
+</div>
+</body>
+</html>

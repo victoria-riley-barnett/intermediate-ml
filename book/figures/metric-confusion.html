@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eight ion channels named wrong, inside an accuracy of 0.978</title>
+  <link href="fonts/fonts.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #5a6580;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    /* min-width: 0 stops this flex item from taking the SVG's max-content
+       width, so the scroller below owns the overflow instead of the page. */
+    .frame { max-width: 1344px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+<style>
+  .book-nav {
+    font: 400 12px/1.5 'Geist', system-ui, sans-serif;
+    letter-spacing: .02em; color: #4f5d75;
+    padding: 4px 0 18px; max-width: 1216px;
+  }
+  .book-nav a { color: #bf4520; text-decoration: none; }
+  .book-nav a:hover { text-decoration: underline; }
+  .book-nav .sep { color: #cfcfd6; padding: 0 7px; }
+  .book-nav-wrap { padding: 0 64px; }
+</style>
+<!-- book-nav:start -->
+<nav class="book-nav" aria-label="Where this figure sits">
+  <a href="../chapters/05-evaluation.html">&larr; Evaluation: how you know a model works</a><span class="sep">/</span><a href="../figures.html">all figures</a><span class="sep">/</span><a href="metric-prevalence.html">Accuracy is the commonest family’s share of the rows &rarr;</a>
+</nav>
+<!-- book-nav:end -->
+
+    <p class="eyebrow">WEEK 05 &middot; EVALUATION</p>
+    <h1>Eight ion channels named wrong, inside an accuracy of 0.978</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 1150" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="metric-confusion-title metric-confusion-desc">
+        <title id="metric-confusion-title">A 7x7 confusion matrix of the gene-family model on 876 held-out genes, raw and row-normalised</title>
+        <desc id="metric-confusion-desc">The seven-by-seven confusion matrix of the week-06 lab's gene-family model on 876 held-out human gene sequences, split from the 4380-gene corpus by np.random.default_rng(42).permutation and 80/20, seed 42. Rows are the true family, columns the family the model named, and one cell is one gene. Panel A gives the raw counts: the diagonal holds 857 genes, so the off-diagonal 19 are wrong. Per family the support is GPCR 100, tyrosine kinase 130, tyrosine phosphatase 61, synthetase 139, synthase 121, ion channel 44, transcription factor 281; column totals are 105, 127, 61, 136, 120, 36, 291. Panel B divides each row by its own n and prints one decimal, so a row of shares sums to 100 within 0.1: ion channel keeps 81.8% of its 44 genes, transcription factor keeps 99.6%. The largest single off-diagonal cell is 6 genes, ion channel named GPCR: the most frequent error, and the matrix gives no reason to call it the important one. 11 of the 19 errors land in column 6. With a flat cost each error costs 1 and the total is 19; that weighting is a choice the matrix cannot supply. Accuracy is 0.978, 857 of 876, and it is the last row of the scalar stack because it is the one that hides the rest. The key states the model, the marks, the source, the symbols and the scikit-learn calls.</desc>
+        <rect width="1280" height="1150" fill="#f5f5f5"/>
+        <text x="120" y="52" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">THE WEEK-06 GENE MODEL, 876 HELD-OUT GENES · ROWS TRUE FAMILY · COLUMNS WHAT IT SAID</text>
+        <text x="1160" y="52" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">ONE CELL = ONE GENE</text>
+        <text x="120" y="84" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">A · RAW COUNTS</text>
+        <text x="120" y="98" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">sum of every cell = 876</text>
+        <text x="680" y="84" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">B · EACH ROW AS A % OF ITS OWN n</text>
+        <text x="680" y="98" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the small family, at its own scale</text>
+        <text x="262" y="120" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">PREDICTED</text>
+        <text x="600" y="120" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">ROW n</text>
+        <text x="282.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">0</text>
+        <text x="322.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">1</text>
+        <text x="362.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">2</text>
+        <text x="402.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">3</text>
+        <text x="442.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">4</text>
+        <text x="482.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">5</text>
+        <text x="522.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">6</text>
+        <line x1="550" y1="140" x2="550" y2="420" stroke="rgba(45,49,66,0.18)" stroke-width="1"/>
+        <line x1="302" y1="140" x2="302" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="342" y1="140" x2="342" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="382" y1="140" x2="382" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="422" y1="140" x2="422" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="462" y1="140" x2="462" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="502" y1="140" x2="502" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="262" y1="180" x2="542" y2="180" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="262" y1="220" x2="542" y2="220" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="262" y1="260" x2="542" y2="260" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="262" y1="300" x2="542" y2="300" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="262" y1="340" x2="542" y2="340" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="262" y1="380" x2="542" y2="380" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <rect x="262" y="140" width="280" height="280" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="822" y="120" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">PREDICTED</text>
+        <text x="1160" y="120" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">ROW n</text>
+        <text x="842.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">0</text>
+        <text x="882.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">1</text>
+        <text x="922.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">2</text>
+        <text x="962.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">3</text>
+        <text x="1002.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">4</text>
+        <text x="1042.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">5</text>
+        <text x="1082.0" y="134" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">6</text>
+        <line x1="1110" y1="140" x2="1110" y2="420" stroke="rgba(45,49,66,0.18)" stroke-width="1"/>
+        <line x1="862" y1="140" x2="862" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="902" y1="140" x2="902" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="942" y1="140" x2="942" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="982" y1="140" x2="982" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="1022" y1="140" x2="1022" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="1062" y1="140" x2="1062" y2="420" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="822" y1="180" x2="1102" y2="180" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="822" y1="220" x2="1102" y2="220" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="822" y1="260" x2="1102" y2="260" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="822" y1="300" x2="1102" y2="300" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="822" y1="340" x2="1102" y2="340" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <line x1="822" y1="380" x2="1102" y2="380" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <rect x="822" y="140" width="280" height="280" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="120" y="164.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">GPCR</text>
+        <text x="680" y="164.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">GPCR</text>
+        <text x="250" y="164.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">0</text>
+        <text x="810" y="164.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">0</text>
+        <text x="600" y="164.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">100</text>
+        <text x="1160" y="164.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">100</text>
+        <text x="120" y="204.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">tyrosine kinase</text>
+        <text x="680" y="204.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">tyrosine kinase</text>
+        <text x="250" y="204.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">1</text>
+        <text x="810" y="204.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">1</text>
+        <text x="600" y="204.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">130</text>
+        <text x="1160" y="204.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">130</text>
+        <text x="120" y="241.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">tyrosine</text>
+        <text x="680" y="241.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">tyrosine</text>
+        <text x="120" y="255.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">phosphatase</text>
+        <text x="680" y="255.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">phosphatase</text>
+        <text x="250" y="244.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">2</text>
+        <text x="810" y="244.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">2</text>
+        <text x="600" y="244.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">61</text>
+        <text x="1160" y="244.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">61</text>
+        <text x="120" y="284.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">synthetase</text>
+        <text x="680" y="284.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">synthetase</text>
+        <text x="250" y="284.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">3</text>
+        <text x="810" y="284.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">3</text>
+        <text x="600" y="284.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">139</text>
+        <text x="1160" y="284.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">139</text>
+        <text x="120" y="324.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">synthase</text>
+        <text x="680" y="324.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">synthase</text>
+        <text x="250" y="324.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">4</text>
+        <text x="810" y="324.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">4</text>
+        <text x="600" y="324.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">121</text>
+        <text x="1160" y="324.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">121</text>
+        <text x="120" y="364.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">ion channel</text>
+        <text x="680" y="364.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">ion channel</text>
+        <text x="250" y="364.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">5</text>
+        <text x="810" y="364.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">5</text>
+        <text x="600" y="364.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">44</text>
+        <text x="1160" y="364.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">44</text>
+        <text x="120" y="401.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">transcription</text>
+        <text x="680" y="401.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">transcription</text>
+        <text x="120" y="415.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">factor</text>
+        <text x="680" y="415.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">factor</text>
+        <text x="250" y="404.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">6</text>
+        <text x="810" y="404.0" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">6</text>
+        <text x="600" y="404.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">281</text>
+        <text x="1160" y="404.0" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">281</text>
+        <rect x="264" y="142" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="824" y="142" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="282.0" y="165.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">99</text>
+        <text x="842.0" y="165.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">99.0</text>
+        <rect x="502" y="140" width="40" height="40" fill="#bf4520"/>
+        <rect x="1062" y="140" width="40" height="40" fill="#bf4520"/>
+        <text x="522.0" y="165.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">1</text>
+        <text x="1082.0" y="165.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">1.0</text>
+        <rect x="304" y="182" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="864" y="182" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="322.0" y="205.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">127</text>
+        <text x="882.0" y="205.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">97.7</text>
+        <rect x="502" y="180" width="40" height="40" fill="#bf4520"/>
+        <rect x="1062" y="180" width="40" height="40" fill="#bf4520"/>
+        <text x="522.0" y="205.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">3</text>
+        <text x="1082.0" y="205.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">2.3</text>
+        <rect x="344" y="222" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="904" y="222" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="362.0" y="245.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">61</text>
+        <text x="922.0" y="245.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">100.0</text>
+        <rect x="384" y="262" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="944" y="262" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="402.0" y="285.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">136</text>
+        <text x="962.0" y="285.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">97.8</text>
+        <rect x="422" y="260" width="40" height="40" fill="#bf4520"/>
+        <rect x="982" y="260" width="40" height="40" fill="#bf4520"/>
+        <text x="442.0" y="285.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">1</text>
+        <text x="1002.0" y="285.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">0.7</text>
+        <rect x="502" y="260" width="40" height="40" fill="#bf4520"/>
+        <rect x="1062" y="260" width="40" height="40" fill="#bf4520"/>
+        <text x="522.0" y="285.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">2</text>
+        <text x="1082.0" y="285.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">1.4</text>
+        <rect x="424" y="302" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="984" y="302" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="442.0" y="325.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">118</text>
+        <text x="1002.0" y="325.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">97.5</text>
+        <rect x="502" y="300" width="40" height="40" fill="#bf4520"/>
+        <rect x="1062" y="300" width="40" height="40" fill="#bf4520"/>
+        <text x="522.0" y="325.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">3</text>
+        <text x="1082.0" y="325.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">2.5</text>
+        <rect x="262" y="340" width="40" height="40" fill="#bf4520"/>
+        <rect x="822" y="340" width="40" height="40" fill="#bf4520"/>
+        <text x="282.0" y="365.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">6</text>
+        <text x="842.0" y="365.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">13.6</text>
+        <rect x="464" y="342" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="1024" y="342" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="482.0" y="365.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">36</text>
+        <text x="1042.0" y="365.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">81.8</text>
+        <rect x="502" y="340" width="40" height="40" fill="#bf4520"/>
+        <rect x="1062" y="340" width="40" height="40" fill="#bf4520"/>
+        <text x="522.0" y="365.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">2</text>
+        <text x="1082.0" y="365.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">4.5</text>
+        <rect x="422" y="380" width="40" height="40" fill="#bf4520"/>
+        <rect x="982" y="380" width="40" height="40" fill="#bf4520"/>
+        <text x="442.0" y="405.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">1</text>
+        <text x="1002.0" y="405.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#f5f5f5" text-anchor="middle" font-weight="500">0.4</text>
+        <rect x="504" y="382" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="1064" y="382" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="522.0" y="405.0" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">280</text>
+        <text x="1082.0" y="405.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">99.6</text>
+        <text x="262" y="444" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">COLUMN n</text>
+        <text x="282.0" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">105</text>
+        <text x="322.0" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">127</text>
+        <text x="362.0" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">61</text>
+        <text x="402.0" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">136</text>
+        <text x="442.0" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">120</text>
+        <text x="482.0" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">36</text>
+        <text x="522.0" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">291</text>
+        <text x="600" y="460" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">876</text>
+        <line x1="120" y1="480" x2="1160" y2="480" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="508" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">EVERY SCALAR IS A SUMMARY OF THIS MATRIX</text>
+        <text x="1160" y="508" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">VALUE</text>
+        <text x="120" y="528" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">RECALL</text>
+        <text x="230" y="528" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">family 5, ion channel</text>
+        <text x="820" y="528" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">36 / 44</text>
+        <text x="1160" y="529" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.818</text>
+        <text x="120" y="550" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">RECALL</text>
+        <text x="230" y="550" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">family 6, transcription factor</text>
+        <text x="820" y="550" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">280 / 281</text>
+        <text x="1160" y="551" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.996</text>
+        <text x="120" y="572" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">PRECISION</text>
+        <text x="230" y="572" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">family 5, ion channel: no other family is called it</text>
+        <text x="820" y="572" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">36 / 36</text>
+        <text x="1160" y="573" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">1.000</text>
+        <text x="120" y="594" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">ACCURACY</text>
+        <text x="230" y="594" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">all 7 families, the diagonal divided by 876</text>
+        <text x="820" y="594" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">857 / 876</text>
+        <text x="1160" y="595" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.978</text>
+        <line x1="120" y1="612" x2="1160" y2="612" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="636" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">WHAT THE OFF-DIAGONAL CELLS COST</text>
+        <text x="120" y="656" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">at a flat cost each of the 19 errors costs 1, so they sum to 19 genes; that flat 1 is a choice, not a measurement</text>
+        <text x="120" y="672" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the largest off-diagonal cell is 6 genes, ion channel named GPCR: the most frequent error, not thereby the costliest</text>
+        <text x="120" y="688" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">11 of the 19 errors land in column 6, the column holding the most predicted genes (291)</text>
+        <text x="120" y="712" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">a gene the lab then follows as the wrong family; whether that costs more for one pair of families than another is a decision the matrix cannot make</text>
+        <text x="120" y="728" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">accuracy 0.978 says how many of the 876 were named right and nothing about which 19, or where they sit</text>
+        <line x1="120" y1="790" x2="1160" y2="790" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="120" y="814" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">MODEL</text>
+        <text x="208" y="814" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">n = 876 held out · k = 7 families, 44–281 genes each · alpha = 0.1 · 9-letter counts</text>
+        <text x="208" y="830" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">the week-06 lab’s MultinomialNB, fitted on 3,504 genes · split = permutation seeded 42, 80/20 · not refitted for this figure</text>
+        <line x1="120" y1="854" x2="1160" y2="854" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="878" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">MARKS</text>
+        <rect x="210" y="870" width="36" height="36" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="257" y="878" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">named as its own family</text>
+        <rect x="538" y="868" width="40" height="40" fill="#bf4520"/>
+        <text x="587" y="878" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">named as another family</text>
+        <rect x="868" y="868" width="40" height="40" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="888.0" y="892.0" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">0</text>
+        <text x="917" y="878" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">no gene in this cell</text>
+        <line x1="120" y1="902" x2="1160" y2="902" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="926" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SOURCE</text>
+        <text x="208" y="926" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">no external citation: the course’s gene corpus, weeks/week06_multiclass/gene_family_data/README.md (mirror, licence unverified)</text>
+        <line x1="120" y1="950" x2="1160" y2="950" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="974" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SYMBOLS</text>
+        <text x="120" y="996" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">i</text>
+        <text x="200" y="996" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the true family: a row</text>
+        <text x="470" y="996" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">j</text>
+        <text x="550" y="996" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">what the model said: a column</text>
+        <text x="120" y="1020" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">M[i][j]</text>
+        <text x="200" y="1020" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">genes of family i the model called j</text>
+        <text x="470" y="1020" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">n_i</text>
+        <text x="550" y="1020" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">row n: genes truly of family i</text>
+        <text x="120" y="1044" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">p(j|i)</text>
+        <text x="200" y="1044" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">panel B: the cell over its row’s n</text>
+        <text x="470" y="1044" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">α</text>
+        <text x="550" y="1044" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the smoothing the fit uses, 0.1</text>
+        <line x1="780" y1="956" x2="780" y2="1066" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="812" y="974" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SKLEARN</text>
+        <text x="800" y="999" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cm = confusion_matrix(y, pred)</text>
+        <text x="1002" y="999" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># rows true, cols pred</text>
+        <text x="800" y="1014" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cm / cm.sum(axis=1)[:, None]</text>
+        <text x="1002" y="1014" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># panel B; 0/0 is nan</text>
+        <text x="800" y="1029" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">ConfusionMatrixDisplay(cm)</text>
+        <text x="1002" y="1029" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># counts, unnormalised</text>
+        <text x="800" y="1044" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">precision_recall_fscore_support</text>
+        <text x="1002" y="1044" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># one row per family</text>
+        <text x="800" y="1059" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">accuracy_score(y, pred)</text>
+        <text x="1002" y="1059" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># 857/876 = 0.978</text>
+        <text x="120" y="1078" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">one real run at 1:1: the week-06 gene fit on human_data.txt, 876 held-out genes, split seeded 42 · python3 tools/metric-confusion.py repeats it in two seconds</text>
+        <text x="120" y="1094" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">week 05 ships a confusion figure but no held-out predictions on disk, and torch is not installed here, so that lab’s matrix cannot be derived and the week-06 fit stands in</text>
+        <text x="120" y="1110" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">counts only: no probabilities, no cost weighting · other arrangements of 19 errors could hold this accuracy; none was run · 0/0 prints as undefined</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
