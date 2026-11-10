@@ -1,0 +1,95 @@
+# Mined from the delivered lecture notebook; prose stays anchored to its passages.
+
+number = "3"
+title = "Backpropagation"
+gist = "The chain rule applied where the values were recorded, then the backward pass."
+
+[timeline]
+row = "1986: backpropagation."
+plate = "lineage-a-1943-1997"
+
+[frame]
+data = "a tiny two-layer model, evaluated on a tiny fixed batch"
+representation = "a computation graph with forward values saved at each operation"
+transformation = "multiply local derivatives in reverse along the graph"
+evidence = "local derivatives compose to the observed gradient"
+source = "411/curriculum.toml week03, resolved by instructor/week_plan.md"
+
+[[steps]]
+claim = "Each operation has its own slope rule."
+see = ["02-autodifferentiation"]
+figure = "eq-chain-rule"
+source = "03_backprop_lecture.ipynb, cell 4"
+source_passage = """
+Rather than differentiate the whole expression by hand, notice that each operation has a built-in rule for its own slope, and the rule needs the value the operation saw during the forward pass:
+
+- the multiplication: the slope with respect to either operand is the other operand. The operands here are $w$ and 2, so the slope of step1 with respect to $w$ is 2.
+- the addition: slope 1. Adding shifts values but does not scale them, so whatever slope flows in flows out unchanged.
+- the square: slope $2 \times$ (the value it saw). It saw 7, so its slope is $2 \times 7 = 14$.
+"""
+text = """
+Rather than differentiate the whole expression by hand, notice that each operation has a built-in rule for its own slope, and the rule needs the value the operation saw during the forward pass:
+
+- the multiplication: the slope with respect to either operand is the other operand. The operands here are $w$ and 2, so the slope of step1 with respect to $w$ is 2.
+- the addition: slope 1. Adding shifts values but does not scale them, so whatever slope flows in flows out unchanged.
+- the square: slope $2 \times$ (the value it saw). It saw 7, so its slope is $2 \times 7 = 14$.
+"""
+
+[[steps]]
+claim = "The backward pass needs values saved during the forward pass."
+source = "03_backprop_lecture.ipynb, cell 4"
+source_passage = """
+That third rule is of interest: the square's slope needs a value that only existed during the forward pass, which is why Pytorch records each operation together with the value that flowed through it, not just the list of operations.
+"""
+text = """
+That third rule is of interest: the square's slope needs a value that only existed during the forward pass, which is why Pytorch records each operation together with the value that flowed through it, not just the list of operations.
+"""
+
+[[steps]]
+claim = "Backpropagation walks the recorded operations in reverse."
+see = ["04-neural-networks"]
+figure = "trace-backward-graph"
+source = "03_backprop_lecture.ipynb, cell 17, What is a walk?"
+source_passage = """
+The record is a list of operations in the order they ran: matmul, add, sigmoid, and so on, each with the values that flowed through it. `backward()` goes through that list in reverse, from the loss back to the input, and at every operation it multiplies two things:
+
+- the operation's slope rule, evaluated at the value the operation saw during the forward pass. These are the toy's rules again: a multiplication's slope with respect to either operand is the other operand, an addition's slope is 1, a square's slope is twice its input,
+- by the product accumulated so far, from the operations closer to the loss.
+"""
+text = """
+The record is a list of operations in the order they ran: matmul, add, sigmoid, and so on, each with the values that flowed through it. [[02-autodifferentiation|`backward()`]] goes through that list in reverse, from the loss back to the input, and at every operation it multiplies two things:
+
+- the operation's slope rule, evaluated at the value the operation saw during the forward pass. These are the toy's rules again: a multiplication's slope with respect to either operand is the other operand, an addition's slope is 1, a square's slope is twice its input,
+- by the product accumulated so far, from the operations closer to the loss.
+"""
+
+[[steps]]
+claim = "A model's gradient is a vector of parameter slopes."
+source = "03_backprop_lecture.ipynb, cell 6"
+source_passage = """
+Gradients are **vectors of partial derivatives** that indicate the direction and rate of the steepest increase of a function, i.e., we can conceive of them as many rates like the above, in a list [dL/dw1, dL/dw2, ..., dL/dwn] where n is the number of parameters in the function.
+"""
+text = """
+Gradients are **vectors of partial derivatives** that indicate the direction and rate of the steepest increase of a function, i.e., we can conceive of them as many rates like the above, in a list [dL/dw1, dL/dw2, ..., dL/dwn] where n is the number of parameters in the function.
+"""
+
+[[steps]]
+claim = "A backward pass is a small multiple of a forward pass."
+figure = "budget-backward-cost"
+see = ["02-autodifferentiation", "04-neural-networks"]
+source = "03_backprop_lecture.ipynb, cell 19, The walk, in the classic picture"
+source_passage = """
+Left: values move forward through a small graph, each node combining its inputs and passing the result on. Right: the same graph, walked backward, with slopes moving in from the output side. At each node the slope arriving from the output side is multiplied by that node's rule, and the result continues on toward the inputs. The number an input finally receives is the slope of the whole function with respect to that input. That is the walk described above, drawn instead of described: every operation's rule evaluated at a recorded forward value, chained back to the parameters. `loss.backward()` just did it for this notebook's network.
+"""
+text = """
+Left: values move forward through a small graph, each node combining its inputs and passing the result on. Right: the same graph, walked backward, with slopes moving in from the output side. At each node the slope arriving from the output side is multiplied by that node's rule, and the result continues on toward the inputs. The number an input finally receives is the slope of the whole function with respect to that input. That is the walk described above, drawn instead of described: every operation's rule evaluated at a recorded forward value, chained back to the parameters. `loss.backward()` just did it for this notebook's network.
+"""
+
+[[code]]
+label = "A backward pass and a finite-difference check"
+file = "03-backpropagation/trace.py"
+credit = "Adapted from SmolML core/value.py (MIT)"
+
+[next]
+missing = "What width, depth and activation change in a network."
+chapter = "04-neural-networks"

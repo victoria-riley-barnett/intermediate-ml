@@ -16,6 +16,8 @@ def words(s):
     return {w for w in re.findall(r"[a-z0-9]+", s.lower()) if w not in STOP}
 
 def desc(slug):
+    if not slug:
+        return ""
     t = (HERE / "figures" / f"{slug}.html").read_text()
     m = re.search(r"<desc[^>]*>(.*?)</desc>", t, re.S)
     return m.group(1) if m else ""
@@ -31,6 +33,8 @@ def main(stems):
             if not text:
                 continue
             pool = words(s.get("source_passage", "") + " " + desc(s.get("figure", "")))
+            text = re.sub(r"\[\[[^\]|]+\|([^\]]+)\]\]", r"\1", text)
+            text = re.sub(r"\[\[[^\]]+\]\]", "", text)
             for sent in re.split(r"(?<=[.!?])\s+", text):
                 w = words(sent)
                 if w and len(w & pool) / len(w) < 0.6:

@@ -1,0 +1,145 @@
+# Every step is anchored in delivered material; text is left in the author's words.
+
+number = "0"
+title = "Objects, and the shape of the work"
+gist = "Data, model, evaluate. A rule you cannot write down, and classes as the way to hold it."
+
+[frame]
+data = "small scientific records and Palmer penguin examples"
+representation = "Python values, tables, and objects"
+transformation = "a plain Python class with state and methods"
+evidence = "the program's output matches a stated expectation"
+source = "411/curriculum.toml week00, corrected by week00_oop/lecture.md, lab.md, and admin/BOOK.md"
+
+[[steps]]
+claim = "A model is a function whose behavior comes from data."
+source = "week00_oop/lecture.md, Why reach for a learned model at all"
+source_passage = """
+A **model**, in this course, means: a function you don't hand-write. Input goes in, a prediction comes out, and its exact behavior comes from data instead of a rule you typed yourself.
+"""
+text = """
+A **model**, in this course, means: a function you don't hand-write. Input goes in, a prediction comes out, and its exact behavior comes from data instead of a rule you typed yourself.
+"""
+see = ["02-autodifferentiation"]
+
+[[steps]]
+claim = "Use machine learning when the rule cannot be written but examples can be labeled."
+source = "week00_oop/lecture.md, Why reach for a learned model at all, continued; A rule you genuinely cannot write down"
+source_passage = """
+**The ML way:** show a model years of examples, each day's conditions paired with what tomorrow's weather actually turned out to be, and let it find, on its own, whatever relationship connects the two. You never write the rule down. That pairing, an example plus the correct answer attached to it, is a **label**; a pile of examples that each carry one is **labeled data**.
+
+**The dividing line:** reach for ML when you can't write down the rule, but you can supply a lot of labeled examples of the rule being followed.
+
+Try writing a step-by-step, exception-free procedure for telling a cat photo from a dog photo, using raw pixels. Not "cats are smaller," some dogs are tiny. Not "pointy ears," so do some dogs.
+
+You can't do it. Nobody can. The knowledge that lets *you* recognize a cat lives somewhere you don't have conscious access to.
+
+But you can hand ten thousand labeled photos to a model and let it find the pattern a hand-written rule never could.
+"""
+text = """
+**The ML way:** show a model years of examples, each day's conditions paired with what tomorrow's weather actually turned out to be, and let it find, on its own, whatever relationship connects the two. You never write the rule down. That pairing, an example plus the correct answer attached to it, is a **label**; a pile of examples that each carry one is **labeled data**.
+
+**The dividing line:** reach for ML when you can't write down the rule, but you can supply a lot of labeled examples of the rule being followed.
+
+Try writing a step-by-step, exception-free procedure for telling a cat photo from a dog photo, using raw pixels. Not "cats are smaller," some dogs are tiny. Not "pointy ears," so do some dogs.
+
+You can't do it. Nobody can. The knowledge that lets *you* recognize a cat lives somewhere you don't have conscious access to.
+
+But you can hand ten thousand labeled photos to a model and let it find the pattern a hand-written rule never could.
+"""
+
+[[steps]]
+claim = "The data can be incomplete, and it can leak the answer."
+source = "week00_oop/lecture.md, Data: a spam filter"
+source_passage = """
+A pile of past emails, each labeled "spam" or "not spam" by a person. From each you pull **features**, measurable properties: trigger words in the subject, exclamation-point count, an unfamiliar sender domain.
+
+**What's missing?** If labels only came from users who clicked "report spam," you're missing all the spam nobody reported.
+
+**What would leak?** A feature like "was this moved to the Spam folder" isn't a feature, it's the answer smuggled back in. A model trained on it looks perfect and is useless the moment it has to predict on an unsorted email. This failure mode has a name, **leakage**, and it's worth checking for every time a model looks suspiciously good.
+"""
+text = """
+A pile of past emails, each labeled "spam" or "not spam" by a person. From each you pull **features**, measurable properties: trigger words in the subject, exclamation-point count, an unfamiliar sender domain.
+
+**What's missing?** If labels only came from users who clicked "report spam," you're missing all the spam nobody reported.
+
+**What would leak?** A feature like "was this moved to the Spam folder" isn't a feature, it's the answer smuggled back in. A model trained on it looks perfect and is useless the moment it has to predict on an unsorted email. This failure mode has a name, **leakage**, and it's worth checking for every time a model looks suspiciously good.
+"""
+
+[[steps]]
+claim = "A model's capacity sets the patterns it can represent."
+source = "week00_oop/lecture.md, Model: what can it even express?"
+source_passage = """
+A model that just counts trigger words ("free," "winner," "act now") expresses one thing well: spam that's blunt about being spam. It's structurally blind to spam that avoids those words, spam that's mostly an image, and context. A real marketing email from a company you use trips the same words as a scam.
+
+This ceiling, the range of patterns a model is even capable of representing regardless of how much data you give it, is its **capacity**. A more flexible model has more capacity, expresses subtler patterns, and costs more: more data to fit well, more room to memorize noise instead of signal, harder to inspect afterward.
+"""
+text = """
+A model that just counts trigger words ("free," "winner," "act now") expresses one thing well: spam that's blunt about being spam. It's structurally blind to spam that avoids those words, spam that's mostly an image, and context. A real marketing email from a company you use trips the same words as a scam.
+
+This ceiling, the range of patterns a model is even capable of representing regardless of how much data you give it, is its **capacity**. A more flexible model has more capacity, expresses subtler patterns, and costs more: more data to fit well, more room to memorize noise instead of signal, harder to inspect afterward.
+"""
+
+[[steps]]
+claim = "Overall accuracy can hide the mistakes that matter."
+source = "week00_oop/lecture.md, Evaluate: did it work, for whom?"
+source_passage = """
+Naive check: overall accuracy. If spam is 20% of all mail, labeling *everything* "not spam" is already 80% accurate, and catches nothing.
+
+Ask *for whom* it worked: a real email wrongly buried in spam (a **false positive**, which intro stats calls a Type I error) is a far more expensive mistake than one spam message that slips through (a **false negative**, Type II). Where did it fail, a language it was never shown, a spam style it's never seen? What's next follows from the answer.
+"""
+text = """
+Naive check: [[05-evaluation|overall accuracy]]. If spam is 20% of all mail, labeling *everything* "not spam" is already 80% accurate, and catches nothing.
+
+Ask *for whom* it worked: a real email wrongly buried in spam (a **false positive**, which intro stats calls a Type I error) is a far more expensive mistake than one spam message that slips through (a **false negative**, Type II). Where did it fail, a language it was never shown, a spam style it's never seen? What's next follows from the answer.
+"""
+
+[[steps]]
+claim = "Code cells run in order and share state."
+source = "week00_oop/lab.md, Notebooks"
+source_passage = """
+Code cells run in order and share state. A variable defined in cell 3 is available in cell 7. This means you can build something across cells, but it also means order matters. If you skip a cell and later code relies on it, you get a `NameError`.
+"""
+text = """
+Code cells run in order and share state. A variable defined in cell 3 is available in cell 7. This means you can build something across cells, but it also means order matters. If you skip a cell and later code relies on it, you get a `NameError`.
+"""
+figure = "trace-state"
+
+[[steps]]
+claim = "A class names the data an object holds and the operations that touch it."
+source = "week00_oop/lab.md, Models are objects"
+source_passage = """
+A class is a blueprint for an object: it names what data the object holds and what operations are allowed to touch that data. Here we want a Counter that always has a count it can bump and reset, and we want many instances. `__init__` sets up the data with a default value; each instance has its own copy. `bump` and `reset` are methods, functions attached to the instance. `self` means "this specific instance."
+
+Two counters hold separate counts. Calling a method on one does not affect the other.
+"""
+text = """
+A class is a blueprint for an object: it names what data the object holds and what operations are allowed to touch that data. Here we want a Counter that always has a count it can bump and reset, and we want many instances. `__init__` sets up the data with a default value; each instance has its own copy. `bump` and `reset` are methods, functions attached to the instance. `self` means "this specific instance."
+
+Two counters hold separate counts. Calling a method on one does not affect the other.
+"""
+figure = "code-object"
+see = ["06-multiclass"]
+
+[[steps]]
+claim = "A method acts on the state held by the object before the dot."
+source = "week00_oop/lecture.md, Reading the dot"
+source_passage = """
+`object.method()` reads as a sentence: *"object, do method to your own data."* `acct.deposit(50)` becomes "account, deposit 50 into yourself." `df.dropna()` becomes "table, drop your own missing rows."
+
+The object before the dot supplies the state; the method after acts on exactly that state. Nothing magic: Python finds the class, calls its method, passes the object in automatically.
+"""
+text = """
+`object.method()` reads as a sentence: *"object, do method to your own data."* `acct.deposit(50)` becomes "account, deposit 50 into yourself." `df.dropna()` becomes "table, drop your own missing rows."
+
+The object before the dot supplies the state; the method after acts on exactly that state. Nothing magic: Python finds the class, calls its method, passes the object in automatically.
+"""
+see = ["02-autodifferentiation"]
+
+[[code]]
+label = "A value and a layer, both objects that hold state"
+file = "00-objects/state.py"
+
+[next]
+missing = "A vector and the operations that turn one into a prediction."
+chapter = "01-linear-analysis"

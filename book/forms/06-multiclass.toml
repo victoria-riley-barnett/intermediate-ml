@@ -1,0 +1,250 @@
+# Chapter form. Every prose field is mined from the delivered course, with its
+# source; nothing here is new narrative. See book/FORM.md.
+
+number = "6"
+title = "Multiclass and softmax"
+gist = "k-mers, logits, softmax and cross-entropy, on genes."
+
+[timeline]
+row = "The feed-forward network ends in a softmax over its scores."
+plate = "feedforward"
+
+[frame]   # the course's own frame: representation -> transformation -> evidence
+data = "4,380 human gene sequences in seven gene families, with 1,682 chimp and 820 dog sequences from other species."
+representation = "k-mer counts: one column per possible window of k bases, 4^k columns"
+transformation = "z = xW + b, seven logits; q = softmax(z); L = -log q_c"
+evidence = "cross-entropy while training; held-out accuracy against naming the largest family for every gene"
+source = "411/curriculum.toml week06, corrected by admin/BOOK.md (k = 6 in the lab, 4,096 columns) and gene_family_data/ row counts"
+
+[[steps]]
+claim = "A class is a name, not a quantity, so the model holds one score per class."
+see = ["05-evaluation", "04-neural-networks"]
+source = "week 6 lecture, Part 1, Seven families are not seven amounts"
+source_passage = """
+The gene family classifier could try to squeeze seven answers out of one number, the way the
+binary classifier squeezed two answers ("ion channel" or "not") out of one. That does not work
+here. **A class is a name, not a quantity.** Family 3 does not sit between family 1 and family 5 in
+any way a model should use, and the model cannot multiply one number by "which family" and get an
+answer.
+
+So the model holds not one number but **`K` numbers**, one for every class. For our data `K` is 7.
+The same idea covers any labeled set of classes: species, cell types, disease stage, a base in a
+sequence.
+"""
+text = """
+A classifier could try to squeeze seven answers out of one number, the way a binary classifier squeezes two answers ("ion channel" or "not") out of one. That does not work here. **A class is a name, not a quantity.** Family 3 does not sit between family 1 and family 5 in any way a model should use, and the model cannot multiply one number by "which family" and get an answer.
+
+So the model holds not one number but **`K` numbers**, one for every class. For the gene families `K` is 7. The same idea covers any labeled set of classes: species, cell types, disease stage, a base in a sequence.
+"""
+
+[[steps]]
+claim = "Counting k-letter windows turns a gene of any length into a fixed-length vector."
+see = ["08-fixed-size-inputs", "09-embeddings"]
+source = "week 6 lecture, Part 1, From a string to a fixed-length vector"
+figure = "trace-kmer-gene"
+source_passage = """
+Before any of that, the sequence itself has to become numbers. A gene is a string of `A`, `C`,
+`G`, `T`, and two genes are rarely the same length: the data here runs from a few dozen bases to
+tens of thousands. A weighted sum needs a fixed number of inputs every time, so the string cannot
+go in directly.
+
+A **k-mer** count fixes this. Slide a window of `k` bases along the sequence, one base at a time,
+and tally which `k`-letter windows occur. However long the sequence, the tally has a fixed length:
+with 4 possible bases, there are exactly $4^k$ distinct `k`-mers.
+
+With $k = 4$, that is $4^4 = 256$ possible windows, so every gene becomes a vector of 256 counts,
+however long it started. A sequence of length `L` produces $L - k + 1$ overlapping windows, each
+one landing in one of the 256 slots. (A handful of sequences contain an unread base, `N`; windows
+touching one are skipped, and the vector is still 256 slots long.)
+"""
+text = """
+Before any of that, the sequence itself has to become numbers. A gene is a string of `A`, `C`, `G`, `T`, and two genes are rarely the same length: the data here runs from a few dozen bases to tens of thousands. A weighted sum needs a fixed number of inputs every time, so the string cannot go in directly.
+
+A **k-mer** count fixes this. Slide a window of `k` bases along the sequence, one base at a time, and tally which `k`-letter windows occur. However long the sequence, the tally has a fixed length: with 4 possible bases, there are exactly 4^k distinct `k`-mers.
+
+A sequence of length `L` produces `L - k + 1` overlapping windows, each one landing in one of the 4^k slots. The figure uses k = 5: a 420-base sequence gives 416 windows in 1024 slots.
+"""
+
+[[steps]]
+claim = "One column of weights per family gives one score, a logit, per family."
+source = "week 6 lecture, Part 1, A column of weights for every family; The logits are scores, not probabilities"
+source_passage = """
+The linear model computes a weighted sum, same as always. Give it one set of weights per class and
+it computes one weighted sum per class:
+
+$$z = xW + b$$
+
+The input `x` is one gene's 256 k-mer counts, `W` is the weight matrix, and `b` is the bias vector.
+
+- `W` has shape `(d, K)`: **one column per family.** Column `j` holds the weights that score
+  family `j`.
+- `z` is the **logits**: a vector of `K = 7` scores, shape `(K,)`.
+
+A logit can be negative, large, or tiny. It is not bounded to 0 and 1, and the scores of one gene
+need not sum to anything.
+
+What a logit does say is **order**: inside one gene's row, a larger logit is more evidence for
+that family than a smaller one. What it does not say is how much. Doubling every logit leaves the
+order alone, and does not change which family the model would pick.
+"""
+text = """
+The linear model computes a weighted sum, same as always. Give it one set of weights per class and it computes one weighted sum per class: `z = xW + b`. The input `x` is one gene's k-mer counts, `W` is the weight matrix, and `b` is the bias vector. `W` has **one column per family**: column `j` holds the weights that score family `j`. `z` is the **logits**: a vector of `K = 7` scores.
+
+A logit can be negative, large, or tiny. It is not bounded to 0 and 1, and the scores of one gene need not sum to anything.
+
+What a logit does say is **order**: inside one gene's row, a larger logit is more evidence for that family than a smaller one. What it does not say is how much. Doubling every logit leaves the order alone, and does not change which family the model would pick.
+"""
+
+[[steps]]
+claim = "The decision is an argmax, and training cannot follow it."
+see = ["02-autodifferentiation#3"]
+source = "week 6 lecture, Part 1, The decision is an argmax; Argmax is a staircase"
+source_passage = """
+`argmax` returns the index of the largest score. That index is the model's predicted family.
+For the gene above, with logits $z = [2.0,\\ 1.0,\\ -1.0,\\ 0.5,\\ -0.3,\\ 1.8,\\ 0.2]$ over
+[GPCR, tyrosine kinase, tyrosine phosphatase, synthetase, synthase, ion channel, transcription
+factor], the largest score is 2.0, at index 0. The model calls this gene a GPCR gene.
+
+**`argmax` throws almost everything away.** It keeps only which score is largest. It discards how
+large any score is, and how far ahead the winner is.
+
+Move one weight by a tiny amount. Every logit moves by a tiny amount. The predicted family does
+not change until one logit passes another, and then it flips all at once.
+
+As a function of the weights, `argmax` is flat almost everywhere, with jumps between the flat
+parts. Flat means gradient zero: no slope for training to follow. **A decision is what we want at
+the end, not what training moves against.**
+"""
+text = """
+`argmax` returns the index of the largest score. That index is the model's predicted family. For a gene with logits `z = [2.0, 1.0, -1.0, 0.5, -0.3, 1.8, 0.2]` over [GPCR, tyrosine kinase, tyrosine phosphatase, synthetase, synthase, ion channel, transcription factor], the largest score is 2.0, at index 0. The model calls this gene a GPCR gene.
+
+**`argmax` throws almost everything away.** It keeps only which score is largest. It discards how large any score is, and how far ahead the winner is.
+
+Move one weight by a tiny amount. Every logit moves by a tiny amount. The predicted family does not change until one logit passes another, and then it flips all at once. As a function of the weights, `argmax` is flat almost everywhere, with jumps between the flat parts. Flat means gradient zero: no slope for training to follow. **A decision is what we want at the end, not what training moves against.**
+"""
+
+[[steps]]
+claim = "Softmax exponentiates the scores, then divides by their total."
+source = "week 6 lecture, Part 2, Exponentiate, then divide by the total; The running example, as a distribution"
+figure = "eq-softmax"
+source_passage = """
+**Softmax** turns a vector of arbitrary scores into a distribution. Two steps do it:
+
+- **Exponentiate.** `exp` of any real number is positive. This removes the sign. (It is
+  $e^{z_j}$, where $e$ is the number 2.718... .)
+- **Divide by the total.** Adding up the exponentials gives the denominator. Dividing by it forces
+  the `K` entries to sum to 1.
+
+`argmax` still points at index 0, GPCR: exponentiating did not change the order, it only turned
+the scores into a distribution. Notice the model puts real weight, 0.30, on index 5, ion channel,
+the family this gene actually belongs to. GPCRs and ion channels are both membrane proteins, and
+short k-mer windows do not always tell them apart.
+
+- **Softmax is not applied entry by entry.** Every $q_j$ depends on all `K` logits, because the
+  denominator reads all of them. Change one logit and the whole row shifts.
+- **The order survives.** If $z_a > z_b$ then $q_a > q_b$. The winner under `argmax` is the same
+  winner before and after softmax.
+"""
+text = """
+**Softmax** turns a vector of arbitrary scores into a distribution. Two steps do it. **Exponentiate:** `exp` of any real number is positive, which removes the sign. **Divide by the total:** adding up the exponentials gives the denominator, and dividing by it forces the `K` entries to sum to 1.
+
+For the gene above, `argmax` still points at index 0, GPCR: exponentiating did not change the order, it only turned the scores into a distribution. Notice the model puts real weight, 0.30, on index 5, ion channel, the family this gene actually belongs to. GPCRs and ion channels are both membrane proteins, and short k-mer windows do not always tell them apart.
+
+**Softmax is not applied entry by entry.** Every `q_j` depends on all `K` logits, because the denominator reads all of them. Change one logit and the whole row shifts. **The order survives.** The winner under `argmax` is the same winner before and after softmax.
+"""
+
+[[steps]]
+claim = "With a one-hot truth, cross-entropy reads one bar: the probability on the right family."
+source = "week 6 lecture, Part 2, A distribution over families; Part 3, One term survives"
+figure = "eq-cross-entropy"
+source_passage = """
+The truth for one gene is a distribution too. It is called **one-hot**: all the mass on the single
+correct family, zero everywhere else. Our example gene really is an ion channel gene, family index
+5.
+
+The truth is one-hot. Every $y_k$ is 0 except $y_c$, which is 1. So every term of the sum vanishes
+except the term for the correct family:
+
+$$H(y, q) = -\\log q_c$$
+
+For our gene, $c = 5$ and $q_c = 0.30$:
+
+$$H(y, q) = -\\log(0.30) = 1.20$$
+
+That is the entire loss for this gene. It reads **one number out of the distribution**: the
+probability the model assigned to the family that was actually right. The other six probabilities
+enter only through the denominator of $q_c$.
+"""
+text = """
+The truth for one gene is a distribution too. It is called **one-hot**: all the mass on the single correct family, zero everywhere else. The example gene really is an ion channel gene, family index 5.
+
+Every `y_k` is 0 except `y_c`, which is 1. So every term of the cross-entropy sum vanishes except the term for the correct family: `H(y, q) = -log q_c`. For the example gene, `c = 5` and `q_c = 0.30`, so `H(y, q) = -log(0.30) = 1.20`.
+
+That is the entire loss for this gene. It reads **one number out of the distribution**: the probability the model assigned to the family that was actually right. The other six probabilities enter only through the denominator of `q_c`.
+"""
+
+[[steps]]
+claim = "The loss is a mismatch between distributions, not a distance between numbers."
+see = ["fig:eq-mse", "02-autodifferentiation#7"]
+source = "week 6 lecture, Part 3, The loss wants the mass on the right family; A mismatch between distributions"
+source_passage = """
+One way to read $-\\log q_c$ is **surprise**. The model assigns a probability to the truth. If it
+was nearly certain and the family was right, $q_c$ is near 1 and the cost is near 0. If it was
+nearly certain and the family was wrong, $q_c$ is near 0 and the cost is large.
+
+The cost is not bounded above. A confidently wrong model pays more and more, and the slope that
+training follows grows to match the mistake.
+
+The two are not the same function. Squared error's slope shrinks as $q_c$ goes to 0, exactly where
+the model is most wrong. Cross-entropy's slope grows there. That is why classification uses the
+log and not the square, for one output and for `K`.
+
+**The loss is a distribution mismatch. The decision is a single index. They are different objects,
+read at different times.**
+"""
+text = """
+One way to read `-log q_c` is **surprise**. The model assigns a probability to the truth. If it was nearly certain and the family was right, `q_c` is near 1 and the cost is near 0. If it was nearly certain and the family was wrong, `q_c` is near 0 and the cost is large.
+
+The cost is not bounded above. A confidently wrong model pays more and more, and the slope that training follows grows to match the mistake. Squared error's slope shrinks as `q_c` goes to 0, exactly where the model is most wrong. Cross-entropy's slope grows there. That is why classification uses the log and not the square, for one output and for `K`.
+
+**The loss is a distribution mismatch. The decision is a single index. They are different objects, read at different times.**
+"""
+
+[[steps]]
+claim = "The gradient is the distribution minus the truth."
+see = ["02-autodifferentiation#8", "03-backpropagation", "07-generalization"]
+source = "week 6 lecture, Part 3, The gradient is the distribution minus the truth"
+source_passage = """
+Combining softmax and cross-entropy gives a derivative that is unusually clean, the same shape as
+the binary case in the bridge section. With respect to each logit $z_j$,
+
+$$\\frac{\\partial L}{\\partial z_j} = q_j - y_j$$
+
+The gradient entry for family `j` is the predicted probability of family `j` minus its true mass.
+
+For the correct family, index 5, $y_c = 1$, so the entry is $0.30 - 1 = -0.70$, a negative number.
+A negative gradient raises the logit when the update subtracts it. For every other family, $y_j =
+0$, so the entry is $q_j$, a positive number, and the update lowers that logit, GPCR's 0.37 hardest
+of all.
+
+Seen this way, one training step says something simple: **raise the logit of the correct family,
+and lower the logits of the others, each in proportion to how much probability the model gave it.**
+The exponent and the log cancel in the derivative, which is why the pair is used together.
+"""
+text = """
+Combining softmax and cross-entropy gives a derivative that is unusually clean. With respect to each logit `z_j`, it is `q_j - y_j`: the predicted probability of family `j` minus its true mass.
+
+For the correct family, index 5, `y_c = 1`, so the entry is `0.30 - 1 = -0.70`, a negative number. A negative gradient raises the logit when the update subtracts it. For every other family, `y_j = 0`, so the entry is `q_j`, a positive number, and the update lowers that logit, GPCR's 0.37 hardest of all.
+
+Seen this way, one training step says something simple: **raise the logit of the correct family, and lower the logits of the others, each in proportion to how much probability the model gave it.** The exponent and the log cancel in the derivative, which is why the pair is used together.
+"""
+
+[[code]]
+label = "Count k-mers, then turn seven scores into a loss"
+file = "06-multiclass/kmer_softmax.py"
+credit = "Softmax and loss adapted from SmolML smolml/utils/activation and smolml/utils/losses (MIT); the k-mer counter is ours"
+note = "The seven logits are the running gene's, so the probabilities, the loss of 1.2 and the gradient match the steps above."
+
+[next]
+missing = "Whether an accuracy on held-out genes can be trusted."
+chapter = "07-generalization"

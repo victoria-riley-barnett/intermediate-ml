@@ -1,0 +1,15 @@
+Read /Users/v/projects/intermediate-ml/book/FORM.md, then the reference instance /Users/v/projects/intermediate-ml/book/forms/02-autodifferentiation.toml. Write ONE file: /Users/v/projects/intermediate-ml/book/forms/04-neural-networks.toml. You may also edit files in /Users/v/projects/intermediate-ml/book/code/04-neural-networks/ (trim prints, fix answers.md numbering, remove class-time wording). Touch nothing else.
+
+The author found the previous chapters had far too much model-written prose. This is a light mining pass: the form, the plates and the code carry the chapter; prose fields are short and, for quotes, copied from her delivered material. When in doubt, leave a field out.
+
+number = "4"
+title = "Neural networks"
+gist = "Neurons, width versus depth, one problem in three representations, and the climb to nn.Module."
+Delivered sources: /Users/v/projects/teaching/411/weeks/week04_nn/ (lecture.md, lab.md, instructor/, run_log.json if present). week04_nn (also /Users/v/projects/intermediate-ml/modelinglab.ipynb)
+Course frame register: /Users/v/projects/teaching/411/curriculum.toml (corrected by /Users/v/projects/teaching/411/admin/BOOK.md).
+Timeline row: 1969: no single cut separates XOR, two do (lineage-a-1943-1997)
+Plates to place: every {{figure ...}} line currently in /Users/v/projects/intermediate-ml/book/chapters/04-neural-networks.md.
+Existing verified code: /Users/v/projects/intermediate-ml/book/code/04-neural-networks/ (scripts and answers.md). Reuse them; do not invent new numbers.
+
+
+Finish by building as FORM.md says and reply with: rendered word count of prose fields (estimate), the steps' claims, and anything you left out.

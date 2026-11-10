@@ -1,0 +1,97 @@
+# Chapter form. Text passages are copied from the plate descriptions.
+
+number = "⌂"
+title = "Architectures, and where each one came from"
+gist = "Each era changes either the block or the input; 2017 to 2022 changes both."
+
+[frame]
+data = "one grid, sequence or protein, drawn small enough to check by hand"
+representation = "the block (what the weights are) and the input (what the first layer is handed)"
+transformation = "one architecture per plate"
+evidence = "each plate's shapes agree with its code"
+source = "Architectures brief; course frame in 411/curriculum.toml, corrected by 411/admin/BOOK.md"
+
+[[steps]]
+claim = "The block changes from counted units to trainable networks."
+chapter = "01-linear-analysis"
+see = ["02-autodifferentiation"]
+figure = "lineage-a-1943-1997"
+source = "book/figures/lineage-a-1943-1997.html, <desc>"
+source_passage = """Seven eras in two epochs. The first epoch studies one unit and its proven limit; the second studies a network that can be trained: error pushed back layer by layer, one filter reused at every position, a cell state carried forward by addition. Every row sits on the same grid, so a mark that comes back keeps its shape and its place. Continues in part two, 2012–2022."""
+text = """Seven eras in two epochs. The first epoch studies one unit and its proven limit; the second studies a network that can be trained: error pushed back layer by layer, one filter reused at every position, a cell state carried forward by addition. Every row sits on the same grid, so a mark that comes back keeps its shape and its place. Continues in part two, 2012–2022."""
+
+[[steps]]
+claim = "The block waits while data and compute change around it."
+chapter = "05-evaluation"
+figure = "quiet-years"
+source = "book/figures/quiet-years.html, <desc>"
+source_passage = """Three timelines from 1994 to 2012. The architecture lane runs from LSTM in 1997 to AlexNet in 2012 with a single hollow mark at pretraining in 2006, too small to scale, and nothing else for fifteen years. A second lane gives what the field taught instead: support vector machines in 1995, boosting in 1997 and random forests in 2001, all resting on hand-built features followed by a simple model. A third lane gives what arrived from elsewhere: CUDA in 2007, on hardware that video games funded, and ImageNet in 2009, crowdsourced. All three lanes meet at 2012, where the top five error was 15.3 percent against a next best of 26.2 percent."""
+text = """Three timelines from 1994 to 2012. The architecture lane runs from LSTM in 1997 to AlexNet in 2012 with a single hollow mark at pretraining in 2006, too small to scale, and nothing else for fifteen years. A second lane gives what the field taught instead: support vector machines in 1995, boosting in 1997 and random forests in 2001, all resting on hand-built features followed by a simple model. A third lane gives what arrived from elsewhere: CUDA in 2007, on hardware that video games funded, and ImageNet in 2009, crowdsourced. All three lanes meet at 2012, where the top five error was 15.3 percent against a next best of 26.2 percent."""
+
+[[steps]]
+claim = "The block changes, then the input changes, then compute and tuning."
+chapter = "07-generalization"
+figure = "lineage-b-2012-2022"
+source = "book/figures/lineage-b-2012-2022.html, <desc>"
+source_passage = """Nine eras in two epochs. The same blocks are trained on far more data and compute, then carried across domains — vision, language, translation, and at last protein structure, where the input changes before the block does; after that what changes is where the compute budget goes, then whose answers the model is tuned toward. Four open directions follow the last row, named but not drawn, because no single mechanism orders them yet. Continues part one, 1943–1997."""
+text = """Nine eras in two epochs. The same blocks are trained on far more data and compute, then carried across domains — vision, language, translation, and at last protein structure, where the input changes before the block does; after that what changes is where the compute budget goes, then whose answers the model is tuned toward. Four open directions follow the last row, named but not drawn, because no single mechanism orders them yet. Continues part one, 1943–1997."""
+
+[[steps]]
+claim = "The block stacks dense layers; its input is a fixed-width vector."
+chapter = "04-neural-networks"
+figure = "feedforward"
+source = "book/figures/feedforward.html, <desc>"
+source_passage = """A feed-forward network read left to right: the input x of shape B × 512 enters a Linear layer whose weight matrix is 512 × 256, then a ReLU capsule, a second Linear of 256 × 256, a second ReLU capsule, and a third Linear of 256 × 10, whose output is y-hat of shape B × 10 after a softmax over the ten scores. White rectangles own weight matrices, gray capsules own none. The key gives the model constants, three equations in flow order, a symbol glossary, and the equivalent nn.Sequential call with each line mapped onto the drawing."""
+text = """A feed-forward network read left to right: the input x of shape B × 512 enters a Linear layer whose weight matrix is 512 × 256, then a ReLU capsule, a second Linear of 256 × 256, a second ReLU capsule, and a third Linear of 256 × 10, whose output is y-hat of shape B × 10 after a softmax over the ten scores. White rectangles own weight matrices, gray capsules own none. The key gives the model constants, three equations in flow order, a symbol glossary, and the equivalent nn.Sequential call with each line mapped onto the drawing."""
+
+[[steps]]
+claim = "The block reuses one filter at every position in a fixed-size image."
+chapter = "10-whole-sequences"
+figure = "convolutional"
+source = "book/figures/convolutional.html, <desc>"
+source_passage = """Two panels. On the left, an 8 by 8 single-channel input grid carries two accent-outlined 3 by 3 receptive fields at non-overlapping positions, joined by a faint slide connector; a 3 by 3 grid of filter values lies beside the grid, bracketed by dashes onto both fields, and one field yields one output cell, y[i,j]. On the right, the stack runs left to right: x enters Conv, ReLU, Pool, Conv, ReLU, Pool, Flatten and Linear and leaves as class scores, with the tensor shape under each stage: B by 32 by 8 by 8, B by 32 by 4 by 4, B by 64 by 4 by 4, B by 64 by 2 by 2, B by 256 and B by K. Rectangles own weights, capsules are applied to the stream. The key gives the model constants, four equations, a symbol glossary, and the equivalent torch.nn calls with the tensor shape each one produces."""
+text = """Two panels. On the left, an 8 by 8 single-channel input grid carries two accent-outlined 3 by 3 receptive fields at non-overlapping positions, joined by a faint slide connector; a 3 by 3 grid of filter values lies beside the grid, bracketed by dashes onto both fields, and one field yields one output cell, y[i,j]. On the right, the stack runs left to right: x enters Conv, ReLU, Pool, Conv, ReLU, Pool, Flatten and Linear and leaves as class scores, with the tensor shape under each stage: B by 32 by 8 by 8, B by 32 by 4 by 4, B by 64 by 4 by 4, B by 64 by 2 by 2, B by 256 and B by K. Rectangles own weights, capsules are applied to the stream. The key gives the model constants, four equations, a symbol glossary, and the equivalent torch.nn calls with the tensor shape each one produces."""
+
+[[steps]]
+claim = "The block reuses nine weights; the input window fixes which values meet them."
+chapter = "10-whole-sequences"
+figure = "eq-conv-window"
+source = "book/figures/eq-conv-window.html, <desc>"
+source_passage = """The rule y = sum over k of w-k x-k, its five symbols, and one position of a 3 by 3 filter worked on a 5 by 5 image. The window holds the values 1 to 9 and the filter is 1, 0, -1 on each of its three rows. Each row of the window gives one product line: 1 times 1 plus 0 times 2 plus -1 times 3 is 1 plus 0 minus 3, which is -2, and each of the next two rows gives -2 again, so y = -2 - 2 - 2 = -6. The same nine weights are reused when the window shifts one cell right; at the border the window runs off the image, so with no padding those positions have no y."""
+text = """The rule y = sum over k of w-k x-k, its five symbols, and one position of a 3 by 3 filter worked on a 5 by 5 image. The window holds the values 1 to 9 and the filter is 1, 0, -1 on each of its three rows. Each row of the window gives one product line: 1 times 1 plus 0 times 2 plus -1 times 3 is 1 plus 0 minus 3, which is -2, and each of the next two rows gives -2 again, so y = -2 - 2 - 2 = -6. The same nine weights are reused when the window shifts one cell right; at the border the window runs off the image, so with no padding those positions have no y."""
+
+[[steps]]
+claim = "The block reuses a cell while the input arrives one step at a time."
+chapter = "08-fixed-size-inputs"
+figure = "recurrent"
+source = "book/figures/recurrent.html, <desc>"
+source_passage = """A recurrent network unrolled over four steps. Inputs x0 to x3 enter four identical cells from below; each cell carries tanh(x W_x + h W_h + b) and softmax(h W_y). The state h leaves each cell to the right and enters the next, a zero state h-1 = 0 enters the first cell from the left, and y-hat leaves the top of every cell with length C. A bracket under the row of cells is labelled same W_x, W_h. No path bypasses a cell. The key gives the constants, three equations, twelve symbols, and the equivalent torch.nn.RNN call with its parameters annotated."""
+text = """A recurrent network unrolled over four steps. Inputs x0 to x3 enter four identical cells from below; each cell carries tanh(x W_x + h W_h + b) and softmax(h W_y). The state h leaves each cell to the right and enters the next, a zero state h-1 = 0 enters the first cell from the left, and y-hat leaves the top of every cell with length C. A bracket under the row of cells is labelled same W_x, W_h. No path bypasses a cell. The key gives the constants, three equations, twelve symbols, and the equivalent torch.nn.RNN call with its parameters annotated."""
+
+[[steps]]
+claim = "The block narrows and widens; its target is the input itself."
+figure = "autoencoder"
+source = "book/figures/autoencoder.html, <desc>"
+source_passage = """An autoencoder read left to right: the input x, B×512, passes into the encoder and the envelope narrows through a 256-wide layer to the code z, 64 wide, drawn in accent at the waist, then the decoder widens back out to the reconstruction x̂, B×512. Each layer is a vertical bar whose height is that layer's width, so the silhouette is two tapers meeting at the narrowest point. An accent path carries x itself from the far left, around under the figure, to a difference circle where it is compared with x̂; the residual feeds an MSE capsule and the loss L comes out. The key gives the model widths, four equations, a twelve-entry symbol glossary, and the equivalent nn.Sequential encoder and decoder with F.mse_loss."""
+text = """An autoencoder read left to right: the input x, B×512, passes into the encoder and the envelope narrows through a 256-wide layer to the code z, 64 wide, drawn in accent at the waist, then the decoder widens back out to the reconstruction x̂, B×512. Each layer is a vertical bar whose height is that layer's width, so the silhouette is two tapers meeting at the narrowest point. An accent path carries x itself from the far left, around under the figure, to a difference circle where it is compared with x̂; the residual feeds an MSE capsule and the loss L comes out. The key gives the model widths, four equations, a twelve-entry symbol glossary, and the equivalent nn.Sequential encoder and decoder with F.mse_loss."""
+
+[[steps]]
+claim = "The block weights every position against every position in the sequence."
+chapter = "11-attention"
+see = ["06-multiclass"]
+figure = "attention-worked"
+source = "book/figures/attention-worked.html, <desc>"
+source_passage = """One attention head worked with real numbers. Four panels left to right: Q, K and V as 4 by 4 matrices of small integers; the score matrix S = QK^T, then the same matrix divided by the square root of the head width, which is 2; the weights A, the softmax of each row, printed to two decimals beside an accent-marked column of row sums that all read 1.00; and the output Y = A V. One score is expanded term by term beneath the score grids: S11 = 1 times 0 plus minus 1 times minus 1 plus 1 times 0 plus minus 1 times 0, which is 1. Each of the four query positions peaks at a different key position. A key gives the model constants, three equations, a twelve-entry symbol glossary, and F.scaled_dot_product_attention with comments mapping the call onto the same symbols."""
+text = """One attention head worked with real numbers. Four panels left to right: Q, K and V as 4 by 4 matrices of small integers; the score matrix S = QK^T, then the same matrix divided by the square root of the head width, which is 2; the weights A, the softmax of each row, printed to two decimals beside an accent-marked column of row sums that all read 1.00; and the output Y = A V. One score is expanded term by term beneath the score grids: S11 = 1 times 0 plus minus 1 times minus 1 plus 1 times 0 plus minus 1 times 0, which is 1. Each of the four query positions peaks at a different key position. A key gives the model constants, three equations, a twelve-entry symbol glossary, and F.scaled_dot_product_attention with comments mapping the call onto the same symbols."""
+
+[[steps]]
+claim = "The block adds residual paths and normalization without changing sequence shape."
+chapter = "12-encoder"
+figure = "encoder-block"
+source = "book/figures/encoder-block.html, <desc>"
+source_passage = """One encoder block read left to right: a layer-norm capsule, the multi-head attention layer, an addition, a second layer-norm capsule, the feed-forward layer and a second addition, with the residual path carrying x around each layer and the shape B×T×512 unchanged end to end. Four card edges behind the block fade out and the label reads L = 6. The key gives the model constants, four equations, a symbol glossary, and the equivalent torch.nn.TransformerEncoderLayer call at its documented defaults."""
+text = """One encoder block read left to right: a layer-norm capsule, the multi-head attention layer, an addition, a second layer-norm capsule, the feed-forward layer and a second addition, with the residual path carrying x around each layer and the shape B×T×512 unchanged end to end. Four card edges behind the block fade out and the label reads L = 6. The key gives the model constants, four equations, a symbol glossary, and the equivalent torch.nn.TransformerEncoderLayer call at its documented defaults."""
+
+[next]
+missing = "It does not show how a model lives as a Python object."
+chapter = "00-objects"

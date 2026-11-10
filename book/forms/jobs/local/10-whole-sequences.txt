@@ -1,0 +1,15 @@
+Read /Users/v/projects/intermediate-ml/book/FORM.md, then the reference instance /Users/v/projects/intermediate-ml/book/forms/02-autodifferentiation.toml. Write ONE file: /Users/v/projects/intermediate-ml/book/forms/10-whole-sequences.toml. You may also edit files in /Users/v/projects/intermediate-ml/book/code/10-whole-sequences/ (trim prints, fix answers.md numbering, remove class-time wording). Touch nothing else.
+
+The author found the previous chapters had far too much model-written prose. This is a light mining pass: the form, the plates and the code carry the chapter; prose fields are short and, for quotes, copied from her delivered material. When in doubt, leave a field out.
+
+number = "10"
+title = "Why whole sequences are hard"
+gist = "Three reductions to a fixed width: average, flatten, slide a window."
+Delivered sources: /Users/v/projects/teaching/411/weeks/week10_sequence_limit/ (lecture.md, lab.md, instructor/, run_log.json if present). week10_sequence_limit
+Course frame register: /Users/v/projects/teaching/411/curriculum.toml (corrected by /Users/v/projects/teaching/411/admin/BOOK.md).
+Timeline row: one filter reused at every position (convolutional)
+Plates to place: every {{figure ...}} line currently in /Users/v/projects/intermediate-ml/book/chapters/10-whole-sequences.md.
+Existing verified code: /Users/v/projects/intermediate-ml/book/code/10-whole-sequences/ (scripts and answers.md). Reuse them; do not invent new numbers.
+
+
+Finish by building as FORM.md says and reply with: rendered word count of prose fields (estimate), the steps' claims, and anything you left out.

@@ -34,6 +34,7 @@ FIGURES = HERE / "figures"
 STYLE = HERE / "style"
 SRC = HERE / "_src"
 OUT = HERE / "out"
+PATCHES = HERE / "figures_patches.toml"
 
 # The book's order. (label, file stem); a None stem is a part heading.
 PARTS = [
@@ -71,30 +72,132 @@ def run_script(rel):
     return r.stdout.rstrip()
 
 
+WIKI = re.compile(r"\[\[([^\]|]+?)(?:\|([^\]]+))?\]\]")
+_FORMS = {}
+
+
+def form_of(stem):
+    if stem not in _FORMS:
+        path = FORMS / f"{stem}.toml"
+        _FORMS[stem] = tomllib.loads(path.read_text()) if path.exists() else None
+    return _FORMS[stem]
+
+
+def form_strings(f):
+    """Every rendered string in a form, with the step it belongs to (0 = chapter level)."""
+    for key in ("gist",):
+        yield 0, f.get(key, "")
+    yield 0, (f.get("timeline") or {}).get("row", "")
+    for v in (f.get("frame") or {}).values():
+        yield 0, v
+    for i, s in enumerate(f.get("steps", []), 1):
+        for key in ("claim", "text", "quote"):
+            yield i, s.get(key, "")
+        for ref in s.get("see", []):
+            yield i, f"[[{ref}]]"
+    for c in f.get("code", []):
+        yield 0, c.get("note", "")
+
+
+def targets_of(stem):
+    f = form_of(stem)
+    found = []
+    for i, text in form_strings(f):
+        for m in WIKI.finditer(text):
+            found.append((i, m.group(1)))
+    return found
+
+
+def figure_homes():
+    homes = {}
+    for _, stem in PARTS:
+        f = stem and form_of(stem)
+        for i, s in enumerate((f or {}).get("steps", []), 1):
+            if s.get("figure"):
+                homes.setdefault(s["figure"], (stem, i))
+    return homes
+
+
+def link_to(here, ref, label=None):
+    """Resolve one [[ref]] to a Markdown link. A bad reference stops the build."""
+    if ref.startswith("fig:"):
+        slug = ref[4:]
+        home = figure_homes().get(slug)
+        if not home:
+            raise SystemExit(f"[[{ref}]] in {here}: no step places that figure")
+        stem, _ = home
+        url = f"#fig-{slug}" if stem == here else f"{stem}.md#fig-{slug}"
+        return f"[{label or plate(slug)[1]}]({url})"
+    stem, _, step = ref.partition("#")
+    f = form_of(stem)
+    if not f and not step and (CHAPTERS / f"{stem}.md").exists():
+        return f"[{label or h1_of(CHAPTERS / f'{stem}.md')}]({stem}.md)"
+    if not f:
+        raise SystemExit(f"[[{ref}]] in {here}: forms/{stem}.toml does not exist")
+    if step and not (step.isdigit() and 1 <= int(step) <= len(f["steps"])):
+        raise SystemExit(f"[[{ref}]] in {here}: no step {step}")
+    base = "" if stem == here else f"{stem}.md"
+    url = base + (f"#step-{step}" if step else "")
+    if not url:
+        url = "#"
+    if label is None:
+        label = f"{f['title']}, step {step}" if step else f["title"]
+    return f"[{label}]({url})"
+
+
+def resolve(here, text):
+    return WIKI.sub(lambda m: link_to(here, m.group(1), m.group(2)), text)
+
+
+def backlinks(stem):
+    """Chapters and steps that link here, computed from the forms themselves."""
+    hits = []
+    for _, other in PARTS:
+        if not other or other == stem or not form_of(other):
+            continue
+        for i, ref in targets_of(other):
+            if ref.startswith("fig:"):
+                home = figure_homes().get(ref[4:])
+                target = home[0] if home else None
+            else:
+                target = ref.partition("#")[0]
+            if target == stem:
+                hits.append((other, i))
+    return sorted(set(hits))
+
+
 def render_form(stem):
     """A chapter form (forms/<stem>.toml) rendered to Markdown. The form holds
     the course's own frame and mined lines; the renderer adds no prose."""
-    f = tomllib.loads((FORMS / f"{stem}.toml").read_text())
-    out = [f"# {f['title']}", "", f"*{f['gist']}*", ""]
+    f = form_of(stem)
+    R = lambda t: resolve(stem, t)
+    out = [f"# {f['title']}", "", f"*{R(f['gist'])}*", ""]
     tl = f.get("timeline")
     if tl:
         link = f" [See the timeline](architectures.md#fig-{tl['plate']})." if tl.get("plate") else ""
-        out += [f"> **On the timeline.** {tl['row']}{link}", ""]
+        out += [f"> **On the timeline.** {R(tl['row'])}{link}", ""]
     fr = f.get("frame")
     if fr:
         out += ["| | |", "|---|---|"]
         for key, label in (("data", "Data"), ("representation", "Representation"),
                            ("transformation", "Transformation"), ("evidence", "Evidence")):
             if fr.get(key):
-                out.append(f"| **{label}** | {fr[key]} |")
+                out.append(f"| **{label}** | {R(fr[key])} |")
         out.append("")
+    needs = [(o, form_of(o)["next"]["missing"]) for _, o in PARTS
+             if o and o != stem and form_of(o) and form_of(o).get("next", {}).get("chapter") == stem]
+    if needs:
+        out += ["> **Answers what other chapters left open.** " + " ".join(
+            f"{R(m)} ([{form_of(o)['title']}]({o}.md))" for o, m in needs), ""]
     for i, s in enumerate(f.get("steps", []), 1):
-        out += [f"## {i}. {s['claim']}", ""]
+        out += [f'<a id="step-{i}"></a>', "", f"## {i}. {R(s['claim'])}", ""]
         body = s.get("text") or s.get("quote")
         if body:
-            out += [body, ""]
+            out += [R(body), ""]
         if s.get("figure"):
             out += [f"{{{{figure {s['figure']}}}}}", ""]
+        if s.get("see"):
+            out += ["**See also:** " + " · ".join(link_to(stem, r) for r in s["see"]), ""]
     if f.get("code"):
         out += ["## In code", ""]
         for c in f["code"]:
@@ -106,15 +209,18 @@ def render_form(stem):
                 out += [f"<small>{c['credit']}</small>", ""]
             out += ["```python", src, "```", "", "Output:", "", "```text", run_script(c["file"]), "```", ""]
             if c.get("note"):
-                out += [c["note"], ""]
-    if f.get("questions"):
-        out += ["## Questions", ""]
-        out += [f"{i}. {q['q']}" for i, q in enumerate(f["questions"], 1)]
-        out += ["", "Answers are at the [back of the book](../answers.md).", ""]
+                out += [R(c["note"]), ""]
     nx = f.get("next")
     if nx:
         title = h1_of(CHAPTERS / f"{nx['chapter']}.md") if (CHAPTERS / f"{nx['chapter']}.md").exists() else nx['chapter']
-        out += ["## Still missing", "", f"{nx['missing']} → [{title}]({nx['chapter']}.md)", ""]
+        out += ["## Still missing", "", f"{R(nx['missing'])} → [{title}]({nx['chapter']}.md)", ""]
+    back = backlinks(stem)
+    if back:
+        items = []
+        for other, i in back:
+            t = form_of(other)["title"]
+            items.append(f"[{t}]({other}.md#step-{i})" if i else f"[{t}]({other}.md)")
+        out += ["## Linked from", "", " · ".join(dict.fromkeys(items)), ""]
     return "\n".join(out)
 
 
@@ -131,12 +237,23 @@ def h1_of(path):
     raise SystemExit(f"{path.name} has no '# ' title")
 
 
+def patch_plate(slug, text):
+    """Apply figures_patches.toml to one plate's HTML; fail if an `old` is missing."""
+    for p in tomllib.loads(PATCHES.read_text()).get("patch", []):
+        if p["slug"] != slug:
+            continue
+        if p["old"] not in text:
+            raise SystemExit(f"figures_patches.toml: {slug}: {p['old']!r} not found in figures/{slug}.html")
+        text = text.replace(p["old"], p["new"])
+    return text
+
+
 def plate(slug):
     """Return (eyebrow, title, svg) for a figure page."""
     path = FIGURES / f"{slug}.html"
     if not path.exists():
         raise SystemExit(f"{{{{figure {slug}}}}}: figures/{slug}.html does not exist")
-    t = path.read_text()
+    t = patch_plate(slug, path.read_text())
     eyebrow = re.search(r'<p class="eyebrow">(.*?)</p>', t, re.S)
     title = re.search(r"<h1>(.*?)</h1>", t, re.S)
     i, j = t.find("<svg"), t.rfind("</svg>")
@@ -156,6 +273,9 @@ def plate(slug):
     # an HTML block in Markdown ends at the first blank line, so remove them all
     svg = re.sub(r"<(?![A-Za-z/!?])", "&lt;", svg)  # a bare < in label text
     svg = "\n".join(line.strip() for line in svg.splitlines() if line.strip())
+    homes = figure_homes()
+    svg = re.sub(r'href="([\w-]+)\.html"',
+                 lambda m: f'href="{homes[m.group(1)][0]}.html#fig-{m.group(1)}"' if m.group(1) in homes else m.group(0), svg)
     svg = re.sub(r"<svg\b",f'<svg class="plate-svg" focusable="false"', svg, count=1)
     return (eyebrow.group(1).strip() if eyebrow else "",
             title.group(1).strip() if title else slug, svg)
@@ -163,6 +283,8 @@ def plate(slug):
 
 def figure_block(slug):
     eyebrow, title, svg = plate(slug)
+    # The book is for a general audience: drop the course's "Week 06 ·" prefix from captions.
+    eyebrow = re.sub(r"^\s*week\s*\d+\s*(?:&middot;|&#183;|·)\s*", "", eyebrow, flags=re.I)
     return (
         f'<figure class="plate" id="fig-{slug}">\n'
         f'<div class="plate-scroll">{svg}</div>\n'
@@ -200,47 +322,70 @@ def summary():
         else:
             title = h1_of(CHAPTERS / f"{stem}.md")
             lines.append(f"- [{label} · {title}](chapters/{stem}.md)")
-    lines += ["", "# Back matter", "", "- [Answers](answers.md)", "- [All figures](figures.md)"]
+    lines += ["", "# Back matter", "", "- [Index of terms and steps](index-terms.md)", "- [All figures](figures.md)"]
     return "\n".join(lines) + "\n"
 
 
+def plain(text):
+    """A form string with wiki links reduced to their labels, for pages outside chapters/."""
+    return WIKI.sub(lambda m: m.group(2) or (form_of(m.group(1).partition("#")[0]) or {"title": m.group(1)})["title"], text)
+
+
 def title_page():
-    rows = []
+    cell = lambda t: plain(t).replace("|", "\\|")
+    rows = ["| | Representation | Transformation | Evidence | Still missing |", "|---|---|---|---|---|"]
     for label, stem in PARTS:
         if stem is None:
-            rows.append(f"\n**{label}**\n")
-        else:
-            rows.append(f"- {label} · [{h1_of(CHAPTERS / f'{stem}.md')}](chapters/{stem}.md)")
+            rows.append(f"| **{label}** | | | | |")
+            continue
+        f = form_of(stem)
+        fr = f.get("frame", {})
+        nx = f.get("next")
+        miss = ""
+        if nx:
+            miss = f"{cell(nx['missing'])} → [{h1_of(CHAPTERS / (nx['chapter'] + '.md'))}](chapters/{nx['chapter']}.md)"
+        rows.append(f"| {label} · [{f['title']}](chapters/{stem}.md) | "
+                    + " | ".join(cell(fr.get(k, "")) for k in ("representation", "transformation", "evidence"))
+                    + f" | {miss} |")
     return (
         "# CSC 411: Intermediate Machine Learning\n\n"
-        "A course for students coming from biology, biochemistry and chemistry, "
-        "with no calculus, linear algebra or machine learning assumed. It goes, one "
-        "step at a time, from a line fitted by hand to a transformer encoder built "
-        "from scratch.\n\n"
-        "The opening chapter is the map: where each architecture came from, and "
-        "whether it changed the block or the input. Every later chapter is a place "
-        "on that map.\n\n" + "\n".join(rows) + "\n"
+        "A reference for students coming from biology, biochemistry and chemistry, "
+        "with no calculus, linear algebra or machine learning assumed. Every chapter "
+        "has the same frame: a representation, a transformation, and the evidence that "
+        "the transformation worked. Each chapter ends on what it still lacks, and the "
+        "chapter that supplies it is linked. Read the table down to see the chain, "
+        "or start from the [architectures](chapters/architectures.md) map.\n\n"
+        + "\n".join(rows) + "\n\n"
+        "See also the [index of terms and steps](index-terms.md) and the [figures](figures.md).\n"
     )
 
 
-def answers_page():
-    """Back matter: every chapter's answers, in book order, from code/<stem>/answers.md."""
-    out = ["# Answers", "",
-           "Answers to the questions at the end of each chapter. Try the questions first: "
-           "a question whose answer you have already read no longer tests anything.", ""]
+TERM_SKIP = {"a", "an", "the", "in", "on", "new", "what", "what\u2019s", "carry", "invented", "surprise", "one"}
+
+
+def index_page():
+    terms = {}
+    claims = ["## Steps, by chapter", ""]
     for label, stem in PARTS:
-        if stem is None:
+        f = stem and form_of(stem)
+        if not f:
             continue
-        f = HERE / "code" / stem / "answers.md"
-        if not f.exists():
-            continue
-        title = h1_of(CHAPTERS / f"{stem}.md")
-        body = f.read_text().strip().splitlines()
-        if body and body[0].startswith("# "):
-            body = body[1:]
-        body = [("#" + l) if l.startswith("#") else l for l in body]  # demote headings
-        out += [f"## {label} · [{title}](chapters/{stem}.md)", ""] + body + [""]
-    return "\n".join(out) + "\n"
+        claims += [f"### {label} · [{f['title']}](chapters/{stem}.md)", ""]
+        for i, st in enumerate(f["steps"], 1):
+            claims.append(f"{i}. [{plain(st['claim'])}](chapters/{stem}.md#step-{i})")
+            body = st.get("text") or st.get("quote") or ""
+            for t in re.findall(r"\*\*([^*]{3,40}?)\*\*", plain(body)):
+                t = t.strip(" .,:;`'").replace("`", "").strip().lower()
+                if t and len(t.split()) <= 3 and "?" not in t and t.split()[0] not in TERM_SKIP:
+                    terms.setdefault(t, []).append((f["title"], stem, i))
+        claims.append("")
+    out = ["# Index", "", "## Terms", "",
+           "Each term is set in bold where a chapter defines or leans on it.", ""]
+    for t in sorted(terms):
+        links = " · ".join(f"[{title}, step {i}](chapters/{stem}.md#step-{i})"
+                           for title, stem, i in dict.fromkeys(terms[t]))
+        out.append(f"- **{t}**: {links}")
+    return "\n".join(out + [""] + claims) + "\n"
 
 
 def figure_index(used):
@@ -313,8 +458,13 @@ def main(argv):
     (SRC / "SUMMARY.md").write_text(summary())
     (SRC / "index.md").write_text(title_page())
     (SRC / "figures.md").write_text(figure_index(used))
-    (SRC / "answers.md").write_text(answers_page())
+    (SRC / "index-terms.md").write_text(index_page())
     shutil.copytree(FIGURES, SRC / "figures")
+    for slug in sorted({p["slug"] for p in tomllib.loads(PATCHES.read_text()).get("patch", [])}):
+        dst = SRC / "figures" / f"{slug}.html"
+        if not dst.exists():
+            raise SystemExit(f"figures_patches.toml: figures/{slug}.html does not exist")
+        dst.write_text(patch_plate(slug, dst.read_text()))
     shutil.copytree(FIGURES / "fonts", work / "figures" / "fonts")
     shutil.copytree(STYLE, work / "style")
     (work / "book.toml").write_text(book_toml(base, OUT))

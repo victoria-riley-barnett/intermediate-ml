@@ -1,0 +1,213 @@
+# Mined from the delivered week; the source passages anchor the rendered text.
+
+number = "7"
+title = "Does the model work on new data?"
+gist = 'What each split is for, learning curves, what "new" means, dropout and seeds, and a leakage case.'
+
+[timeline]
+row = "2012: Trains the same layers on far more data and compute."
+plate = "lineage-b-2012-2022"
+
+[frame]
+data = "4,380 human gene sequences in seven families, split into 2,628 training, 876 validation, and 876 test sequences"
+representation = "1,024 normalized shares of overlapping 5-mers; one prediction per gene"
+transformation = "stratified 60/20/20 split; GeneNet with optional dropout; keep the lowest-validation-loss parameters"
+evidence = "training and held-out loss and accuracy; repeated-seed spread; twin audit; one final test score"
+source = "411/curriculum.toml week07, corrected by 411/admin/BOOK.md and the delivered week 7 lecture and lab"
+
+[[steps]]
+claim = "A model can fit its training examples and still miss the pattern."
+source = "411/weeks/week07_generalization/lecture.md, A model can fit without learning the pattern"
+source_passage = """
+Start with a case small enough to check by hand. Four calibration standards give these readings:
+
+| concentration | 1 | 2 | 3 | 4 |
+|---|---|---|---|---|
+| measured response | 0.11 | 0.19 | 0.32 | 0.38 |
+
+We fit two curves to them and ask which one to trust. The first is a straight line. The second is a cubic, a curve of the form $y = a + bx + cx^2 + dx^3$. Its four adjustable constants are exactly enough to pass through four points, so it can hit every standard. The line has only two constants and misses each standard slightly, by about 0.001, −0.013, 0.023 and −0.011. The cubic misses by nothing. If we score each curve by its error on these four standards, the cubic wins.
+
+But a calibration curve exists to predict samples we have not measured yet. So measure one more: a new standard at concentration 5 reads 0.48. The line predicts about 0.485, very close. The cubic, carried one step further, predicts 0.25, off by nearly half the signal. The curve that fit the standards best was the worst at the job we wanted it for.
+
+Why did the cubic fail? Each reading is the true response plus a small random error from the instrument, which we call **noise**. The true response rises steadily with concentration. The errors do not follow any pattern, and they would be different if we measured again. The line has too little freedom to chase the errors, so it keeps only the steady rise. The cubic has enough freedom to bend through the errors, so it records them as if they were part of the curve, and beyond the last standard those errors carry it far from the truth.
+
+Fitting the accidents of one sample as if they were the pattern is **overfitting**. The opposite failure is **underfitting**: a model too limited, or trained too briefly, to capture the pattern even in the data it was fitted to. The line would underfit if the true response curved.
+
+A neural network is a fitted curve with many more adjustable constants. They are called **parameters** (in a network, the weights), and training adjusts them to reduce error on the training data, which is what the cubic did with its four. That is why error on the training data cannot tell you whether a model learned the pattern or the noise. To find out, you need examples the model was not fitted to. The ability to predict those well is **generalization**.
+
+This does not mean a simpler model always wins. Very large networks can generalize well. What the example does establish is narrower: how well a model fits the examples it was fitted to says little about how it will do on the next one, so the next one has to be measured. The next section sets that up.
+"""
+text = """
+Start with a case small enough to check by hand. Four calibration standards give these readings:
+
+| concentration | 1 | 2 | 3 | 4 |
+|---|---|---|---|---|
+| measured response | 0.11 | 0.19 | 0.32 | 0.38 |
+
+We fit two curves to them and ask which one to trust. The first is a straight line. The second is a cubic, a curve of the form $y = a + bx + cx^2 + dx^3$. Its four adjustable constants are exactly enough to pass through four points, so it can hit every standard. The line has only two constants and misses each standard slightly, by about 0.001, −0.013, 0.023 and −0.011. The cubic misses by nothing. If we score each curve by its error on these four standards, the cubic wins.
+
+But a calibration curve exists to predict samples we have not measured yet. So measure one more: a new standard at concentration 5 reads 0.48. The line predicts about 0.485, very close. The cubic, carried one step further, predicts 0.25, off by nearly half the signal. The curve that fit the standards best was the worst at the job we wanted it for.
+
+Why did the cubic fail? Each reading is the true response plus a small random error from the instrument, which we call **noise**. The true response rises steadily with concentration. The errors do not follow any pattern, and they would be different if we measured again. The line has too little freedom to chase the errors, so it keeps only the steady rise. The cubic has enough freedom to bend through the errors, so it records them as if they were part of the curve, and beyond the last standard those errors carry it far from the truth.
+
+Fitting the accidents of one sample as if they were the pattern is **overfitting**. The opposite failure is **underfitting**: a model too limited, or trained too briefly, to capture the pattern even in the data it was fitted to. The line would underfit if the true response curved.
+
+A neural network is a fitted curve with many more adjustable constants. They are called **parameters** (in a network, the weights), and training adjusts them to reduce error on the training data, which is what the cubic did with its four. That is why error on the training data cannot tell you whether a model learned the pattern or the noise. To find out, you need examples the model was not fitted to. The ability to predict those well is **generalization**.
+
+This does not mean a simpler model always wins. Very large networks can generalize well. What the example does establish is narrower: how well a model fits the examples it was fitted to says little about how it will do on the next one, so the next one has to be measured. The next section sets that up.
+"""
+
+[[steps]]
+claim = "Training, validation, and test each have a separate job."
+see = ["05-evaluation"]
+source = "411/weeks/week07_generalization/lecture.md, The split gives each set one job"
+source_passage = """
+The extra standard at concentration 5 was measured after the fit. For a real model we set such examples aside before training. We need examples with known answers that the model never uses to adjust its parameters. These are **held-out** examples. We keep two held-out sets rather than one, because they have different jobs:
+
+| set | changes the weights? | used to make choices? | purpose |
+|---|---|---|---|
+| training | yes | indirectly | fit the model |
+| validation | no | yes | choose settings and the stopping point |
+| test | no | no, until the end | report the finished choice |
+
+The validation set is not a second training set. It is the one we look at while working, to decide among models, epoch counts, learning rates or penalties. Because every choice is made by looking at it, a validation score after many choices is slightly flattering.
+
+The test set is scored once, after every choice is made. If the result disappoints and you change the model, those examples have become validation data and you need a fresh test. A chemist validating an assay does the same: tune the cutoff on development samples, then run the blinded samples once.
+
+**In the gene data.** The 4,380 genes are cut into 2,628 for training, 876 for validation and 876 for test, keeping each family's share the same in all three. From here on the validation genes are the ones we look at, and the test genes stay sealed until the end.
+"""
+text = """
+The extra standard at concentration 5 was measured after the fit. For a real model we set such examples aside before training. We need examples with known answers that the model never uses to adjust its parameters. These are **held-out** examples. We keep two held-out sets rather than one, because they have different jobs:
+
+| set | changes the weights? | used to make choices? | purpose |
+|---|---|---|---|
+| training | yes | indirectly | fit the model |
+| validation | no | yes | choose settings and the stopping point |
+| test | no | no, until the end | report the finished choice |
+
+The validation set is not a second training set. It is the one we look at while working, to decide among models, epoch counts, learning rates or penalties. Because every choice is made by looking at it, a validation score after many choices is slightly flattering.
+
+The test set is scored once, after every choice is made. If the result disappoints and you change the model, those examples have become validation data and you need a fresh test. A chemist validating an assay does the same: tune the cutoff on development samples, then run the blinded samples once.
+
+**In the gene data.** The 4,380 genes are cut into 2,628 for training, 876 for validation and 876 for test, keeping each family's share the same in all three. From here on the validation genes are the ones we look at, and the test genes stay sealed until the end.
+"""
+
+[[steps]]
+claim = "Overfitting is a trend, not just a gap between losses."
+figure = "plot-curves"
+source = "411/weeks/week07_generalization/lecture.md, Learning curves show the useful part of training"
+source_passage = """
+With the split in place we can watch a model learn and see, as it happens, whether it is learning the pattern or the noise. One pass through the training data is an **epoch**. After each epoch we measure the **loss**, a single number that is large when predictions are bad and small when they are good (for classification, cross-entropy). We measure it on both the training set and the validation set:
+
+Plotting the two losses against epoch gives a **learning curve**. Three shapes cover most of what you will see:
+
+1. **Underfitting** (left): both losses stay high and barely move. The model, or the training, has not captured the pattern.
+2. **Learning** (middle): both losses fall together, so what the model learns from the training data also helps on new data.
+3. **Overfitting** (right): training loss keeps falling, but validation loss bottoms out and climbs. The model is getting better at the training examples and worse at the task.
+
+In every panel validation loss sits above training loss, and that is normal: the parameters were adjusted on the training data, never on the validation data. So a gap by itself is not overfitting. Overfitting is the trend in the right panel, where the validation curve turns upward while the training curve keeps going down.
+
+Training loss falls toward zero, as in the overfitting panel. Validation loss reaches its lowest value, 0.62, at epoch 10 and climbs back to 0.87 by epoch 60. Accuracy tells a different story: 0.86 near epoch 10 and 0.88 at epoch 60, so the network keeps naming more genes correctly even as its loss rises. The reason is that loss punishes a wrong answer in proportion to how confident it was. When the network is wrong it is on average 84% sure at epoch 60, against 66% near epoch 10.
+
+So which epoch to keep depends on what you will use the network for. If you only need the family name, accuracy is still improving at epoch 60. If you will act on how sure the network is, the epoch with the lowest loss is better. Decide before you look at the test set, and write the choice down.
+"""
+text = """
+With the split in place we can watch a model learn and see, as it happens, whether it is learning the pattern or the noise. One pass through the training data is an **epoch**. After each epoch we measure the **loss**, a single number that is large when predictions are bad and small when they are good (for classification, cross-entropy). We measure it on both the training set and the validation set:
+
+Plotting the two losses against epoch gives a **learning curve**. Three shapes cover most of what you will see:
+
+1. **Underfitting** (left): both losses stay high and barely move. The model, or the training, has not captured the pattern.
+2. **Learning** (middle): both losses fall together, so what the model learns from the training data also helps on new data.
+3. **Overfitting** (right): training loss keeps falling, but validation loss bottoms out and climbs. The model is getting better at the training examples and worse at the task.
+
+In every panel validation loss sits above training loss, and that is normal: the parameters were adjusted on the training data, never on the validation data. So a gap by itself is not overfitting. Overfitting is the trend in the right panel, where the validation curve turns upward while the training curve keeps going down.
+
+Training loss falls toward zero, as in the overfitting panel. Validation loss reaches its lowest value, 0.62, at epoch 10 and climbs back to 0.87 by epoch 60. Accuracy tells a different story: 0.86 near epoch 10 and 0.88 at epoch 60, so the network keeps naming more genes correctly even as its loss rises. The reason is that loss punishes a wrong answer in proportion to how confident it was. When the network is wrong it is on average 84% sure at epoch 60, against 66% near epoch 10.
+
+So which epoch to keep depends on what you will use the network for. If you only need the family name, accuracy is still improving at epoch 60. If you will act on how sure the network is, the epoch with the lowest loss is better. Decide before you look at the test set, and write the choice down.
+"""
+
+[[steps]]
+claim = "Related rows on both sides of a split can flatter its score."
+see = ["06-multiclass"]
+figure = "split-homology-leakage"
+source = "411/weeks/week07_generalization/lecture.md, What “new” means"
+source_passage = """
+The failure has a name. **Data leakage** is any route by which information about held-out examples reaches the model before the held-out score is computed. Three common routes:
+
+- **Preprocessing on everything.** A mean, standard deviation, feature selection rule or vocabulary computed from all data before the split has already seen the held-out examples. Fit it on training data only, then apply it unchanged.
+- **Related samples on both sides.** With five blood samples from each of twenty patients, a random split by sample lets the model recognize the patient instead of the disease. Split by patient. Technical replicates are near-copies for the same reason.
+- **Exact duplicates.** Public databases hold identical entries, so a “new” test example may have a twin in training. That measures memory, not prediction.
+
+No software warns you about any of these. Leakage never raises an error; it only makes the result look better than it is. So before splitting, name the unit you want to generalize across (patient, species, lab, sequencing run) and check that all of that unit's samples sit on one side.
+"""
+text = """
+The failure has a name. **Data leakage** is any route by which information about held-out examples reaches the model before the held-out score is computed. Three common routes:
+
+- **Preprocessing on everything.** A mean, standard deviation, feature selection rule or vocabulary computed from all data before the split has already seen the held-out examples. Fit it on training data only, then apply it unchanged.
+- **Related samples on both sides.** With five blood samples from each of twenty patients, a random split by sample lets the model recognize the patient instead of the disease. Split by patient. Technical replicates are near-copies for the same reason.
+- **Exact duplicates.** Public databases hold identical entries, so a “new” test example may have a twin in training. That measures memory, not prediction.
+
+No software warns you about any of these. Leakage never raises an error; it only makes the result look better than it is. So before splitting, name the unit you want to generalize across (patient, species, lab, sequencing run) and check that all of that unit's samples sit on one side.
+"""
+
+[[steps]]
+claim = "A test score describes the examples it resembles."
+see = ["08-fixed-size-inputs"]
+source = "411/weeks/week07_generalization/lecture.md, What “new” means"
+source_passage = """
+**In the gene data.** We checked our own split for the third route. The file has 4,380 rows but only 3,629 different sequences, so some validation genes must have an identical copy among the training genes. We split the validation genes into those with a twin and those without, and scored each group.
+
+207 of the 876 validation genes have a twin in training, and the network names all of them correctly. On the other 669 it is right 84% of the time. The 0.88 over all validation genes is a mixture of the two, so 0.84 is the better answer to “how well does the network name a gene it has never seen?” The check itself is two lines:
+
+```python
+seen = set(sequences[i] for i in train_index)
+has_twin = [sequences[i] in seen for i in val_index]
+```
+
+The test set needs the same check. 169 of the 876 test genes have a training twin, and on the other 707 the network is right about 84% of the time. That is the number to report for an unseen gene, and it is still a little generous, because near-copies that are not identical may remain.
+
+This is also why a held-out score is never a claim about everything. It estimates performance on data like the held-out data: if the test genes come from the same database as the training genes, a high score says nothing about another lab's instrument or another population. So state the question exactly: generalize from what kind of examples to what kind of new examples?
+"""
+text = """
+**In the gene data.** We checked our own split for the third route. The file has 4,380 rows but only 3,629 different sequences, so some validation genes must have an identical copy among the training genes. We split the validation genes into those with a twin and those without, and scored each group.
+
+207 of the 876 validation genes have a twin in training, and the network names all of them correctly. On the other 669 it is right 84% of the time. The 0.88 over all validation genes is a mixture of the two, so 0.84 is the better answer to “how well does the network name a gene it has never seen?” The check itself is two lines:
+
+```python
+seen = set(sequences[i] for i in train_index)
+has_twin = [sequences[i] in seen for i in val_index]
+```
+
+The test set needs the same check. 169 of the 876 test genes have a training twin, and on the other 707 the network is right about 84% of the time. That is the number to report for an unseen gene, and it is still a little generous, because near-copies that are not identical may remain.
+
+This is also why a held-out score is never a claim about everything. It estimates performance on data like the held-out data: if the test genes come from the same database as the training genes, a high score says nothing about another lab's instrument or another population. So state the question exactly: generalize from what kind of examples to what kind of new examples?
+"""
+
+[[steps]]
+claim = "Dropout's gain must exceed the variation between random seeds."
+see = ["architectures"]
+figure = "compare-regularizers"
+source = "411/weeks/week07_generalization/lecture.md, Reducing overfitting, briefly"
+source_passage = """
+**Dropout** switches off a random fraction of the units in a layer on every training step. A unit is one small computing element that outputs a number, and switching it off means forcing that output to zero for that step. Because any unit may vanish, the network cannot rely on one unit to carry a quirk of the training data. Dropout is noise added during training only. It is not a gene knockout, which is a fixed change to a living system that you then study.
+
+At evaluation time dropout must be off, so you call `model.eval()` before scoring. A quick check: score the same trained model twice on the same data. The two numbers must match exactly. If they do not, dropout is still on.
+
+Whether dropout helped is again a question for the validation set, and the answer has to be bigger than run-to-run variation. Training starts from random values, so two runs that differ only in their random seed give slightly different results: our five plain runs reach lowest validation losses between 0.609 and 0.628. A difference smaller than that spread is not evidence.
+"""
+text = """
+**[[architectures|Dropout]]** switches off a random fraction of the units in a layer on every training step. A unit is one small computing element that outputs a number, and switching it off means forcing that output to zero for that step. Because any unit may vanish, the network cannot rely on one unit to carry a quirk of the training data. Dropout is noise added during training only. It is not a gene knockout, which is a fixed change to a living system that you then study.
+
+At evaluation time dropout must be off, so you call `model.eval()` before scoring. A quick check: score the same trained model twice on the same data. The two numbers must match exactly. If they do not, dropout is still on.
+
+Whether dropout helped is again a question for the validation set, and the answer has to be bigger than run-to-run variation. Training starts from random values, so two runs that differ only in their random seed give slightly different results: our five plain runs reach lowest validation losses between 0.609 and 0.628. A difference smaller than that spread is not evidence.
+"""
+
+[[code]]
+label = "A stratified split, a dropout mask, and an exact-twin check"
+file = "07-generalization/split_dropout.py"
+
+[next]
+missing = "A fixed-width share vector leaves sequence order unrepresented."
+chapter = "08-fixed-size-inputs"

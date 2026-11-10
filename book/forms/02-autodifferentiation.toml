@@ -1,5 +1,4 @@
-# Chapter form. Every prose field is mined from the delivered course, with its
-# source; nothing here is new narrative. See book/FORM.md.
+# Chapter form. Every passage is anchored in the delivered week, with its source.
 
 number = "2"
 title = "Autodifferentiation"
@@ -9,62 +8,266 @@ gist = "Loss, direction, the update, learning rate; mean squared versus mean abs
 row = "1958: a weight moves by the error times that weight's own input."
 plate = "lineage-a-1943-1997"
 
-[frame]   # the course's own frame: representation -> transformation -> evidence
-question = "What can this week's model learn from the selected representation?"
+[frame]
 data = "Forty points generated from y = 3x + 7 with noise added, so the right answer is known."
 representation = "parameters, predictions, errors, and loss"
 transformation = "w <- w - lr * dloss/dw, repeated"
 evidence = "loss decreases for the right reason and gradients agree"
-path = "one full batch kept visible before introducing minibatches"
-source = "CSC 411 week 2"
+source = "411/curriculum.toml week02; 411/weeks/week02_autodifferentiation/lab.md"
 
 [[steps]]
 claim = "The loss turns forty errors into one number."
-quote = "Forty numbers are hard to compare against another forty and impossible to search with, so they have to be reduced to one. That single number is the loss, and the convention is that smaller means better."
-source = "week 2 lab, What the loss measures"
+source = "week02_autodifferentiation/lab.md, What the loss measures"
 figure = "eq-mse"
+source_passage = '''
+A model that makes a prediction for every data point also makes an error for every data point. With forty points, that is forty separate numbers describing how wrong the model is. Forty numbers are hard to compare against another forty and impossible to search with, so they have to be reduced to one. That single number is the **loss**, and the convention is that smaller means better.
+
+The recipe has three steps. Take the error at each point, which is the prediction minus the truth. Square it. Average the squares.
+
+$$\text{MSE} = \text{mean}\left(\left(\hat{y} - y\right)^2\right)$$
+
+The squaring does two separate jobs, and it is worth separating them.
+
+The first job is to remove the signs. An error of +2 and an error of -2 are equally wrong, but averaging them directly would let them cancel and report no error at all. The flat line through the average penguin mass did exactly that: it was wrong about nearly every bird and still scored close to zero, because its overestimates and underestimates destroyed each other. Squaring makes every error positive, so they can only accumulate.
+
+The second job is less obvious. Squaring does not treat all errors proportionally.
+
+| error | squared |
+|---|---|
+| -1 | 1 |
+| +2 | 4 |
+| -3 | 9 |
+
+The third error is three times the size of the first and contributes nine times as much to the loss. That is not a flaw. It follows directly from squaring, and it is what the tool does. It does have a consequence you should expect: a model fitted with squared error will move its line to reduce one very large miss, even when that makes every other point slightly worse.
+'''
+text = """
+A model that makes a prediction for every data point also makes an error for every data point. With forty points, that is forty separate numbers describing how wrong the model is. Forty numbers are hard to compare against another forty and impossible to search with, so they have to be reduced to one. That single number is the **loss**, and the convention is that smaller means better.
+
+The loss used here is mean squared error. The recipe has three steps. Take the error at each point, which is the prediction minus the truth. Square it. Average the squares.
+
+The squaring does two separate jobs, and it is worth separating them.
+
+The first job is to remove the signs. An error of +2 and an error of -2 are equally wrong, but averaging them directly would let them cancel and report no error at all. The flat line through the average penguin mass did exactly that: it was wrong about nearly every bird and still scored close to zero, because its overestimates and underestimates destroyed each other. Squaring makes every error positive, so they can only accumulate.
+
+The second job is less obvious. Squaring does not treat all errors proportionally. An error of -1 squares to 1, an error of +2 to 4, and an error of -3 to 9.
+
+The third error is three times the size of the first and contributes nine times as much to the loss. That is not a flaw. It follows directly from squaring, and it is what the tool does. It does have a consequence you should expect: a model fitted with squared error will move its line to reduce one very large miss, even when that makes every other point slightly worse.
+"""
 
 [[steps]]
 claim = "Every point on the loss curve is a whole model."
-quote = "Every point on this curve represents an entire model, one particular choice of w, scored against all the data points at once."
-source = "week 2 lab, The loss as a function of the weight"
+source = "week02_autodifferentiation/lab.md, The loss as a function of the weight"
+source_passage = '''
+The curve falls, reaches a minimum near `w = 3.0`, and rises again.
+
+The horizontal axis deserves a second look, because it is not the kind of quantity plots usually put there. It is not a measurement of anything in the world. It is a parameter, a number we choose. Every point on this curve represents an entire model, one particular choice of `w`, scored against all forty data points at once. Moving to the right along the axis does not mean looking at a different sample. It means considering a different model.
+
+The shape tells us the problem is solvable. There is a lowest point, and the whole task is to find it.
+'''
+text = """
+The curve falls, reaches a minimum near `w = 3.0`, and rises again.
+
+The horizontal axis deserves a second look, because it is not the kind of quantity plots usually put there. It is not a measurement of anything in the world. It is a parameter, a number we choose. Every point on this curve represents an entire model, one particular choice of `w`, scored against all forty data points at once. Moving to the right along the axis does not mean looking at a different sample. It means considering a different model.
+
+The shape tells us the problem is solvable. There is a lowest point, and the whole task is to find it.
+"""
 
 [[steps]]
 claim = "The derivative gives the direction; the minus sign takes the step downhill."
-quote = "The derivative points in the direction the loss increases, so subtracting it moves in the direction the loss decreases."
-source = "week 2 lab, One step, and then many"
+source = "week02_autodifferentiation/lab.md, Finding the direction; One step, and then many"
 figure = "gradient-descent"
+source_passage = '''
+This rate, measured at a specific point, is the **derivative of the loss with respect to the parameter**. Two things about it matter, and they are separate.
+
+Its **sign** tells you which way to move. A negative derivative means the loss falls as the parameter rises, so the parameter should increase. A positive derivative means the opposite.
+
+Its **size** tells you how sharply the loss responds to this parameter right now. A derivative of -64 means the loss is changing quickly here. A derivative near zero means moving this parameter barely changes anything, which is what happens at the bottom of the curve, where there is no improvement left to find.
+
+We now have a direction. Acting on it means changing the parameter by some amount in that direction, which is one line of arithmetic:
+
+$$w \leftarrow w - \text{lr} \times \frac{\partial \, \text{loss}}{\partial w}$$
+
+That line has two symbols worth naming. The arrow means "becomes": work out the right-hand side, then store the result back into `w`. The fraction with the curly $\partial$ is a derivative, read out loud as "the derivative of the loss with respect to `w`", and it is exactly the quantity we measured a moment ago. The curly $\partial$ is used instead of a straight $d$ to signal that the loss depends on more than one parameter and we are varying only this one while holding the other still.
+
+The minus sign is what makes this work. The derivative points in the direction the loss *increases*, so subtracting it moves in the direction the loss decreases. When the derivative is negative, as it is here, subtracting a negative value increases `w`, which is what we determined we wanted.
+'''
+text = """
+The rate of change of the loss, measured at a specific point, is the **derivative of the loss with respect to the parameter**. Two things about it matter, and they are separate.
+
+Its **sign** tells you which way to move. A negative derivative means the loss falls as the parameter rises, so the parameter should increase. A positive derivative means the opposite.
+
+Its **size** tells you how sharply the loss responds to this parameter right now. A derivative of -64 means the loss is changing quickly here. A derivative near zero means moving this parameter barely changes anything, which is what happens at the bottom of the curve, where there is no improvement left to find.
+
+Acting on a direction means changing the parameter by some amount in that direction, which is one line of arithmetic: `w <- w - lr * dloss/dw`.
+
+That line has two symbols worth naming. The arrow means "becomes": work out the right-hand side, then store the result back into `w`. The fraction `dloss/dw` is a derivative, read out loud as "the derivative of the loss with respect to `w`". It is written with a curly d to signal that the loss depends on more than one parameter and we are varying only this one while holding the other still.
+
+The minus sign is what makes this work. The derivative points in the direction the loss *increases*, so subtracting it moves in the direction the loss decreases. When the derivative is negative, subtracting a negative value increases `w`.
+"""
 
 [[steps]]
 claim = "Gradient descent is that step, repeated."
-quote = "Running that line repeatedly is gradient descent, and it is the algorithm the rest of this book is built on."
-source = "week 2 lab, One step, and then many"
+source = "week02_autodifferentiation/lab.md, One step, and then many"
 figure = "loop-gradient-descent"
+source_passage = '''
+Running that line repeatedly is **gradient descent**, and it is the algorithm the rest of this course is built on.
+
+Sixty steps landed at `w = 3.000`, `b = 6.989`, close to the `w = 3`, `b = 7` the data was built from.
+
+Close, and not exact. The difference is not a failure of the loop.
+
+Run long enough, this loop settles at a particular line and stays there. The word for settling at a value and staying is **converging**, and you will meet it constantly from here on.
+
+The loss curve on the left is worth learning to read, because you will look at thousands of these. A healthy run falls steeply at first, when the parameters are far from where they belong and the gradients are large, then flattens as it approaches the minimum and the gradients shrink toward zero. The flattening is the run reporting that it has arrived. Three shapes matter: this one, a curve still falling steeply when the run ends, which means it needed more steps or a larger learning rate, and a curve that rises, which is the next section.
+
+Finally, compare the fitted line against a line chosen by looking at the scatter plot. A reasonable guess by eye of `w = 2.5`, `b = 8.0` scores 6.72. The loop scores 2.06, and it never saw the plot.
+'''
+text = """
+Running that line repeatedly is **gradient descent**, and it is the algorithm the rest of this book is built on.
+
+Sixty steps landed at `w = 3.000`, `b = 6.989`, close to the `w = 3`, `b = 7` the data was built from.
+
+Close, and not exact. The difference is not a failure of the loop.
+
+Run long enough, this loop settles at a particular line and stays there. The word for settling at a value and staying is **converging**, and it comes up constantly from here on.
+
+The loss curve is worth learning to read, because you will look at thousands of these. A healthy run falls steeply at first, when the parameters are far from where they belong and the gradients are large, then flattens as it approaches the minimum and the gradients shrink toward zero. The flattening is the run reporting that it has arrived. Three shapes matter: this one, a curve still falling steeply when the run ends, which means it needed more steps or a larger learning rate, and a curve that rises, which is the next section.
+
+Finally, compare the fitted line against a line chosen by looking at the scatter plot. A reasonable guess by eye of `w = 2.5`, `b = 8.0` scores 6.72. The loop scores 2.06, and it never saw the plot.
+"""
 
 [[steps]]
 claim = "PyTorch records the operations and walks them back into .grad."
+see = ["03-backpropagation#2", "03-backpropagation#3"]
+source = "week02_autodifferentiation/lab.md, Finding the direction; One step, and then many"
 figure = "code-gd"
+source_passage = '''
+Three pieces of that cell are new. `requires_grad=True` marks a tensor as one you want derivatives for, which tells PyTorch to pay attention to what happens to it. `.grad` is where the answer is stored afterwards. `.item()` pulls the single number out of a one-element tensor so that it prints cleanly.
+
+**`loss.backward()`** is what computes the derivatives and stores them. Before you call it, `w.grad` and `b.grad` hold `None`, because nothing has been calculated yet. After the call they hold numbers. If you ever find yourself looking at a gradient of `None`, the usual cause is that `backward()` was never reached.
+
+**`with torch.no_grad():`** temporarily switches off PyTorch's recording.
+
+To work out a derivative, PyTorch writes down every operation it performs on a tracked tensor, so that it can retrace those steps afterwards. Updating a parameter is itself an operation on a tracked tensor, so it would get written down too, and that is not what we want. The update is bookkeeping we are doing to the model from the outside. It is not part of the calculation the model performs on the data, and recording it would corrupt the notes that the next `backward()` reads. Wrapping the update in `no_grad()` says: do this arithmetic, and do not write it down.
+
+**`w.grad.zero_()`** sets the gradient back to zero before the next step begins. This one needs more explanation than the others, because it looks like housekeeping and it is not.
+
+When you call `backward()`, PyTorch does not replace whatever is sitting in `w.grad`. It adds to it. If `w.grad` already holds -67.5 from the previous step and this step computes -40.2, then afterwards `w.grad` holds -107.7, the sum of the two.
+
+The cost is that ordinary training has to clear the gradient by hand on every pass. A loop that forgets this line does not crash. It builds a running total of every gradient so far, uses that total as though it were the current gradient, and pushes the parameter much too far in a direction that stopped being correct several steps ago.
+'''
+text = """
+Three pieces of the code are new. `requires_grad=True` marks a tensor as one you want derivatives for, which tells PyTorch to pay attention to what happens to it. `.grad` is where the answer is stored afterwards. `.item()` pulls the single number out of a one-element tensor so that it prints cleanly.
+
+**`loss.backward()`** is what computes the derivatives and stores them. Before you call it, `w.grad` and `b.grad` hold `None`, because nothing has been calculated yet. After the call they hold numbers. If you ever find yourself looking at a gradient of `None`, the usual cause is that `backward()` was never reached.
+
+**`with torch.no_grad():`** temporarily switches off PyTorch's recording.
+
+To work out a derivative, PyTorch writes down every operation it performs on a tracked tensor, so that it can [[03-backpropagation#3|retrace those steps]] afterwards. Updating a parameter is itself an operation on a tracked tensor, so it would get written down too, and that is not what we want. The update is bookkeeping we are doing to the model from the outside. It is not part of the calculation the model performs on the data, and recording it would corrupt the notes that the next `backward()` reads. Wrapping the update in `no_grad()` says: do this arithmetic, and do not write it down.
+
+**`w.grad.zero_()`** sets the gradient back to zero before the next step begins. This one needs more explanation than the others, because it looks like housekeeping and it is not.
+
+When you call `backward()`, PyTorch does not replace whatever is sitting in `w.grad`. It adds to it. If `w.grad` already holds -67.5 from the previous step and this step computes -40.2, then afterwards `w.grad` holds -107.7, the sum of the two.
+
+The cost is that ordinary training has to clear the gradient by hand on every pass. A loop that forgets this line does not crash. It builds a running total of every gradient so far, uses that total as though it were the current gradient, and pushes the parameter much too far in a direction that stopped being correct several steps ago.
+"""
 
 [[steps]]
 claim = "The learning rate is a choice, and it fails two recognizable ways."
-quote = "There is no formula that produces the right learning rate. It depends on the scale of the data. The honest procedure is to try a value, look at the loss curve, and adjust."
-source = "week 2 lab, The learning rate"
+source = "week02_autodifferentiation/lab.md, One step, and then many; The learning rate"
+source_passage = '''
+The `lr` in that update is the **learning rate**. The derivative tells you which way to go and how steep the ground is, but it does not tell you how far to travel. The learning rate is that decision, expressed as the fraction of the gradient to actually apply.
+
+Everything in this notebook so far has one correct answer. The learning rate does not. It is the first quantity in this course that you have to choose, where the right choice depends on the data, and where the two ways of getting it wrong produce two recognizable failures.
+
+The loss does not decrease. It grows by a factor of about six on every step.
+
+The mechanism is worth stating precisely. The gradient at the starting point correctly identifies which direction reduces the loss, and it continues to be correct throughout. The problem is distance. A learning rate of 0.05 makes the step large enough that `w` travels past the minimum and lands on the far side of it, higher up than where it started. The gradient at that new position is larger and points back the other way, so the next step is bigger still and overshoots further. Each step makes the following one worse. This is the most common way a first attempt at training a model fails.
+
+The opposite mistake fails quietly:
+
+Nothing is wrong with this run except that it is far too slow. The loss decreases on every step, the direction is right, and after sixty steps it has barely moved. Given enough steps it would arrive. A run like this is harder to catch than the exploding one, because nothing about it looks broken.
+
+There is no formula that produces the right learning rate. It depends on the scale of the data, which is why a value that works here would not work on the penguins, where flipper lengths near 200 make the gradients enormous. The honest procedure is to try a value, look at the loss curve, and adjust.
+'''
+text = """
+The `lr` in that update is the **learning rate**. The derivative tells you which way to go and how steep the ground is, but it does not tell you how far to travel. The learning rate is that decision, expressed as the fraction of the gradient to actually apply.
+
+Everything so far has one correct answer. The learning rate does not. It is the first quantity here that you have to choose, where the right choice depends on the data, and where the two ways of getting it wrong produce two recognizable failures.
+
+Raise the learning rate from 0.01 to 0.05. The loss does not decrease. It grows by a factor of about six on every step.
+
+The mechanism is worth stating precisely. The gradient at the starting point correctly identifies which direction reduces the loss, and it continues to be correct throughout. The problem is distance. A learning rate of 0.05 makes the step large enough that `w` travels past the minimum and lands on the far side of it, higher up than where it started. The gradient at that new position is larger and points back the other way, so the next step is bigger still and overshoots further. Each step makes the following one worse. This is the most common way a first attempt at training a model fails.
+
+The opposite mistake fails quietly. Nothing is wrong with this run except that it is far too slow. The loss decreases on every step, the direction is right, and after sixty steps it has barely moved. Given enough steps it would arrive. A run like this is harder to catch than the exploding one, because nothing about it looks broken.
+
+There is no formula that produces the right learning rate. It depends on the scale of the data, which is why a value that works here would not work on the penguins, where flipper lengths near 200 make the gradients enormous. The honest procedure is to try a value, look at the loss curve, and adjust.
+"""
 
 [[steps]]
 claim = "The loss is where you say what 'wrong' means."
-quote = "Making squared error as small as possible against a set of numbers lands you on their mean. Making absolute error as small as possible against the same numbers lands you on their median."
-source = "week 2 lab, Choosing a loss"
+see = ["06-multiclass#6"]
+source = "week02_autodifferentiation/lab.md, Choosing a loss; Which value does each loss choose?; Which one should you actually use?"
+source_passage = '''
+Everything so far has treated mean squared error as given. It is not given. It is a choice, and it is the place where you tell the model what the word "wrong" means. Change it and you change what the model considers a good answer.
+
+The most common alternative is mean absolute error, which averages the sizes of the errors rather than their squares:
+
+$$\text{MAE} = \text{mean}\left(\left|\hat{y} - y\right|\right)$$
+
+It drops into the same loop with no other changes. Same parameters, same gradients, same update rule. The only difference is the definition of the number being made small.
+
+That one difference changes the answer, and it changes it in a way you already have a name for. Making squared error as small as possible against a set of numbers lands you on their **mean**. Making absolute error as small as possible against the same numbers lands you on their **median**. Everything you know about how those two behave carries straight over: one extreme value drags the mean, and mostly leaves the median where it was.
+
+Before fitting a line, look at the simplest possible case: five repeated readings of one quantity, where the last one went wrong.
+
+Squared error bottoms out at 5.72, the mean. Absolute error bottoms out at 4.20, the median.
+
+Notice that 5.72 is not close to any of the five readings. Four of them sit near 4.1 and one sits at 12, and the mean lands in the empty space between. The median ignores how far away the bad reading is and only counts that it is one value out of five, so it stays with the group.
+
+Squared error also encodes a claim about how bad big misses are, and often it is the right claim. One error of 10 contributes 100 to the total, while ten separate errors of 1 contribute 10 between them, so squared error says that a single large miss is worse than many small ones spread around. If you are predicting a dose, a concentration, or a structural load, that is usually exactly what you want. Being off by a lot once can be far more costly than being slightly off many times.
+
+So the question to ask is not which loss is more accurate. It is:
+
+- Do I think my extreme points are errors, or are they signal?
+- Is one big miss worse than several small ones, or does it not matter how the error is distributed?
+'''
+text = """
+Everything so far has treated mean squared error as given. It is not given. It is a choice, and it is the place where you tell the model what the word "wrong" means. Change it and you change what the model considers a good answer.
+
+The most common alternative is mean absolute error, which averages the sizes of the errors rather than their squares. It drops into the same loop with no other changes. Same parameters, same gradients, same update rule. The only difference is the definition of the number being made small.
+
+That one difference changes the answer, and it changes it in a way you already have a name for. Making squared error as small as possible against a set of numbers lands you on their **mean**. Making absolute error as small as possible against the same numbers lands you on their **median**. Everything you know about how those two behave carries straight over: one extreme value drags the mean, and mostly leaves the median where it was.
+
+Before fitting a line, look at the simplest possible case: five repeated readings of one quantity, where the last one went wrong.
+
+Squared error bottoms out at 5.72, the mean. Absolute error bottoms out at 4.20, the median.
+
+Notice that 5.72 is not close to any of the five readings. Four of them sit near 4.1 and one sits at 12, and the mean lands in the empty space between. The median ignores how far away the bad reading is and only counts that it is one value out of five, so it stays with the group.
+
+Squared error also encodes a claim about how bad big misses are, and often it is the right claim. One error of 10 contributes 100 to the total, while ten separate errors of 1 contribute 10 between them, so squared error says that a single large miss is worse than many small ones spread around. If you are predicting a dose, a concentration, or a structural load, that is usually exactly what you want. Being off by a lot once can be far more costly than being slightly off many times.
+
+So the question to ask is not which loss is more accurate. It is: do I think my extreme points are errors, or are they signal? And is one big miss worse than several small ones, or does it not matter how the error is distributed?
+"""
 
 [[steps]]
 claim = "One weight's gradient is the error times the input it multiplies."
+see = ["03-backpropagation#4", "06-multiclass#8"]
+source = "week02_autodifferentiation/lab.md, Further exploration, The same loop on real measurements"
 figure = "eq-weight-gradient"
+source_passage = '''
+Nothing here is broken. The loop is correct line by line. The difficulty is that the two parameters need very different step sizes. In the expression `w * x + b`, the weight is multiplied by numbers near 200 while the bias is multiplied by 1, so the gradient with respect to `w` is roughly two hundred times the size of the gradient with respect to `b`. A single learning rate has to serve both. Any value large enough to move the bias sends the weight to infinity, and any value small enough to keep the weight stable leaves the bias effectively frozen.
+'''
+text = """
+The difficulty is that the two parameters need very different step sizes. In the expression `w * x + b`, the weight is multiplied by numbers near 200 while the bias is multiplied by 1, so the gradient with respect to `w` is roughly two hundred times the size of the gradient with respect to `b`. A single learning rate has to serve both. Any value large enough to move the bias sends the weight to infinity, and any value small enough to keep the weight stable leaves the bias effectively frozen.
+
+On the plate, a weight whose input is zero receives gradient zero.
+"""
 
 [[code]]
 label = "One step by hand, in pure Python"
 file = "02-autodifferentiation/one_step.py"
 credit = "Adapted from SmolML core/value.py, utils/losses, utils/optimizers (MIT)"
-output = """loss 6.2568   dL/dw -31.284
-w after one step: 2.9128"""
 note = "The same numbers as the mean squared error plate."
 
 [[code]]
@@ -74,17 +277,6 @@ file = "02-autodifferentiation/loop.py"
 [[code]]
 label = "Mean or median: what each loss chooses"
 file = "02-autodifferentiation/mean_median.py"
-
-[[questions]]
-q = "Fitting the line involves four tensors: x, y, w and b. Which two does the procedure change, and which two are given?"
-[[questions]]
-q = "A step is w = w - lr * w.grad, and w.grad is negative. What happens to w, and why does the minus sign produce that?"
-[[questions]]
-q = "A loss curve falls smoothly and is still falling at step 60, having gone from about 35 to about 31. What should change?"
-[[questions]]
-q = "In the oversized-learning-rate run the loss grows on every step. Describe what one step does to the weight, using the word overshoot and naming what is overshot."
-[[questions]]
-q = "One added point out of forty-one pulls the squared-error line towards it and leaves the absolute-error line nearly still. Explain why from the way each loss adds up its errors."
 
 [next]
 missing = "A derivative for anything deeper than one layer."

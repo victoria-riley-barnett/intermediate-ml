@@ -21,7 +21,7 @@ def report(y_true, y_pred):
             "recall": ratio(tp, tp + fn),        # denominator: rows that are truly 1
             "precision": ratio(tp, tp + fp)}     # denominator: rows the model called 1
 
-# Ten rows, invented to give the counts the lab found by hand.
+# Ten rows, invented to give the counts worked out by hand.
 true_10 = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
 pred_10 = [1, 1, 1, 1, 0, 1, 1, 0, 0, 0]
 print(report(true_10, pred_10))

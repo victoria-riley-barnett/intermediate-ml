@@ -1,0 +1,542 @@
+# Exact string replacements applied to book/figures/<slug>.html at build time.
+# Every `old` must occur in its plate (the build fails otherwise); all occurrences are replaced.
+
+[[patch]]
+slug = "arch-mask"
+old = "<p class=\"eyebrow\">WEEK 11 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "budget-backward-cost"
+old = "<p class=\"eyebrow\">WEEK 03 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "budget-t2"
+old = "<p class=\"eyebrow\">WEEK 11 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "code-gd"
+old = "<p class=\"eyebrow\" style=\"font-size:10px; letter-spacing:0.14em;\">WEEK 02 &middot; "
+new = "<p class=\"eyebrow\" style=\"font-size:10px; letter-spacing:0.14em;\">"
+
+[[patch]]
+slug = "code-object"
+old = "<p class=\"eyebrow\" style=\"font-size:10px; letter-spacing:0.14em;\">WEEK 00 &middot; "
+new = "<p class=\"eyebrow\" style=\"font-size:10px; letter-spacing:0.14em;\">"
+
+[[patch]]
+slug = "code-provenance"
+old = "<p class=\"eyebrow\" style=\"font-size:10px; letter-spacing:0.14em;\">WEEK 15 &middot; "
+new = "<p class=\"eyebrow\" style=\"font-size:10px; letter-spacing:0.14em;\">"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "<p class=\"eyebrow\">Week 14 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "compare-linear-hidden"
+old = "<p class=\"eyebrow\">Week 04 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "compare-regularizers"
+old = "<p class=\"eyebrow\">WEEK 07 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "compare-three-readers"
+old = "<p class=\"eyebrow\">Week 08 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "compare-three-reductions"
+old = "<p class=\"eyebrow\">Week 10 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "eq-chain-rule"
+old = "<p class=\"eyebrow\">Week 03 · "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "eq-layernorm"
+old = "<p class=\"eyebrow\">WEEK 12 · "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "eq-mse"
+old = "<p class=\"eyebrow\">WEEK 02 · "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "eq-residual"
+old = "<p class=\"eyebrow\">WEEK 12 · "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "eq-scaled-dot-product"
+old = "<p class=\"eyebrow\">Week 11 · "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "loop-gradient-descent"
+old = "<p class=\"eyebrow\">Week 02 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "metric-confusion"
+old = "<p class=\"eyebrow\">WEEK 05 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "metric-prevalence"
+old = "<p class=\"eyebrow\">WEEK 05 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "metric-threshold"
+old = "<p class=\"eyebrow\">Week 05 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "plot-curves"
+old = "<p class=\"eyebrow\">Week 07 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "plot-similarity"
+old = "<p class=\"eyebrow\">WEEK 09 · "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "split-homology-leakage"
+old = "<p class=\"eyebrow\">Week 07 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "split-train-only"
+old = "<p class=\"eyebrow\">Week 01 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "trace-backward-graph"
+old = "<p class=\"eyebrow\">WEEK 03 &middot; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "trace-context-window"
+old = "<p class=\"eyebrow\">WEEK 09 &#183; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "trace-kmer-gene"
+old = "<p class=\"eyebrow\">Week 06 &#183; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "trace-padding-shifts"
+old = "<p class=\"eyebrow\">WEEK 08 · "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "trace-shape"
+old = "<p class=\"eyebrow\">WEEK 01 &#183; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "trace-state"
+old = "<p class=\"eyebrow\">Week 00 &#183; "
+new = "<p class=\"eyebrow\">"
+
+[[patch]]
+slug = "eq-dot-product"
+old = "what this course does with it"
+new = "what this book does with it"
+
+[[patch]]
+slug = "eq-matrix-multiply"
+old = "what this course does with it"
+new = "what this book does with it"
+
+[[patch]]
+slug = "eq-mean-variance"
+old = "what this course does with it"
+new = "what this book does with it"
+
+[[patch]]
+slug = "split-train-only"
+old = "what this course does with it"
+new = "what this book does with it"
+
+[[patch]]
+slug = "trace-shape"
+old = "what this course does with it"
+new = "what this book does with it"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "The method on data the course did not choose"
+new = "The method on data the book did not choose"
+
+[[patch]]
+slug = "architecture-day"
+old = "Architecture day — CSC 411, 29 October 2026"
+new = "Machine learning architectures"
+
+[[patch]]
+slug = "architecture-day"
+old = "      <p class=\"eyebrow\">CSC 411 · Thursday 29 October 2026 · Thornton Hall 335</p>\n"
+new = ""
+
+[[patch]]
+slug = "architecture-day"
+old = " · set for the Thursday session,\n      29 October 2026"
+new = ""
+
+[[patch]]
+slug = "architecture-day"
+old = "CSC 411 · architecture day · 29 October 2026"
+new = "Machine learning architectures"
+
+[[patch]]
+slug = "architecture-day"
+old = "The transformer built in weeks 10 to 12 is"
+new = "The transformer built in this book is"
+
+[[patch]]
+slug = "architecture-day"
+old = "is new today."
+new = "is new here."
+
+[[patch]]
+slug = "architecture-day"
+old = "<p>The last two pages announce the final project and assign its first part, the\ndataset choice. Everything before them is background for the decision that assignment\nasks for.</p>"
+new = "<p>Everything here is background for choosing which arrangement suits a given\ndataset.</p>"
+
+[[patch]]
+slug = "architecture-day"
+old = "<div class=\"cgroup\"><p class=\"clabel\">Today also</p><p class=\"cline\">The final project, announced</p><p class=\"cline\">Part 1 · the dataset, assigned</p></div>"
+new = ""
+
+[[patch]]
+slug = "architecture-day"
+old = "the work in this course."
+new = "the work in this book."
+
+[[patch]]
+slug = "architecture-day"
+old = "Most failures in this course were"
+new = "Most failures in this book were"
+
+[[patch]]
+slug = "architecture-day"
+old = "the ones this course builds with"
+new = "the ones this book builds with"
+
+[[patch]]
+slug = "architecture-day"
+old = "the rest of the course stands on"
+new = "the rest of the book stands on"
+
+[[patch]]
+slug = "architecture-day"
+old = "closes the loop on week 9."
+new = "closes the loop on the embedding chapter."
+
+[[patch]]
+slug = "arch-mask"
+old = "the week-8 run log"
+new = "the earlier run log"
+
+[[patch]]
+slug = "arch-mask"
+old = "the week-11 lab's"
+new = "the attention chapter's"
+
+[[patch]]
+slug = "arch-mask"
+old = "which is what the course builds"
+new = "which is what this book builds"
+
+[[patch]]
+slug = "arch-mask"
+old = "this is what the course builds (week 12 encoder)"
+new = "this is the encoder's case"
+
+[[patch]]
+slug = "arch-mask"
+old = "this course's own"
+new = "this book's own"
+
+[[patch]]
+slug = "budget-t2"
+old = "counted at the course's sequence length"
+new = "counted at the book's sequence length"
+
+[[patch]]
+slug = "budget-t2"
+old = "every week-08 batch was padded"
+new = "every batch was padded"
+
+[[patch]]
+slug = "budget-t2"
+old = "THE LENGTH THE COURSE RAN"
+new = "THE LENGTH RUN HERE"
+
+[[patch]]
+slug = "budget-t2"
+old = "the length the course ran"
+new = "the length used here"
+
+[[patch]]
+slug = "budget-t2"
+old = "week 08 run_log.json"
+new = "run_log.json"
+
+[[patch]]
+slug = "budget-t2"
+old = "the delivered week-08 config"
+new = "the delivered config"
+
+[[patch]]
+slug = "budget-t2"
+old = "course arithmetic, not a published measurement"
+new = "arithmetic, not a published measurement"
+
+[[patch]]
+slug = "budget-t2"
+old = "# week 11 attention();"
+new = "# attention();"
+
+[[patch]]
+slug = "code-object"
+old = "The week-00 lab's Counter class"
+new = "The Counter class"
+
+[[patch]]
+slug = "code-object"
+old = "The listing is the lab's text verbatim"
+new = "The listing is verbatim"
+
+[[patch]]
+slug = "code-object"
+old = "the class is verbatim from weeks/week00_oop/lab.md, 9 lines;"
+new = "the class is verbatim, 9 lines;"
+
+[[patch]]
+slug = "code-object"
+old = "is this figure's, not the lab's"
+new = "is this figure's alone"
+
+[[patch]]
+slug = "code-object"
+old = "the function listing is not in the lab:"
+new = "the function listing is not above:"
+
+[[patch]]
+slug = "code-provenance"
+old = "the course's human_data.txt"
+new = "human_data.txt"
+
+[[patch]]
+slug = "code-provenance"
+old = "what a CSC 411 project is graded on"
+new = "what a project is checked on"
+
+[[patch]]
+slug = "code-provenance"
+old = "what a 411 project is graded on"
+new = "what a project is checked on"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "the model the week-06 lab delivers"
+new = "the model the multiclass chapter delivers"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "THE LABS&#8217; MODEL"
+new = "THE GENE MODEL"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "# the labs’ setting"
+new = "# the usual setting"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "week06 gene_family_data/human_data.txt"
+new = "gene_family_data/human_data.txt"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "the course artifact"
+new = "the book artifact"
+
+[[patch]]
+slug = "compare-baseline-first"
+old = "not the week-06 lab&#8217;s; the lab also learns"
+new = "not the earlier model&#8217;s; it also learns"
+
+[[patch]]
+slug = "compare-regularizers"
+old = "the week 07 gene network"
+new = "the gene network"
+
+[[patch]]
+slug = "compare-regularizers"
+old = "weeks/week07_generalization/run_log.json"
+new = "run_log.json"
+
+[[patch]]
+slug = "compare-three-readers"
+old = "the delivered week-08 run: weeks/week08_sequence_failure/run_log.json"
+new = "the delivered run: run_log.json"
+
+[[patch]]
+slug = "compare-three-readers"
+old = "one of week 10’s three reductions"
+new = "one of the three reductions"
+
+[[patch]]
+slug = "compare-three-readers"
+old = "and week 11 is where attention generalises it"
+new = "and attention generalises it"
+
+[[patch]]
+slug = "compare-three-reductions"
+old = "the week 8 recurrent reader"
+new = "the recurrent reader"
+
+[[patch]]
+slug = "compare-three-reductions"
+old = "attention in week 11 is the fourth"
+new = "attention is the fourth"
+
+[[patch]]
+slug = "eq-layernorm"
+old = "the delivered week-12 encoder block"
+new = "the delivered encoder block"
+
+[[patch]]
+slug = "eq-mse"
+old = "four grid points of the week-02 lab's controlled regression"
+new = "four grid points of a controlled regression"
+
+[[patch]]
+slug = "eq-mse"
+old = "as the lab holds it"
+new = "as in the setup"
+
+[[patch]]
+slug = "metric-confusion"
+old = "the week-06 lab's gene-family model"
+new = "the gene-family model"
+
+[[patch]]
+slug = "metric-confusion"
+old = "THE WEEK-06 GENE MODEL"
+new = "THE GENE MODEL"
+
+[[patch]]
+slug = "metric-confusion"
+old = "the week-06 lab’s MultinomialNB"
+new = "the MultinomialNB"
+
+[[patch]]
+slug = "metric-confusion"
+old = "the course’s gene corpus, weeks/week06_multiclass/gene_family_data/README.md"
+new = "the gene corpus, gene_family_data/README.md"
+
+[[patch]]
+slug = "metric-confusion"
+old = "the week-06 gene fit on human_data.txt"
+new = "the gene fit on human_data.txt"
+
+[[patch]]
+slug = "metric-confusion"
+old = "week 05 ships a confusion figure"
+new = "ch. 5 ships a confusion figure"
+
+[[patch]]
+slug = "metric-confusion"
+old = "so that lab’s matrix cannot be derived and the week-06 fit stands in"
+new = "so that matrix cannot be derived and the multiclass fit stands in"
+
+[[patch]]
+slug = "metric-prevalence"
+old = "weeks/week06_multiclass/gene_family_data/human_data.txt"
+new = "gene_family_data/human_data.txt"
+
+[[patch]]
+slug = "metric-prevalence"
+old = "counted from the course artifact"
+new = "counted from the artifact"
+
+[[patch]]
+slug = "plot-curves"
+old = "the week 07 gene network"
+new = "the gene network"
+
+[[patch]]
+slug = "plot-curves"
+old = "the five the lab trains"
+new = "the five trained"
+
+[[patch]]
+slug = "plot-curves"
+old = "the 5 the lab trains"
+new = "the 5 trained"
+
+[[patch]]
+slug = "trace-context-window"
+old = "the week-09 lecture's illustrative table"
+new = "an illustrative table"
+
+[[patch]]
+slug = "trace-kmer-gene"
+old = "the delivered lab defaults to k = 6, 4096 slots, and searches k = 5, 6 and 7"
+new = "a common default is k = 6, 4096 slots, and k = 5, 6 and 7 are all searched"
+
+[[patch]]
+slug = "trace-kmer-gene"
+old = "the lab's default is k = 6 (4096 slots)"
+new = "a common default is k = 6 (4096 slots)"
+
+[[patch]]
+slug = "trace-padding-shifts"
+old = "411/weeks/week08_sequence_failure/run_log.json"
+new = "run_log.json"
+
+[[patch]]
+slug = "trace-shape"
+old = "Five of the week-01 lab's own lines"
+new = "Five lines"
+
+[[patch]]
+slug = "trace-shape"
+old = "the lab's own text"
+new = "the listing's own text"
+
+[[patch]]
+slug = "trace-shape"
+old = "copies the lab's lines as written"
+new = "copies the lines as written"
+
+[[patch]]
+slug = "trace-shape"
+old = "one per line the lab runs"
+new = "one per line run"
+
+[[patch]]
+slug = "trace-shape"
+old = "the lab's line, copied as written"
+new = "the line, copied as written"
+
+[[patch]]
+slug = "trace-shape"
+old = "the lab's reading of .shape"
+new = "the reading of .shape"
