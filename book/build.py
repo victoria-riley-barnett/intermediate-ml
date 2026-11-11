@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
 """Build the CSC 411 book into book/out/.
 
-    python3 book/build.py                 # local preview, served at /
-    python3 book/build.py --base=/intermediate-ml/   # the GitHub Pages path
-
-Then preview over HTTP (search needs it):
-
-    python3 -m http.server -d book/out 8000
+    python3 book/build.py
+    python3 -m http.server -d book/out 8000      # then open http://localhost:8000
 
 What it does, in order:
 
-1. Copies chapters/*.md into an mdBook source tree, replacing each
-   `{{figure <slug>}}` line with that figure's SVG inline: ids prefixed so two
-   figures on one page cannot collide, title as caption, and a link to the
-   full-size plate.
-2. Copies figures/ verbatim (the full-size plates and their vendored fonts).
-3. Writes SUMMARY.md from PARTS below, a figure index page, and book.toml.
-4. Runs mdbook (looked for in ../.tools/, then on PATH).
+1. Runs verify.py over book/atoms/: stops on any atom that fails or has drifted.
+2. Writes the reader view (reader.py): one plain HTML page per chapter, composed
+   from forms/<stem>.toml and its atoms; one page per atom; the ledger; the plates
+   (figures/, with figures_patches.toml applied); the home page.
 
-Standard library only.
+Every link is relative, so the same output serves at / or under a Pages subpath.
+The helpers below (plates, wiki links, the older mdBook renderer) are shared with
+reader.py. Standard library only.
 """
 import html
 import pathlib
@@ -115,9 +110,10 @@ def figure_homes():
         for i, s in enumerate((f or {}).get("steps", []), 1):
             if s.get("figure"):
                 homes.setdefault(s["figure"], (stem, i))
-        for i, sec in enumerate((f or {}).get("section", []), 1):
-            for slug in sec.get("figures", []):
-                homes.setdefault(slug, (stem, 0))
+        for sec in (f or {}).get("section", []):
+            for para in sec.get("para", []):
+                for slug in para.get("figures", []):
+                    homes.setdefault(slug, (stem, 0))
     return homes
 
 
@@ -258,10 +254,15 @@ def load_atoms():
     for _, stem in PARTS:
         f = stem and form_of(stem)
         for sec in (f or {}).get("section", []):
-            for i in sec["atoms"]:
-                if i not in ATOMS:
-                    raise SystemExit(f"forms/{stem}.toml: atom {i} is not in atoms/")
-                APPEARS[i] = (stem, sec["title"])
+            for para in sec["para"]:
+                for i in para["atoms"]:
+                    if i not in ATOMS:
+                        raise SystemExit(f"forms/{stem}.toml: atom {i} is not in atoms/")
+                    APPEARS[i] = (stem, sec["name"])
+        for i in (f or {}).get("questions", {}).get("atoms", []):
+            if i not in ATOMS:
+                raise SystemExit(f"forms/{stem}.toml: atom {i} is not in atoms/")
+            APPEARS[i] = (stem, "questions")
 
 
 def inline(text):
@@ -659,44 +660,27 @@ def mdbook():
 
 
 def main(argv):
-    global SRC, OUT
-    import tempfile
-    base = "/"
+    """Verify the atoms, then write the reader view (reader.py) into OUT."""
+    global OUT
     for a in argv:
-        if a.startswith("--base="):
-            base = a.split("=", 1)[1]
         if a.startswith("--out="):
             OUT = pathlib.Path(a.split("=", 1)[1]).resolve()
-    # each build gets its own work dir, so two builds can run at once
-    work = pathlib.Path(tempfile.mkdtemp(prefix="book-"))
-    SRC = work / "_src"
-    if not base.endswith("/"):
-        base += "/"
-    shutil.rmtree(OUT, ignore_errors=True)
+    import reader
+    reader.build = sys.modules[__name__]  # run as a script, this module is __main__, not `build`
     load_atoms()
-    (SRC / "atoms").mkdir(parents=True)
-    for a in ATOMS.values():
-        (SRC / "atoms" / f"{a['id']}.md").write_text(atom_page(a))
-    (SRC / "ledger.md").write_text(ledger_page())
-    used = copy_chapters()
-    (SRC / "SUMMARY.md").write_text(summary())
-    (SRC / "index.md").write_text(title_page())
-    (SRC / "figures.md").write_text(figure_index(used))
-    (SRC / "index-terms.md").write_text(index_page())
-    shutil.copytree(FIGURES, SRC / "figures")
-    for slug in sorted({p["slug"] for p in tomllib.loads(PATCHES.read_text()).get("patch", [])}):
-        dst = SRC / "figures" / f"{slug}.html"
-        if not dst.exists():
-            raise SystemExit(f"figures_patches.toml: figures/{slug}.html does not exist")
-        dst.write_text(patch_plate(slug, dst.read_text()))
-    shutil.copytree(FIGURES / "fonts", work / "figures" / "fonts")
-    shutil.copytree(STYLE, work / "style")
-    (work / "book.toml").write_text(book_toml(base, OUT))
-    subprocess.run([mdbook(), "build", str(work)], check=True)
+    work = OUT.with_name(OUT.name + ".new")
     shutil.rmtree(work, ignore_errors=True)
-    # mdBook rewrites .md links only inside the pages it renders; the plates
-    # link back to chapters as .html already, so nothing else to fix.
-    print(f"built {OUT}  ({len(used)} figures inline)")
+    used = reader.write(work)
+    # swap in place, so a server already pointed at OUT keeps serving
+    if OUT.exists():
+        for child in OUT.iterdir():
+            shutil.rmtree(child) if child.is_dir() else child.unlink()
+    else:
+        OUT.mkdir(parents=True)
+    for child in work.iterdir():
+        shutil.move(str(child), OUT / child.name)
+    work.rmdir()
+    print(f"built {OUT}  ({len(used)} plates placed)")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@
 id = "ch2.loss"
 kind = "term"
 term = "loss"
-text = "One number that scores a model against all of its data at once; smaller is better."
+text = "The loss is one number that scores a model against all of its data at once, and smaller is better."
 see = ["ch2.mse", "ch2.mae"]
 [atom.verify]
 method = "hand"
@@ -21,7 +21,7 @@ sha1 = "a4d329033821"
 id = "ch2.mse"
 kind = "term"
 term = "mean squared error"
-text = "The average, over all points, of (prediction − truth)²."
+text = "Mean squared error, the loss used here, averages (prediction − truth)² over all the points."
 uses = ["ch2.loss"]
 [atom.verify]
 method = "hand"
@@ -33,10 +33,11 @@ sha1 = "a4d329033821"
 [[atom]]
 id = "ch2.signs-cancel"
 kind = "example"
-text = "Errors of +2 and −2 average to 0, so an unsquared average can call a wrong model perfect."
+text = "Squaring matters because errors of +2 and −2 would otherwise average to 0, and an unsquared average could call a wrong model perfect."
 uses = ["ch2.mse"]
 [atom.verify]
 method = "computed"
+says = "(+2 + (−2)) / 2 = 0."
 expr = "(2 + -2) / 2"
 number = "0"
 [atom.source]
@@ -47,11 +48,12 @@ sha1 = "a4d329033821"
 [[atom]]
 id = "ch2.squares-grow"
 kind = "example"
-text = "Errors of −1, +2 and −3 square to 1, 4 and 9: three times the miss costs nine times as much."
+text = "It also weighs big misses heavily: errors of −1, +2 and −3 square to 1, 4 and 9, so three times the miss costs nine times as much."
 uses = ["ch2.mse"]
 see = ["ch2.big-miss"]
 [atom.verify]
 method = "computed"
+says = "(−1)² = 1, 2² = 4, (−3)² = 9, and 9 / 1 = 9."
 expr = "[e ** 2 for e in (-1, 2, -3)] == [1, 4, 9] and (-3) ** 2 / (-1) ** 2 == 9"
 [atom.source]
 file = "411/weeks/week02_autodifferentiation/lab.md"
@@ -61,7 +63,7 @@ sha1 = "a4d329033821"
 [[atom]]
 id = "ch2.big-miss"
 kind = "claim"
-text = "A squared-error fit will move to shrink one large miss even if every other point gets slightly worse."
+text = "A squared-error fit will therefore move to shrink one large miss, even if every other point gets slightly worse."
 uses = ["ch2.squares-grow"]
 see = ["ch2.mean-median"]
 [atom.verify]
@@ -74,7 +76,7 @@ sha1 = "a4d329033821"
 [[atom]]
 id = "ch2.mse-worked"
 kind = "figure-fact"
-text = "On four noise-free points of y = 3x + 7 with b held at 7.000, the loss at w = 2.600 is 6.2568."
+text = "On four noise-free points of y = 3x + 7, with b held at its true value 7.000, the loss at w = 2.600 is 6.2568."
 uses = ["ch2.mse"]
 [atom.verify]
 method = "plate"
@@ -83,7 +85,7 @@ plate = "eq-mse"
 [[atom]]
 id = "ch2.mse-run"
 kind = "code"
-text = "The same four points in pure Python: loss 6.2568 and dL/dw −31.284 at w = 2.6."
+text = "A dozen lines of pure Python reproduce that number, along with the slope at the same point, dL/dw = −31.284."
 uses = ["ch2.mse-worked"]
 [atom.verify]
 method = "run"
@@ -95,7 +97,7 @@ expect = "loss 6.2568   dL/dw -31.284"
 [[atom]]
 id = "ch2.point-is-model"
 kind = "claim"
-text = "Each point on a loss-against-weight curve is a whole model, scored on all the data."
+text = "Each point on that curve is a whole model: one choice of w, scored against all of the data."
 uses = ["ch2.loss"]
 [atom.verify]
 method = "hand"
@@ -107,7 +109,7 @@ sha1 = "54eebbef1bb4"
 [[atom]]
 id = "ch2.bottom-at-3"
 kind = "figure-fact"
-text = "The loss is 6.2568 at w = 2.600 and at w = 3.400, and 0.0000 at w = 3.000."
+text = "The loss is the same 6.2568 at w = 3.400 and falls to 0.0000 at w = 3.000, the weight the points were made from."
 uses = ["ch2.mse-worked"]
 [atom.verify]
 method = "plate"
@@ -116,9 +118,10 @@ plate = "eq-mse"
 [[atom]]
 id = "ch2.scan-cost"
 kind = "example"
-text = "Scanning 11 candidate values per parameter costs 121 models for two parameters and over a million for six."
+text = "Scoring every candidate does not scale: 11 values per parameter is 121 models for two parameters and more than a million for six."
 [atom.verify]
 method = "computed"
+says = "11² = 121 and 11⁶ = 1,771,561."
 expr = "11 ** 2 == 121 and 11 ** 6 > 1_000_000"
 [atom.source]
 file = "411/weeks/week02_autodifferentiation/lab.md"
@@ -131,7 +134,7 @@ sha1 = "35d03ec70fbf"
 id = "ch2.derivative"
 kind = "term"
 term = "derivative"
-text = "How fast the loss changes as one parameter moves, measured at the current value."
+text = "The derivative says how fast the loss changes as one parameter moves, measured at its current value."
 uses = ["ch2.loss"]
 see = ["ch2.gradient"]
 [atom.verify]
@@ -145,7 +148,7 @@ sha1 = "35d03ec70fbf"
 id = "ch2.gradient"
 kind = "term"
 term = "gradient"
-text = "All of a model's derivatives together, one per parameter; PyTorch stores each in .grad."
+text = "With more than one parameter, the derivatives taken together are the gradient, and PyTorch stores each one in .grad."
 uses = ["ch2.derivative"]
 [atom.verify]
 method = "hand"
@@ -157,7 +160,7 @@ sha1 = "35d03ec70fbf"
 [[atom]]
 id = "ch2.sign-orders"
 kind = "figure-fact"
-text = "The slope is −31.284 at w = 2.600, 0.000 at w = 3.000 and 31.284 at w = 3.400: its sign says which way the bottom is."
+text = "Its sign says which way the bottom is: the slope is −31.284 at w = 2.600, 0.000 at w = 3.000 and 31.284 at w = 3.400."
 uses = ["ch2.derivative", "ch2.bottom-at-3"]
 [atom.verify]
 method = "plate"
@@ -166,7 +169,7 @@ plate = "eq-mse"
 [[atom]]
 id = "ch2.slope-sum"
 kind = "figure-fact"
-text = "At w = 2.600 the errors weighted by x sum to −62.5680, and two over n times that is −31.284."
+text = "At w = 2.600 the errors weighted by their inputs sum to −62.5680, and two over n times that sum is the slope."
 uses = ["ch2.sign-orders"]
 [atom.verify]
 method = "plate"
@@ -175,10 +178,11 @@ plate = "eq-mse"
 [[atom]]
 id = "ch2.slope-check"
 kind = "example"
-text = "Two over four times −62.568 is −31.284."
+text = "With n = 4 that is −31.284."
 uses = ["ch2.slope-sum"]
 [atom.verify]
 method = "computed"
+says = "2 / 4 × (−62.568) = −31.284."
 expr = "2 / 4 * -62.568"
 number = "-31.284"
 
@@ -188,7 +192,7 @@ number = "-31.284"
 id = "ch2.update-rule"
 kind = "term"
 term = "update rule"
-text = "w ← w − lr × dloss/dw: subtracting the derivative moves w downhill."
+text = "The update rule turns the slope into a move, w ← w − lr × dloss/dw, and the minus sign sends w downhill."
 uses = ["ch2.derivative", "ch2.learning-rate"]
 [atom.verify]
 method = "run"
@@ -202,7 +206,7 @@ sha1 = "a6c072c36c6d"
 [[atom]]
 id = "ch2.one-step"
 kind = "figure-fact"
-text = "A step size of 0.010 times the slope moves w from 2.600 to 2.9128, short of the bottom."
+text = "With a step size of 0.010, one update takes w from 2.600 to 2.9128, short of the bottom."
 uses = ["ch2.update-rule", "ch2.sign-orders"]
 [atom.verify]
 method = "plate"
@@ -211,10 +215,11 @@ plate = "eq-mse"
 [[atom]]
 id = "ch2.one-step-check"
 kind = "example"
-text = "2.6 − 0.01 × (−31.284) = 2.91284."
+text = "That is 2.6 − 0.01 × (−31.284) = 2.91284."
 uses = ["ch2.one-step"]
 [atom.verify]
 method = "computed"
+says = "2.6 − 0.01 × (−31.284) = 2.91284."
 expr = "2.6 - 0.01 * -31.284"
 number = "2.91284"
 
@@ -222,7 +227,7 @@ number = "2.91284"
 id = "ch2.gradient-descent"
 kind = "term"
 term = "gradient descent"
-text = "The update rule applied again and again until the loss stops falling."
+text = "Gradient descent is that update applied again and again until the loss stops falling."
 uses = ["ch2.update-rule"]
 see = ["ch2.converging"]
 [atom.verify]
@@ -235,7 +240,7 @@ sha1 = "a6c072c36c6d"
 [[atom]]
 id = "ch2.walk-shrinks"
 kind = "figure-fact"
-text = "On L = θ² with step size 0.1, θ goes 2.000, 1.600, 1.280, 1.024, 0.819: each step 0.8 of the last."
+text = "On the simplest loss, L = θ², with step size 0.1, θ goes 2.000, 1.600, 1.280, 1.024, 0.819, each step 0.8 of the last."
 uses = ["ch2.gradient-descent"]
 [atom.verify]
 method = "plate"
@@ -244,17 +249,18 @@ plate = "gradient-descent"
 [[atom]]
 id = "ch2.walk-check"
 kind = "example"
-text = "Each step multiplies θ by 1 − 2 × 0.1 = 0.8, so four steps from 2 give 0.8192."
+text = "Each step multiplies θ by 1 − 2 × 0.1 = 0.8, so four steps from 2 leave 0.8192."
 uses = ["ch2.walk-shrinks"]
 [atom.verify]
 method = "computed"
+says = "2 × 0.8⁴ = 0.8192."
 expr = "2 * (1 - 2 * 0.1) ** 4"
 number = "0.8192"
 
 [[atom]]
 id = "ch2.loop-halves"
 kind = "figure-fact"
-text = "With target 4 and step size 0.1, the weight goes 0.0000, 2.0000, 3.0000, 3.5000, 3.7500: each gain half the last."
+text = "Fitting a single weight to a target of 4 with step size 0.1, the weight goes 0.0000, 2.0000, 3.0000, 3.5000, 3.7500, each gain half the last."
 uses = ["ch2.gradient-descent"]
 [atom.verify]
 method = "plate"
@@ -263,7 +269,7 @@ plate = "loop-gradient-descent"
 [[atom]]
 id = "ch2.loop-run"
 kind = "code"
-text = "With both w and b free and lr 0.01, 3,000 steps reach w 3.000 and b 7.000."
+text = "With both w and b free and a learning rate of 0.01, 3,000 steps reach w = 3.000 and b = 7.000."
 uses = ["ch2.gradient-descent"]
 [atom.verify]
 method = "run"
@@ -274,7 +280,7 @@ expect = "lr 0.01  step 3000  loss 2.028e-15  w 3.000  b 7.000"
 id = "ch2.converging"
 kind = "term"
 term = "converging"
-text = "Settling at one value and staying there as the steps continue."
+text = "Settling at one value and staying there is called converging."
 uses = ["ch2.gradient-descent"]
 [atom.verify]
 method = "run"
@@ -284,11 +290,12 @@ expect = ["step 1000  loss 7.425e-05  w 3.002  b 6.984", "step 3000  loss 2.028e
 [[atom]]
 id = "ch2.grad-adds"
 kind = "claim"
-text = "backward() adds into .grad: −67.5 already there plus −40.2 new leaves −107.7."
+text = "One detail is easy to miss: backward() adds into .grad instead of replacing it, so −67.5 already there plus −40.2 new leaves −107.7."
 uses = ["ch2.gradient"]
 see = ["ch2.forgot-zero"]
 [atom.verify]
 method = "computed"
+says = "−67.5 + (−40.2) = −107.7."
 expr = "-67.5 + -40.2"
 number = "-107.7"
 [atom.source]
@@ -299,7 +306,7 @@ sha1 = "a6c072c36c6d"
 [[atom]]
 id = "ch2.forgot-zero"
 kind = "code"
-text = "Without clearing .grad, lr 0.01 gives loss 17.19 at step 50 and 92.96 at step 200: it gets worse."
+text = "A loop that never clears .grad does not crash, but its loss is 17.19 at step 50 and 92.96 at step 200, and getting worse."
 uses = ["ch2.grad-adds"]
 [atom.verify]
 method = "run"
@@ -309,7 +316,7 @@ expect = ["lr 0.01  step   50  loss 17.19", "lr 0.01  step  200  loss 92.96"]
 [[atom]]
 id = "ch2.no-grad"
 kind = "claim"
-text = "The update is wrapped in no_grad() so it is not recorded as part of the model's calculation."
+text = "The update itself is wrapped in no_grad() so that it is not recorded as part of the model's calculation."
 see = ["03-backpropagation"]
 [atom.verify]
 method = "hand"
@@ -324,7 +331,7 @@ sha1 = "a6c072c36c6d"
 id = "ch2.learning-rate"
 kind = "term"
 term = "learning rate"
-text = "The fraction of the gradient applied in one step; chosen, not learned."
+text = "The learning rate is the fraction of the gradient applied in each step, and it is chosen, not learned."
 uses = ["ch2.gradient"]
 [atom.verify]
 method = "hand"
@@ -337,7 +344,7 @@ sha1 = "a6c072c36c6d"
 id = "ch2.overshoot"
 kind = "term"
 term = "overshoot"
-text = "A step so large that the weight lands past the minimum, higher than it started."
+text = "Too large a rate overshoots: the step carries the weight past the minimum to a point higher than where it started."
 uses = ["ch2.learning-rate"]
 see = ["ch2.lr-large"]
 [atom.verify]
@@ -350,7 +357,7 @@ sha1 = "1abcdcc94c3e"
 [[atom]]
 id = "ch2.lr-large"
 kind = "code"
-text = "At lr 0.03 the loss rises from 160.9 to 5.378e+04 in ten steps."
+text = "At a rate of 0.03 the loss climbs from 160.9 to about 54,000 in ten steps."
 uses = ["ch2.overshoot"]
 [atom.verify]
 method = "run"
@@ -360,7 +367,7 @@ expect = ["lr 0.03  step    1  loss 160.9", "lr 0.03  step   10  loss 5.378e+04"
 [[atom]]
 id = "ch2.lr-small"
 kind = "code"
-text = "At lr 0.0005 the loss is still 12.44 after 200 steps: right direction, too slow."
+text = "Too small a rate fails quietly: at 0.0005 the loss is still 12.44 after 200 steps."
 uses = ["ch2.learning-rate"]
 [atom.verify]
 method = "run"
@@ -370,7 +377,7 @@ expect = "lr 0.0005  step  200  loss 12.44"
 [[atom]]
 id = "ch2.lr-no-formula"
 kind = "claim"
-text = "No formula gives the right learning rate; it depends on the scale of the data."
+text = "No formula gives the right rate, because it depends on the scale of the data."
 uses = ["ch2.learning-rate"]
 see = ["ch2.scale"]
 [atom.verify]
@@ -386,7 +393,7 @@ sha1 = "1abcdcc94c3e"
 id = "ch2.mae"
 kind = "term"
 term = "mean absolute error"
-text = "The average, over all points, of |prediction − truth|."
+text = "Mean absolute error is the main alternative: it averages |prediction − truth| instead of the square."
 uses = ["ch2.loss"]
 see = ["ch2.mse"]
 [atom.verify]
@@ -399,7 +406,7 @@ sha1 = "a95a979868f5"
 [[atom]]
 id = "ch2.mean-median"
 kind = "code"
-text = "For readings 4.0, 4.2, 4.1, 4.3 and 12.0, squared error is smallest at the mean, 5.72, and absolute error at the median, 4.20."
+text = "On five readings, 4.0, 4.2, 4.1, 4.3 and 12.0, squared error is smallest at their mean, 5.72, and absolute error at their median, 4.20."
 uses = ["ch2.mse", "ch2.mae"]
 [atom.verify]
 method = "run"
@@ -409,10 +416,11 @@ expect = ["squared error is smallest at 5.72   (mean 5.72)", "absolute error is 
 [[atom]]
 id = "ch2.big-miss-costs"
 kind = "example"
-text = "Under squared error one miss of 10 costs 100, while ten misses of 1 cost 10."
+text = "Squared error says one large miss is worse than many small ones: a miss of 10 costs 100, while ten misses of 1 cost 10."
 uses = ["ch2.mse"]
 [atom.verify]
 method = "computed"
+says = "10² = 100; 10 × 1² = 10."
 expr = "10 ** 2 == 100 and 10 * 1 ** 2 == 10"
 [atom.source]
 file = "411/weeks/week02_autodifferentiation/lab.md"
@@ -422,7 +430,7 @@ sha1 = "6c69ade5c616"
 [[atom]]
 id = "ch2.loss-is-a-choice"
 kind = "claim"
-text = "Choosing the loss is choosing what counts as wrong: an outlier you distrust argues for absolute error, one you believe argues for squared."
+text = "So choosing a loss is choosing what counts as wrong: an outlier you distrust argues for absolute error, and one you believe argues for squared error."
 uses = ["ch2.mean-median"]
 see = ["06-multiclass"]
 [atom.verify]
@@ -437,7 +445,7 @@ sha1 = "6c69ade5c616"
 [[atom]]
 id = "ch2.weight-gradient"
 kind = "figure-fact"
-text = "With error 3 and inputs 2, 0 and 3, the weights' gradients are 6, 0 and 9."
+text = "For a single layer, each weight's gradient is the error times that weight's input: with error 3 and inputs 2, 0 and 3, the gradients are 6, 0 and 9."
 uses = ["ch2.gradient"]
 see = ["03-backpropagation"]
 [atom.verify]
@@ -447,7 +455,7 @@ plate = "eq-weight-gradient"
 [[atom]]
 id = "ch2.zero-input"
 kind = "figure-fact"
-text = "The weight whose input is 0 gets gradient 0 and stays at 5, though it is the largest weight."
+text = "The weight whose input is 0 gets gradient 0 and stays at 5, even though it is the largest weight."
 uses = ["ch2.weight-gradient"]
 [atom.verify]
 method = "plate"
@@ -456,7 +464,7 @@ plate = "eq-weight-gradient"
 [[atom]]
 id = "ch2.scale"
 kind = "claim"
-text = "When inputs are near 200 the weight's gradient is about 200 times the bias's, so no single learning rate suits both."
+text = "That is why scale matters: with inputs near 200 the weight's gradient is about 200 times the bias's, and no single learning rate suits both."
 uses = ["ch2.weight-gradient", "ch2.learning-rate"]
 [atom.verify]
 method = "hand"
@@ -484,6 +492,7 @@ answer = "Up. Subtracting a negative number adds, and a negative derivative mean
 uses = ["ch2.update-rule"]
 [atom.verify]
 method = "computed"
+says = "2.6 − 0.01 × (−31.284) = 2.91284, which is above 2.6."
 expr = "2.6 - 0.01 * -31.284 > 2.6"
 
 [[atom]]

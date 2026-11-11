@@ -1,0 +1,92 @@
+/* The reader view. After Tufte's page (a text column, a wide margin for sidenotes
+   and captions, figures across both) and Shutt's web pages (plain documents, links
+   in sentences, Up / Next / See also lines). Sidenote layout after tufte-css (MIT). */
+
+:root {
+  --paper: #fdfcf8; --ink: #2d3142; --soft: #636a7a; --faint: #d9d5cb; --accent: #bf4520;
+  --text: 'Instrument Serif', 'ET Book', Palatino, 'Palatino Linotype', Georgia, serif;
+  --sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+}
+html { font-size: 12px; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--text);
+       -webkit-font-smoothing: antialiased; }
+article { max-width: 1320px; margin: 0 auto; padding: 2.5rem 5% 6rem 9%; }
+
+/* the text column is 58% of the article; the margin to its right is 36% */
+article > * { width: 58%; }
+article > figure.wide, article > pre, article > div.para, article > table.ledger { width: 100%; }
+
+p, li, td, th, dd { font-size: 1.72rem; line-height: 1.55; }
+p { margin: 0 0 1.3rem; }
+h1 { font-weight: 400; font-size: 3.6rem; line-height: 1.1; margin: 1.2rem 0 1rem; }
+h2 { font-weight: 400; font-style: italic; font-size: 2.5rem; margin: 3.6rem 0 1rem; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--faint);
+    text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--accent); }
+a.term { text-decoration-color: var(--accent); }
+dfn { font-style: italic; }
+code { font-family: var(--mono); font-size: 0.82em; }
+hr { border: 0; border-top: 1px solid var(--faint); margin: 3.4rem 0 1.4rem; }
+
+.up { font-size: 1.4rem; color: var(--soft); margin: 0; }
+.question { font-style: italic; font-size: 2.05rem; line-height: 1.35; color: var(--soft); margin-bottom: 1.6rem; }
+table.frame { border-collapse: collapse; margin: 0 0 1.4rem; }
+table.frame th { font-weight: 400; font-style: italic; color: var(--soft); text-align: left;
+                 padding: 0.1rem 1.4rem 0.1rem 0; vertical-align: top; white-space: nowrap; }
+table.frame td { padding: 0.1rem 0; }
+table.frame th, table.frame td { font-size: 1.5rem; line-height: 1.4; }
+.timeline { font-size: 1.5rem; color: var(--soft); }
+
+/* a paragraph and its sidenotes: text in the column, notes in the margin beside it */
+div.para { display: grid; grid-template-columns: 58% 36%; column-gap: 6%; align-items: start; }
+div.para > p { margin: 0 0 1.3rem; }
+aside.margin { font-size: 1.22rem; line-height: 1.4; color: var(--soft); padding-top: 0.35rem; }
+aside.margin .sn { display: block; margin-bottom: 0.9rem; }
+aside.margin code { font-size: 0.95em; color: var(--ink); }
+
+/* figures run across text and margin; the caption sits in the margin */
+figure.wide { margin: 1.6rem 0 2.6rem; display: grid; grid-template-columns: 58% 36%; column-gap: 6%; }
+figure.wide .art { grid-column: 1 / -1; }
+figure.wide .art svg { display: block; width: 100%; height: auto; }
+figure.wide .art svg.multiple { width: auto; max-width: 100%; }
+figure.wide figcaption { grid-column: 2; font-size: 1.22rem; line-height: 1.4; color: var(--soft); margin-top: 0.5rem; }
+figure.wide figcaption .ftitle { font-style: italic; color: var(--ink); }
+figure.wide figcaption .src { display: block; margin-top: 0.4rem; }
+
+ol.questions li { margin-bottom: 0.8rem; }
+details summary { cursor: pointer; color: var(--soft); font-size: 1.4rem; }
+details { margin-top: 0.2rem; }
+
+pre { background: none; border-left: 1px solid var(--faint); padding: 0.2rem 0 0.2rem 1.2rem; margin: 0.4rem 0 1rem;
+      overflow-x: auto; font-size: 1.25rem; line-height: 1.45; }
+pre.output { color: var(--soft); margin-bottom: 2.4rem; }
+p.codelabel { font-style: italic; margin: 1.6rem 0 0.3rem; }
+
+.quiet, .tbw { color: var(--soft); font-style: italic; }
+.nav { font-size: 1.55rem; margin: 0.3rem 0; }
+.statement { font-size: 2.2rem; line-height: 1.4; }
+ul.plain { list-style: none; padding: 0; }
+ul.plain li { margin: 0 0 0.7rem; }
+table.ledger { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.ledger th, table.ledger td { font-size: 1.3rem; text-align: left; padding: 0.15rem 1.4rem 0.15rem 0;
+                                   border-bottom: 1px solid var(--faint); font-weight: 400; }
+table.ledger th { font-style: italic; color: var(--soft); }
+
+/* the author's glue: hidden in the reader view, shown with ?draft=1 */
+.glue { display: none; }
+body.draft .glue { display: block; border: 1px dashed var(--faint); color: var(--soft); font-style: italic;
+                   padding: 0.5rem 0.8rem; font-size: 1.4rem; }
+
+/* narrow screens: one column, sidenotes and captions fall below what they belong to */
+@media (max-width: 820px) {
+  article { padding: 1.6rem 6% 4rem; }
+  article > * { width: 100%; }
+  div.para, figure.wide { display: block; }
+  aside.margin { border-left: 1px solid var(--faint); padding: 0 0 0 1rem; margin: -0.4rem 0 1.4rem; }
+  figure.wide .art { overflow-x: auto; }
+  figure.wide .art svg:not(.multiple) { min-width: 640px; }
+  figure.wide .art svg.multiple { min-width: 560px; max-width: none; }
+  p, li, td, dd { font-size: 1.6rem; }
+  h1 { font-size: 3rem; }
+}

@@ -11,7 +11,8 @@ An atom has exactly one primary verifier, [atom.verify] with `method`:
   plate     every number in `text` appears in the <desc> of figures/<plate>.html.
   computed  evaluates `expr` (Python, math available). With `number`, the value,
             rounded to that number's decimals, must equal it, and `number` must
-            appear in `text`; without, the value must be true.
+            appear in `text` (and in `says`, the working shown to readers, if
+            given); without, the value must be true.
   hand      cannot be checked by machine: `unsigned` until `signed = "YYYY-MM-DD"`.
 
 Provenance is separate from verification. [atom.source] names the delivered course
@@ -129,6 +130,8 @@ def check(atom):
             places = len(n.split(".")[1]) if "." in n else 0
             if round(float(value), places) != float(n):
                 return "fail", f"{v['expr']} = {value!r}, text says {n}"
+            if v.get("says") and n.lstrip("-") not in v["says"]:
+                return "fail", f"the displayed working (`says`) does not show {n}"
             return "pass", f"{v['expr']} = {round(float(value), places)}"
         return ("pass", f"{v['expr']} is true") if value is True else ("fail", f"{v['expr']} is {value!r}")
 
