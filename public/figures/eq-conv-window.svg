@@ -1,0 +1,119 @@
+<svg viewBox="0 0 1280 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-conv-window-title eq-conv-window-desc">
+        <title id="eq-conv-window-title">One convolution position</title>
+        <desc id="eq-conv-window-desc">The rule y = sum over k of w-k x-k, its five symbols, and one position of a 3 by 3 filter worked on a 5 by 5 image. The window holds the values 1 to 9 and the filter is 1, 0, -1 on each of its three rows. Each row of the window gives one product line: 1 times 1 plus 0 times 2 plus -1 times 3 is 1 plus 0 minus 3, which is -2, and each of the next two rows gives -2 again, so y = -2 - 2 - 2 = -6. The same nine weights are reused when the window shifts one cell right; at the border the window runs off the image, so with no padding those positions have no y.</desc>
+        <defs>
+          <marker id="eq-conv-window-arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#4f5d75"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520">y</tspan> = Σ<tspan font-size="16" dy="5.5">k</tspan><tspan dy="-5.5"> w</tspan><tspan font-size="16" dy="5.5">k</tspan><tspan dy="-5.5"> x</tspan><tspan font-size="16" dy="5.5">k</tspan></text>
+        <line x1="120" y1="144" x2="1160" y2="144" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="176" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">SYMBOL</text>
+        <text x="200" y="176" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">NAME</text>
+        <text x="380" y="176" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WHAT IT IS</text>
+        <line x1="120" y1="190" x2="1160" y2="190" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="218" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">y</text>
+        <text x="200" y="218" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">output</text>
+        <text x="380" y="218" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number; the value written for this one window position</text>
+        <text x="120" y="244" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">Σ<tspan font-size="10" dy="3.5">k</tspan></text>
+        <text x="200" y="244" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">sum</text>
+        <text x="380" y="244" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">operator; add the nine terms, one per cell of the window</text>
+        <text x="120" y="270" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">k</text>
+        <text x="200" y="270" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">cell index</text>
+        <text x="380" y="270" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">index; 1 to 9, which cell of the window</text>
+        <text x="120" y="296" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">w<tspan font-size="10" dy="3.5">k</tspan></text>
+        <text x="200" y="296" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">filter weight</text>
+        <text x="380" y="296" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number; the filter weight at cell k, the same nine at every position</text>
+        <text x="120" y="322" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">x<tspan font-size="10" dy="3.5">k</tspan></text>
+        <text x="200" y="322" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">pixel</text>
+        <text x="380" y="322" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number; the image value at cell k inside this window</text>
+        <line x1="120" y1="344" x2="1160" y2="344" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="378" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WORKED · IMAGE 5×5 · 1 CHANNEL · WINDOW 3×3 · FILTER 3×3 · STRIDE 1 · NO PADDING</text>
+        <text x="120" y="404" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">IMAGE</text>
+        <text x="248" y="404" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">PATCH</text>
+        <text x="340" y="404" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">FILTER</text>
+        <text x="440" y="404" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">NINE PRODUCTS, ONE ROW AT A TIME</text>
+        <line x1="120" y1="416" x2="210" y2="416" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="120" y1="434" x2="210" y2="434" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="120" y1="452" x2="210" y2="452" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="120" y1="470" x2="210" y2="470" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="120" y1="488" x2="210" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="120" y1="506" x2="210" y2="506" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="120" y1="416" x2="120" y2="506" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="138" y1="416" x2="138" y2="506" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="156" y1="416" x2="156" y2="506" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="174" y1="416" x2="174" y2="506" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="192" y1="416" x2="192" y2="506" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="210" y1="416" x2="210" y2="506" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <text x="129.0" y="428.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <text x="147.0" y="428.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="165.0" y="428.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <text x="183.0" y="428.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="201.0" y="428.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="129.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="147.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="165.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="183.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <text x="201.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <text x="129.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="147.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="165.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">5</text>
+        <text x="183.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">6</text>
+        <text x="201.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="129.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <text x="147.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">7</text>
+        <text x="165.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">8</text>
+        <text x="183.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">9</text>
+        <text x="201.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="129.0" y="500.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="147.0" y="500.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="165.0" y="500.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="183.0" y="500.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <text x="201.0" y="500.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <rect x="156" y="434" width="54" height="54" fill="none" stroke="#bf4520" stroke-width="1.6" stroke-dasharray="5,4"/>
+        <rect x="138" y="434" width="54" height="54" fill="none" stroke="#bf4520" stroke-width="2"/>
+        <text x="120" y="522" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">dashed = the next position, +1 cell</text>
+        <line x1="216" y1="461" x2="242" y2="461" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#eq-conv-window-arrow)"/>
+        <line x1="308" y1="461" x2="334" y2="461" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#eq-conv-window-arrow)"/>
+        <line x1="400" y1="461" x2="432" y2="461" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#eq-conv-window-arrow)"/>
+        <line x1="248" y1="434" x2="302" y2="434" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="248" y1="452" x2="302" y2="452" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="248" y1="470" x2="302" y2="470" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="248" y1="488" x2="302" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="248" y1="434" x2="248" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="266" y1="434" x2="266" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="284" y1="434" x2="284" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="302" y1="434" x2="302" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <text x="257.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="275.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="293.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">3</text>
+        <text x="257.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">4</text>
+        <text x="275.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">5</text>
+        <text x="293.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">6</text>
+        <text x="257.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">7</text>
+        <text x="275.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">8</text>
+        <text x="293.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">9</text>
+        <line x1="340" y1="434" x2="394" y2="434" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="340" y1="452" x2="394" y2="452" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="340" y1="470" x2="394" y2="470" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="340" y1="488" x2="394" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="340" y1="434" x2="340" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="358" y1="434" x2="358" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="376" y1="434" x2="376" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <line x1="394" y1="434" x2="394" y2="488" stroke="rgba(45,49,66,0.40)" stroke-width="1"/>
+        <text x="349.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="367.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <text x="385.0" y="446.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <text x="349.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="367.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <text x="385.0" y="464.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <text x="349.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <text x="367.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <text x="385.0" y="482.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−1</text>
+        <text x="440" y="446" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">1·1 + 0·2 + (−1)·3 = 1 + 0 − 3 = −2</text>
+        <text x="440" y="466" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">1·4 + 0·5 + (−1)·6 = 4 + 0 − 6 = −2</text>
+        <text x="440" y="486" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">1·7 + 0·8 + (−1)·9 = 7 + 0 − 9 = −2</text>
+        <line x1="440" y1="506" x2="700" y2="506" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <rect x="440" y="520" width="260" height="32" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="452" y="542" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">y = −2 − 2 − 2 = <tspan fill="#bf4520" font-weight="500">−6</tspan></text>
+        <text x="120" y="584" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">at the border the window runs off the image: with no padding those x<tspan font-size="9" dy="3">k</tspan> are missing, so y is undefined</text>
+      </svg>

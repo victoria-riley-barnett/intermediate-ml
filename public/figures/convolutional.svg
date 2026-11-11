@@ -1,0 +1,209 @@
+<svg viewBox="0 0 1280 744" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="convolutional-title convolutional-desc">
+        <title id="convolutional-title">A convolutional network</title>
+        <desc id="convolutional-desc">Two panels. On the left, an 8 by 8 single-channel input grid carries two accent-outlined 3 by 3 receptive fields at non-overlapping positions, joined by a faint slide connector; a 3 by 3 grid of filter values lies beside the grid, bracketed by dashes onto both fields, and one field yields one output cell, y[i,j]. On the right, the stack runs left to right: x enters Conv, ReLU, Pool, Conv, ReLU, Pool, Flatten and Linear and leaves as class scores, with the tensor shape under each stage: B by 32 by 8 by 8, B by 32 by 4 by 4, B by 64 by 4 by 4, B by 64 by 2 by 2, B by 256 and B by K. Rectangles own weights, capsules are applied to the stream. The key gives the model constants, four equations, a symbol glossary, and the equivalent torch.nn calls with the tensor shape each one produces.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#4f5d75"/></marker>
+          <marker id="arrow-accent" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#bf4520"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+        <!-- ══ (A) LOCALITY AND WEIGHT SHARING ═════════════════════════════
+             One filter, two positions. The two accent outlines are the same
+             receptive field at non-overlapping positions; the faint connector
+             between them is the slide. The dashes bracket the one filter onto
+             both fields, so the sharing is drawn rather than asserted. -->
+        <rect x="120" y="106" width="144" height="144" fill="#eaeaee"/>
+        <g stroke="rgba(45,49,66,0.45)" stroke-width="1">
+          <line x1="138" y1="106" x2="138" y2="250"/>
+          <line x1="156" y1="106" x2="156" y2="250"/>
+          <line x1="174" y1="106" x2="174" y2="250"/>
+          <line x1="192" y1="106" x2="192" y2="250"/>
+          <line x1="210" y1="106" x2="210" y2="250"/>
+          <line x1="228" y1="106" x2="228" y2="250"/>
+          <line x1="246" y1="106" x2="246" y2="250"/>
+          <line x1="120" y1="124" x2="264" y2="124"/>
+          <line x1="120" y1="142" x2="264" y2="142"/>
+          <line x1="120" y1="160" x2="264" y2="160"/>
+          <line x1="120" y1="178" x2="264" y2="178"/>
+          <line x1="120" y1="196" x2="264" y2="196"/>
+          <line x1="120" y1="214" x2="264" y2="214"/>
+          <line x1="120" y1="232" x2="264" y2="232"/>
+        </g>
+        <rect x="120" y="106" width="144" height="144" fill="none" stroke="rgba(45,49,66,0.55)" stroke-width="1.4"/>
+
+        <!-- the slide: faint, no head, it is a second position, not a move -->
+        <line x1="237" y1="162" x2="237" y2="194" stroke="rgba(79,93,117,0.50)" stroke-width="1.4" stroke-dasharray="4,3"/>
+
+        <!-- one filter, bracketed onto both fields: no heads, so the dashes
+             read as "the same w reaches here too" rather than as flow -->
+        <g opacity="0.72">
+          <path d="M 268,133 H 274 Q 282,133 282,141 V 215 Q 282,223 274,223 H 268"
+                fill="none" stroke="#4f5d75" stroke-width="1.4" stroke-dasharray="4,3"/>
+          <path d="M 296,178 H 282" fill="none" stroke="#4f5d75" stroke-width="1.4" stroke-dasharray="4,3"/>
+        </g>
+        <line x1="354" y1="178" x2="382" y2="178" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+        <!-- the two receptive fields: the one accent, twice -->
+        <rect x="210" y="106" width="54" height="54" fill="none" stroke="#bf4520" stroke-width="2"/>
+        <rect x="210" y="196" width="54" height="54" fill="none" stroke="#bf4520" stroke-width="2"/>
+
+        <!-- the filter: a learned object, so it is a white rectangle -->
+        <rect x="296" y="149" width="58" height="58" rx="3" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <g stroke="rgba(45,49,66,0.25)" stroke-width="1">
+          <line x1="315.33" y1="149" x2="315.33" y2="207"/>
+          <line x1="334.67" y1="149" x2="334.67" y2="207"/>
+          <line x1="296" y1="168.33" x2="354" y2="168.33"/>
+          <line x1="296" y1="187.67" x2="354" y2="187.67"/>
+        </g>
+        <g fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">
+          <text x="305.67" y="162.87">1</text><text x="325" y="162.87">0</text><text x="344.33" y="162.87">−1</text>
+          <text x="305.67" y="182.2">2</text><text x="325" y="182.2">0</text><text x="344.33" y="182.2">−2</text>
+          <text x="305.67" y="201.53">1</text><text x="325" y="201.53">0</text><text x="344.33" y="201.53">−1</text>
+        </g>
+
+        <!-- one field, one cell -->
+        <rect x="382" y="163" width="30" height="30" fill="#eaeaee" stroke="rgba(45,49,66,0.60)" stroke-width="1.6"/>
+
+        <text x="120" y="88" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">x</text>
+        <text x="210" y="88" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">same w, every position</text>
+        <text x="120" y="272" fill="#5a6580" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">B×1×8×8</text>
+        <text x="325" y="141" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">w</text>
+        <text x="397" y="152" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">y[i,j]</text>
+        <text x="397" y="214" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">one scalar</text>
+
+        <!-- ══ (B) THE STACK ═══════════════════════════════════════════════ -->
+        <line x1="456" y1="144" x2="483" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="551" y1="144" x2="578" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="624" y1="144" x2="651" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="697" y1="144" x2="724" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="792" y1="144" x2="819" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="865" y1="144" x2="892" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="938" y1="144" x2="965" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="1033" y1="144" x2="1060" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+        <line x1="1128" y1="144" x2="1155" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+        <!-- applied to the stream: filled capsules, no weights -->
+        <rect x="578" y="126" width="46" height="36" rx="18" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <text x="601" y="149" fill="#2d3142" font-size="13" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">ReLU</text>
+
+        <rect x="651" y="126" width="46" height="36" rx="18" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <text x="674" y="149" fill="#2d3142" font-size="13" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Pool</text>
+
+        <rect x="819" y="126" width="46" height="36" rx="18" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <text x="842" y="149" fill="#2d3142" font-size="13" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">ReLU</text>
+
+        <rect x="892" y="126" width="46" height="36" rx="18" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <text x="915" y="149" fill="#2d3142" font-size="13" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Pool</text>
+
+        <rect x="965" y="126" width="68" height="36" rx="18" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <text x="999" y="149" fill="#2d3142" font-size="13" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Flatten</text>
+
+        <!-- learned transformations: white rectangles, they own weights -->
+        <rect x="483" y="100" width="68" height="88" rx="6" fill="#f5f5f5"/>
+        <rect x="483" y="100" width="68" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="517" y="140" fill="#2d3142" font-size="16" font-weight="600"
+              font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Conv</text>
+        <text x="517" y="168" fill="#4f5d75" font-size="12"
+              font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">w·x + c</text>
+
+        <rect x="724" y="100" width="68" height="88" rx="6" fill="#f5f5f5"/>
+        <rect x="724" y="100" width="68" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="758" y="140" fill="#2d3142" font-size="16" font-weight="600"
+              font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Conv</text>
+        <text x="758" y="168" fill="#4f5d75" font-size="12"
+              font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">w·x + c</text>
+
+        <rect x="1060" y="100" width="68" height="88" rx="6" fill="#f5f5f5"/>
+        <rect x="1060" y="100" width="68" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="1094" y="140" fill="#2d3142" font-size="16" font-weight="600"
+              font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Linear</text>
+        <text x="1094" y="168" fill="#4f5d75" font-size="12"
+              font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">256×K</text>
+
+        <!-- stream names, and the shape rail: the arithmetic, left to right -->
+        <text x="469" y="130" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">x</text>
+        <text x="1141" y="130" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">ŷ</text>
+
+        <g fill="#5a6580" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">
+          <text x="517" y="214">B×32×8×8</text>
+          <text x="674" y="214">B×32×4×4</text>
+          <text x="758" y="214">B×64×4×4</text>
+          <text x="915" y="214">B×64×2×2</text>
+          <text x="999" y="214">B×256</text>
+          <text x="1094" y="214">B×K</text>
+        </g>
+
+        <!-- ══ KEY: constants, equations, reference call ═══════════════════ -->
+        <line x1="120" y1="384" x2="1160" y2="384" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+
+        <text x="120" y="408" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">MODEL</text>
+        <text x="208" y="408" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">C = 1 channel · H = W = 8 · k = 3 kernel · K = 10 classes · B = batch</text>
+
+        <line x1="120" y1="432" x2="1160" y2="432" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+
+        <text x="120" y="456" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">TERM</text>
+        <text x="200" y="456" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">EQUATION</text>
+
+        <text x="120" y="482" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">Conv</text>
+        <text x="200" y="482" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">y[i,j] = Σ<tspan font-size="9" dy="3">a,b</tspan><tspan dy="-3"> w[a,b]·x[i+a, j+b] + c</tspan></text>
+
+        <text x="120" y="508" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">ReLU</text>
+        <text x="200" y="508" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">ReLU(z) = max(0, z)</text>
+
+        <text x="120" y="534" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">Pool</text>
+        <text x="200" y="534" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">max over a 2×2 window, stride 2</text>
+
+        <text x="120" y="560" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">Flatten</text>
+        <text x="200" y="560" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">B×64×2×2 → B×256</text>
+
+        <!-- ══ REFERENCE: the library calls, kept apart from the key ═══════ -->
+        <line x1="780" y1="444" x2="780" y2="576" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="812" y="456" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">PYTORCH</text>
+
+        <text x="812" y="482" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">nn.Conv2d(1, 32, kernel_size=3, padding=1)</text>
+        <text x="812" y="498" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">nn.MaxPool2d(2)</text>
+        <text x="812" y="514" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">nn.Conv2d(32, 64, kernel_size=3, padding=1)</text>
+        <text x="812" y="530" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">nn.MaxPool2d(2)</text>
+        <text x="812" y="546" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">nn.Flatten()</text>
+        <text x="812" y="562" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">nn.Linear(256, 10)</text>
+
+        <text x="1082" y="482" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># k=3, pad 1</text>
+        <text x="1082" y="498" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># 4×4</text>
+        <text x="1082" y="514" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># 32→64</text>
+        <text x="1082" y="530" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># 2×2</text>
+        <text x="1082" y="546" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># 64·2·2=256</text>
+        <text x="1082" y="562" fill="#5a6580" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># 256→K</text>
+
+        <!-- ══ SYMBOLS ═════════════════════════════════════════════════════ -->
+        <line x1="120" y1="588" x2="1160" y2="588" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+        <text x="120" y="612" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">SYMBOLS</text>
+
+        <text x="120" y="638" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">x</text>
+        <text x="190" y="638" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">one input channel, H×W</text>
+        <text x="470" y="638" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">y</text>
+        <text x="540" y="638" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">one element of the conv output</text>
+        <text x="820" y="638" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">ŷ</text>
+        <text x="890" y="638" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">class scores, B×K</text>
+
+        <text x="120" y="662" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">w</text>
+        <text x="190" y="662" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">one k×k filter, reused at all positions</text>
+        <text x="470" y="662" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">i, j</text>
+        <text x="540" y="662" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">row, column of that element</text>
+        <text x="820" y="662" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">32, 64</text>
+        <text x="890" y="662" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">filters in each conv layer</text>
+
+        <text x="120" y="686" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">c</text>
+        <text x="190" y="686" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">bias, one per filter</text>
+        <text x="470" y="686" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">a, b</text>
+        <text x="540" y="686" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">row, column inside the k×k window</text>
+        <text x="820" y="686" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">256</text>
+        <text x="890" y="686" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">flattened length, 64·2·2</text>
+
+        <text x="120" y="710" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">z</text>
+        <text x="190" y="710" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">conv output before ReLU</text>
+        <text x="470" y="710" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">w·x</text>
+        <text x="540" y="710" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">dot product over one window</text>
+        <text x="820" y="710" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">2×2</text>
+        <text x="890" y="710" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">pool window, stride 2</text>
+      </svg>
