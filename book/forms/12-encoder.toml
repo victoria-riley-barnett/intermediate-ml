@@ -17,86 +17,28 @@ source = "411/curriculum.toml week12, corrected by 411/admin/BOOK.md; week12_enc
 
 [[steps]]
 claim = "The labels depend on motif order, not the letters present."
-source = "week12_encoder lab.md, 1. The data"
-source_passage = """
-Every sequence is 48 residues long, drawn from a twenty-letter alphabet. Two three-letter motifs sit in it: `WWW` and `CCC`. Filler positions never contain `W` or `C`, so the only `W`s and `C`s in a string are the motifs themselves. One motif starts somewhere in positions 0 to 11, the other starts somewhere in 36 to 44, so the two never touch. Which motif is placed first is the label: 1 when `WWW` comes first, 0 when `CCC` does.
-
-Both motifs are present in every sequence. Nothing about which letters occur separates the classes; only their order does.
-"""
-text = """
-Every sequence is 48 residues long, drawn from a twenty-letter alphabet. Two three-letter motifs sit in it: `WWW` and `CCC`. Filler positions never contain `W` or `C`, so the only `W`s and `C`s in a string are the motifs themselves. One motif starts somewhere in positions 0 to 11, the other starts somewhere in 36 to 44, so the two never touch. Which motif is placed first is the label: 1 when `WWW` comes first, 0 when `CCC` does.
-
-Both motifs are present in every sequence. Nothing about which letters occur separates the classes; only their order does.
-"""
 
 [[steps]]
 claim = "A residual connection leaves a derivative-one path through a stack."
 see = ["02-autodifferentiation"]
 figure = "eq-residual"
-source = "week12_encoder lecture.md, Three things attention cannot do alone"
-source_passage = """
-The first failure is depth itself. Each block is a nonlinear map, and a stack of them can only carry information forward by re-encoding it through another set of weights at every stage. Small distortions introduced by one block are fed into the next and amplified, so the composition of many blocks drifts away from the input even when no transformation is wanted. Backpropagation shows the same problem from the other side: the gradient at the first block is the product of one Jacobian per block, and if those matrices shrink vectors on average, the product shrinks exponentially. A residual connection changes the block to `y = x + F(x)`. The Jacobian becomes `I + dF/dx`, and the identity term guarantees a path from output to input with derivative exactly one, independent of depth and independent of what `F` has learned. The gradient arrives undiminished, and `F` only has to learn a correction to the identity rather than a full re-encoding of the representation. Both signal and gradient get a route that the weights cannot degrade.
-"""
-text = """
-The first failure is depth itself. Each block is a nonlinear map, and a stack of them can only carry information forward by re-encoding it through another set of weights at every stage. Small distortions introduced by one block are fed into the next and amplified, so the composition of many blocks drifts away from the input even when no transformation is wanted. [[02-autodifferentiation|Backpropagation]] shows the same problem from the other side: the gradient at the first block is the product of one Jacobian per block, and if those matrices shrink vectors on average, the product shrinks exponentially. A residual connection changes the block to `y = x + F(x)`. The Jacobian becomes `I + dF/dx`, and the identity term guarantees a path from output to input with derivative exactly one, independent of depth and independent of what `F` has learned. The gradient arrives undiminished, and `F` only has to learn a correction to the identity rather than a full re-encoding of the representation. Both signal and gradient get a route that the weights cannot degrade.
-"""
 
 [[steps]]
 claim = "Layer normalisation runs across features, not positions."
 figure = "eq-layernorm"
-source = "week12_encoder lab.md, 3. One block"
-source_passage = """
-Layer normalisation runs across the 32 features of each row, never across positions: normalising across positions would make one position depend on which others happen to be present.
-"""
-text = """
-Layer normalisation runs across the 32 features of each row, never across positions: normalising across positions would make one position depend on which others happen to be present.
-"""
 
 [[steps]]
 claim = "Pre-norm keeps the identity route untouched and preserves the block shape."
 see = ["architectures"]
 figure = "encoder-block"
-source = "week12_encoder lab.md, 3. One block"
-source_passage = """
-The order is pre-norm, with the normalisation inside the residual branch: `x = x + attn(norm1(x))`, then `x = x + ffn(norm2(x))`.
-
-Three checks matter. The output shape equals the input shape, `(4, 48, 32)`, which is what lets blocks be stacked at all. Every attention row sums to one, so the softmax did what it claims. And the relative change tells us how far an untrained block moves its input: with a residual the block only has to supply a correction, so the ratio stays modest even though the branch itself is arbitrary.
-"""
-text = """
-The order is pre-norm, with the normalisation inside the residual branch: `x = x + attn(norm1(x))`, then `x = x + ffn(norm2(x))`.
-
-Three checks matter. The output shape equals the input shape, `(4, 48, 32)`, which is what lets blocks be stacked at all. Every attention row sums to one, so the softmax did what it claims. And the relative change tells us how far an untrained block moves its input: with a residual the block only has to supply a correction, so the ratio stays modest even though the branch itself is arbitrary.
-"""
 
 [[steps]]
 claim = "Position vectors preserve sequence order until the final mean pooling."
 see = ["06-multiclass"]
-source = "week12_encoder lab.md, 4. The encoder"
-source_passage = """
-The encoder turns ids into vectors, adds a learned position vector to each, runs the blocks, averages over the 48 positions, and applies one linear layer to two scores. Mean pooling is deliberately blunt: it discards order at the last moment, which forces the blocks to encode the answer somewhere in the vectors before pooling happens.
-
-Every row of that printout is `(4, 48, 32)` from the embedding through the last block. The block maps `(B, 48, 32)` to `(B, 48, 32)`; the only shape changes are at the entry, where ids become vectors, and at the exit, where positions collapse to a single vector per sequence.
-"""
-text = """
-The encoder turns ids into vectors, adds a learned position vector to each, runs the blocks, averages over the 48 positions, and applies one linear layer to [[06-multiclass|two scores]]. Mean pooling is deliberately blunt: it discards order at the last moment, which forces the blocks to encode the answer somewhere in the vectors before pooling happens.
-
-Every row of that printout is `(4, 48, 32)` from the embedding through the last block. The block maps `(B, 48, 32)` to `(B, 48, 32)`; the only shape changes are at the entry, where ids become vectors, and at the exit, where positions collapse to a single vector per sequence.
-"""
 
 [[steps]]
 claim = "The attention map proposes a place to look; ablation decides whether it matters."
 see = ["05-evaluation"]
-source = "week12_encoder lab.md, 6. Measure the map"
-source_passage = """
-Any number above the baseline is a claim about this head on these sequences. The control is to keep the head and move the mask: score the attention of sequence `n` against the motif positions of sequence `n+1`. If the effect is real, it should not survive that substitution.
-
-Remember what these numbers are not. Attention weight is not contribution: a head can put weight on a column and the value it carries can still be ignored downstream. So the decisive test is an ablation, not a picture — zero the motif positions in the input, or average the attention of a head across the batch and see whether the score moves. The measurement narrows the search; it does not settle it.
-"""
-text = """
-Any number above the baseline is a claim about this head on these sequences. The control is to keep the head and move the mask: score the attention of sequence `n` against the motif positions of sequence `n+1`. If the effect is real, it should not survive that substitution.
-
-Remember what these numbers are not. Attention weight is not contribution: a head can put weight on a column and the value it carries can still be ignored downstream. So the decisive test is an ablation, not a picture — zero the motif positions in the input, or average the attention of a head across the batch and see whether the score moves. The measurement narrows the search; it does not settle it.
-"""
 
 [[code]]
 label = "Layer normalisation and a residual add, in pure Python"

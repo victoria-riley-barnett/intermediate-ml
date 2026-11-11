@@ -17,129 +17,27 @@ source = "411/curriculum.toml week05, corrected by 411/admin/BOOK.md and week05_
 
 [[steps]]
 claim = "Evaluation judges a finished model; analysis looks inside while it is still being built."
-source = "week 5 lab, introduction"
-source_passage = """
-Evaluation and analysis are two different jobs. Evaluation judges a finished model: how often is it right, and what kind of wrong is it. Analysis looks inside a model while it is still being built.
-"""
-text = """
-Evaluation and analysis are two different jobs. Evaluation judges a finished model: how often is it right, and what kind of wrong is it. Analysis looks inside a model while it is still being built.
-"""
 
 [[steps]]
 claim = "Held-out rows show how a model behaves on data it has never seen."
 see = ["07-generalization"]
-source = "week 5 lab, Splitting the rows: 250 to learn from, 750 held back"
-source_passage = """
-The first 250 rows train the model. The remaining 750 are kept out of training entirely, and every number you report later comes from them.
-
-Slicing is how you split: `X[:n_train]` means the first 250 rows, `X[n_train:]` means everything from row 250 onward. Both classes stay in roughly the same proportion, which is what you want. Those 750 rows are the only ones that can tell you how the model behaves on data it has never seen, which is the question every number is trying to answer.
-"""
-text = """
-The first 250 rows train the model. The remaining 750 are kept out of training entirely, and every number you report later comes from them.
-
-Slicing is how you split: `X[:n_train]` means the first 250 rows, `X[n_train:]` means everything from row 250 onward. Both classes stay in roughly the same proportion, which is what you want. Those 750 rows are the only ones that can tell you how the model behaves on data it has never seen, which is the question every number is trying to answer.
-"""
 
 [[steps]]
 claim = "Every classification metric is arithmetic on four counts."
 see = ["06-multiclass"]
-source = "week 5 lab, The confusion matrix: TP, FP, FN, TN"
-source_passage = """
-Those four counts are the confusion matrix, and every metric is arithmetic on them.
-"""
-text = """
-Those four counts are the [[06-multiclass|confusion matrix]], and every metric is arithmetic on them.
-"""
 figure = "metric-confusion"
 
 [[steps]]
 claim = "A metric's denominator tells you which rows it describes."
 see = ["02-autodifferentiation"]
-source = "week 5 lab, report(): accuracy_score, recall_score, precision_score"
-source_passage = """
-The three metrics answer three different questions, and the quickest way to keep them apart is to read the denominator first, because the denominator is what the question is about:
-
-| metric | the question | the arithmetic |
-|---|---|---|
-| **accuracy** | of all the rows, how many did it get right? | `(TP + TN) / everything` |
-| **recall** | of the rows that really are 1s, how many did it find? | `TP / (TP + FN)` |
-| **precision** | of the rows it called 1s, how many really are? | `TP / (TP + FP)` |
-
-Accuracy weighs all four cells equally. Recall and precision do not, which is why they disagree with it whenever the classes are not equally common or the two errors are not equally costly.
-"""
-text = """
-The three metrics answer three different questions, and the quickest way to keep them apart is to read the denominator first, because the denominator is what the question is about:
-
-| metric | the question | the arithmetic |
-|---|---|---|
-| **accuracy** | of all the rows, how many did it get right? | `(TP + TN) / everything` |
-| **recall** | of the rows that really are 1s, how many did it find? | `TP / (TP + FN)` |
-| **precision** | of the rows it called 1s, how many really are? | `TP / (TP + FP)` |
-
-Accuracy weighs all four cells equally. Recall and precision do not, which is why they disagree with it whenever the classes are not equally common or the two errors are not equally costly.
-"""
 
 [[steps]]
 claim = "Accuracy can be high when a rule ignores every minority class."
 see = ["06-multiclass"]
-source = "week 5 lecture, Accuracy can be high while the model is useless; Every number needs a baseline"
-source_passage = """
-Most screening data is unbalanced: far more healthy rows than sick ones. So consider a model that answers "healthy" to everything.
-
-| accuracy | recall |
-|---|---|
-| $2/3 = 0.667$ | $0/1 = 0.000$ |
-
-Two thirds right, and it finds nobody. **A test that misses the sick is not rescued by being right about the healthy.**
-
-A **baseline** is the score of the simplest model that could possibly work, measured on the same data with the same metric. It is the number your model has to beat before it has done anything at all.
-
-For a screening problem the simplest model is usually "call everyone healthy."
-
-| on the ten-row example | accuracy | recall |
-|---|---|---|
-| the simplest guess | $2/3 = 0.667$ | $0/1 = 0.000$ |
-
-High accuracy, no use. So accuracy is the wrong baseline for this problem, and the number to report beside a recall is the recall of the simplest model that finds anybody at all.
-
-**Never report a metric alone.** Report it beside the simplest guess, and say which error you chose to care about.
-"""
-text = """
-Most screening data is unbalanced: far more healthy rows than sick ones. So consider a model that answers "healthy" to everything.
-
-| accuracy | recall |
-|---|---|
-| $2/3 = 0.667$ | $0/1 = 0.000$ |
-
-Two thirds right, and it finds nobody. **A test that misses the sick is not rescued by being right about the healthy.**
-
-A **baseline** is the score of the simplest model that could possibly work, measured on the same data with the same metric. It is the number your model has to beat before it has done anything at all.
-
-For a screening problem the simplest model is usually "call everyone healthy."
-
-| on the ten-row example | accuracy | recall |
-|---|---|---|
-| the simplest guess | $2/3 = 0.667$ | $0/1 = 0.000$ |
-
-High accuracy, no use. So accuracy is the wrong baseline for this problem, and the number to report beside a recall is the recall of the simplest model that finds anybody at all.
-
-**Never report a metric alone.** Report it beside the simplest guess, and say which error you chose to care about.
-"""
 figure = "metric-prevalence"
 
 [[steps]]
 claim = "Choosing a cutoff trades one kind of error for the other."
-source = "week 5 lab, The cutoff, and which error you would rather make"
-source_passage = """
-The model outputs a probability. The 0.5 that turns it into a decision is a choice.
-
-Think about what 0.5 assumes: that the two mistakes are equally bad. Calling a 0 a 1, and calling a 1 a 0. For many real problems that is false. If this were a screening tool and a missed 1 were the expensive error, you would lower the cutoff, so that a row only has to look somewhat like a 1 to be called one. Recall would rise, because you would catch more of the 1s. Precision would fall, because some of the rows you now call 1s really are 0s. Moving the cutoff trades one of those errors for the other, and which way to trade is a decision about the problem rather than about the model.
-"""
-text = """
-The model outputs a probability. The 0.5 that turns it into a decision is a choice.
-
-Think about what 0.5 assumes: that the two mistakes are equally bad. Calling a 0 a 1, and calling a 1 a 0. For many real problems that is false. If this were a screening tool and a missed 1 were the expensive error, you would lower the cutoff, so that a row only has to look somewhat like a 1 to be called one. Recall would rise, because you would catch more of the 1s. Precision would fall, because some of the rows you now call 1s really are 0s. Moving the cutoff trades one of those errors for the other, and which way to trade is a decision about the problem rather than about the model.
-"""
 figure = "metric-threshold"
 
 [[code]]

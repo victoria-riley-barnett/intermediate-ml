@@ -17,106 +17,37 @@ source = "411/curriculum.toml week04_nn; 411/weeks/week04_nn/lab.md"
 
 [[steps]]
 claim = "A neuron is a weighted sum followed by an activation."
-source = "week04_nn/lab.md, Neurons"
-source_passage = """A neuron takes in a set of inputs, let's call that $x = {x_1, x_2, x_3, ..., x_n}$
-
-These inputs are multiplied by a set of weights, $w = {w_1, w_2, w_3, ..., w_n}$
-
-The weighted inputs are summed together, and a bias term, b, is added to the result. This can be represented mathematically as:
-
-$$z = w_1x_1 + w_2x_2 + w_3x_3 + ... + w_nx_n + b$$
-
-The output of the neuron is then passed through an activation function, which introduces non-linearity into the model. This allows the neuron to learn more complex patterns in the data."""
-text = """A neuron takes in a set of inputs, let's call that $x = {x_1, x_2, x_3, ..., x_n}$
-
-These inputs are multiplied by a set of weights, $w = {w_1, w_2, w_3, ..., w_n}$
-
-The weighted inputs are summed together, and a bias term, b, is added to the result. This can be represented mathematically as:
-
-$$z = w_1x_1 + w_2x_2 + w_3x_3 + ... + w_nx_n + b$$
-
-The output of the neuron is then passed through an activation function, which introduces non-linearity into the model. This allows the neuron to learn more complex patterns in the data."""
 
 [[steps]]
 claim = "Width builds features in parallel; depth composes them in rounds."
-source = "week04_nn/lab.md, Width and depth buy different things"
-source_passage = """**Width** is how many bends you get in one round. Each neuron contributes one weighted sum and one bend, so a layer of 16 neurons hands the next layer 16 different views of the same input, built in parallel and all built from the same raw features.
-
-**Depth** is how many rounds of composition you get. The second layer does not see the raw features at all. It sees the 16 views the first layer built, and it combines those. A third layer would combine what the second one built. This is what "hierarchical representation" means when you read it: each layer's features are made out of the previous layer's features, not out of the input."""
-text = """**Width** is how many bends you get in one round. Each neuron contributes one weighted sum and one bend, so a layer of 16 neurons hands the next layer 16 different views of the same input, built in parallel and all built from the same raw features.
-
-**Depth** is how many rounds of composition you get. The second layer does not see the raw features at all. It sees the 16 views the first layer built, and it combines those. A third layer would combine what the second one built. This is what "hierarchical representation" means when you read it: each layer's features are made out of the previous layer's features, not out of the input."""
 
 [[steps]]
 claim = "The activation is what makes depth real."
 see = ["02-autodifferentiation"]
-source = "week04_nn/lab.md, Activations, in detail"
-source_passage = """
-The identity case collapses completely. With sigmoid or ReLU in between, no single linear layer can reproduce what the two layers compute. The activation is what makes depth real.
-"""
-text = """
-The identity case collapses completely. With sigmoid or ReLU in between, no single linear layer can reproduce what the two layers compute. The activation is what makes depth real.
-"""
 
 [[steps]]
 claim = "Each layer takes the previous layer's output as its input."
 see = ["06-multiclass"]
-source = "week04_nn/lab.md, Neural Networks"
 figure = "feedforward"
-source_passage = """When we stack multiple layers of neurons together, we get a **multi-layer neural network**, which can be used to model more complex relationships between features and the target variable. Each layer of neurons takes in the output of the previous layer as its input, allowing the network to learn hierarchical representations of the data.
-
-Hidden layers are the layers of neurons that are not directly connected to the input or output of the network. These layers allow the network to learn more complex representations of the data, and they are critical for the success of deep learning models."""
-text = """When we stack multiple layers of neurons together, we get a **multi-layer neural network**, which can be used to model more complex relationships between features and the target variable. Each layer of neurons takes in the output of the previous layer as its input, allowing the network to learn hierarchical representations of the data.
-
-Hidden layers are the layers of neurons that are not directly connected to the input or output of the network. These layers allow the network to learn more complex representations of the data, and they are critical for the success of deep learning models."""
 
 [[steps]]
 claim = "One problem tests three representations with the same data and loss."
-source = "week04_nn/lab.md, One problem, three representations"
-source_passage = """The problem below has two features and two classes. We will attack it three ways: with a line, with crossed features built by hand, and with a small network. All three get the same data, the same loss, and the same training routine. The only thing that differs is the representation."""
-text = """The problem below has two features and two classes. We will attack it three ways: with a line, with crossed features built by hand, and with a small network. All three get the same data, the same loss, and the same training routine. The only thing that differs is the representation."""
 
 [[steps]]
 claim = "The network bends where the data put a bend."
-source = "week04_nn/lab.md, The three, side by side"
 figure = "compare-linear-hidden"
-source_passage = """
-Three representations of one problem. The line had nowhere to bend, so it quit and guessed. The crossed model bent wherever we told it a cell boundary was, which is exactly why its shape is a staircase. The network bent wherever the data put a bend.
-"""
-text = """
-Three representations of one problem. The line had nowhere to bend, so it quit and guessed. The crossed model bent wherever we told it a cell boundary was, which is exactly why its shape is a staircase. The network bent wherever the data put a bend.
-"""
 
 [[steps]]
 claim = "`nn.Module` holds a network's parameters, forward pass, and gradients."
 see = ["02-autodifferentiation"]
-source = "week04_nn/lab.md, Second rung: nn.Module"
-source_passage = """
-`nn.Module` is PyTorch's base class for models. Subclass it, register your parameters in `__init__`, define `forward`, and the bookkeeping comes for free: `.parameters()` returns exactly the list we used to write by hand, and `.zero_grad()` clears every gradient at once. Every model in PyTorch speaks this protocol.
-"""
-text = """
-`nn.Module` is PyTorch's base class for models. Subclass it, register your parameters in `__init__`, define `forward`, and the bookkeeping comes for free: `.parameters()` returns exactly the list we used to write by hand, and `.zero_grad()` clears every gradient at once. Every model in PyTorch speaks this protocol.
-"""
 
 [[steps]]
 claim = "`TensorDataset` pairs features and targets; `DataLoader` returns batches."
 see = ["06-multiclass"]
-source = "week04_nn/lab.md, Fourth rung: Dataset and DataLoader"
-source_passage = """
-`TensorDataset` bundles the features and targets into one object, giving us an interface to interact with them by index, the two arrays walked together instead of separately.
-
-`DataLoader` then wraps the dataset and hands it over in batches: point it at `ds`, and looping over it yields one chunk of rows at a time.
-"""
-text = """
-`TensorDataset` bundles the features and targets into one object, giving us an interface to interact with them by index, the two arrays walked together instead of separately.
-
-`DataLoader` then wraps the dataset and hands it over in batches: point it at `ds`, and looping over it yields one chunk of rows at a time.
-"""
 
 [[code]]
 label = "One linear unit and a hidden layer, in pure Python"
 file = "04-neural-networks/xor.py"
-note = "Runs the four XOR cases with one linear unit and a four-unit hidden layer."
 
 [next]
 missing = "A metric that evaluates predictions on held-out data."

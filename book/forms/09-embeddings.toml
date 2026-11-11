@@ -16,100 +16,36 @@ source = "week09_embedding lecture and lab; curriculum.toml week09, checked agai
 
 [[steps]]
 claim = "An embedding gives each residue type an adjustable vector."
-source = "week09_embedding/lecture.md, introduction"
-source_passage = """
-An **embedding** gives each residue type a vector: an ordered list of numbers used by the model. The same vector is looked up wherever that residue appears. Training changes those vectors in response to the prediction task.
-"""
-text = """
-An **embedding** gives each residue type a vector: an ordered list of numbers used by the model. The same vector is looked up wherever that residue appears. Training changes those vectors in response to the prediction task.
-"""
 
 [[steps]]
 claim = "A residue ID is an address into the embedding table."
 see = ["08-fixed-size-inputs"]
-source = "week09_embedding/lecture.md, A lookup table with learnable rows"
-source_passage = """
-The ID is an address, not a measurement: ID 9 is not chemically larger than ID 7. Looking up L returns the same eight numbers as multiplying L's one-hot row by $E$. Lookup skips the multiplication by all the zeroes.
-"""
-text = """
-The ID is an address, not a measurement: ID 9 is not chemically larger than ID 7. Looking up L returns the same eight numbers as multiplying L's one-hot row by $E$. Lookup skips the multiplication by all the zeroes.
-"""
 figure = "embedding"
 
 [[steps]]
 claim = "The target residue is left out while its six neighbours supply the input."
-source = "week09_embedding/lecture.md, A protein supplies its own missing-letter task"
-source_passage = """
-Each eligible position is one training example: six neighbours are the input, and the residue in the middle is the target. The following short sequence is an **invented illustration**, not a sequence claimed to have been measured:
-
-The target `I` comes from the centre of `A L V I D K G`; hiding it creates the input `A L V D K G`. With the fixed alphabet, the input IDs are `[0, 9, 17, 2, 8, 5]` and the target ID is `7`. The target is retained for the loss, but its position is not passed into the model as an input.
-"""
-text = """
-Each eligible position is one training example: six neighbours are the input, and the residue in the middle is the target. The following short sequence is an **invented illustration**, not a sequence claimed to have been measured:
-
-The target `I` comes from the centre of `A L V I D K G`; hiding it creates the input `A L V D K G`. With the fixed alphabet, the input IDs are `[0, 9, 17, 2, 8, 5]` and the target ID is `7`. The target is retained for the loss, but its position is not passed into the model as an input.
-"""
 figure = "trace-context-window"
 
 [[steps]]
 claim = "Averaging makes one context vector and forgets neighbour order."
 see = ["10-whole-sequences"]
-source = "week09_embedding/lab.md, 3. A table and a head"
-source_passage = """
-`nn.Embedding(20, 8)` is a lookup table and nothing more: twenty rows of eight numbers, a hundred and sixty numbers in all, initialised as noise. The forward pass takes ids of shape `(B, 6)`, returns rows of shape `(B, 6, 8)`, and averages over the six neighbours to give a context vector of shape `(B, 8)`. Averaging is what collapses six rows into one while keeping the width at eight, and it also makes the model blind to the order of the neighbours — a bag of context, not a sequence.
-"""
-text = """
-`nn.Embedding(20, 8)` is a lookup table and nothing more: twenty rows of eight numbers, a hundred and sixty numbers in all, initialised as noise. The forward pass takes ids of shape `(B, 6)`, returns rows of shape `(B, 6, 8)`, and averages over the six neighbours to give a context vector of shape `(B, 8)`. Averaging is what collapses six rows into one while keeping the width at eight, and it also makes the model blind to the order of the neighbours — a bag of context, not a sequence.
-"""
 
 [[steps]]
 claim = "A linear head turns the context into scores and a loss."
 see = ["06-multiclass"]
-source = "week09_embedding/lecture.md, From six neighbours to one prediction"
-source_passage = """
-The six IDs become six vectors of eight numbers. The model averages those vectors into a single context vector. A linear head turns that summary into 20 scores, one for each candidate centre residue. Softmax turns the scores into probabilities, and a loss measures how much probability was assigned to the recorded centre. Each part answers a different question: what numbers represent the neighbours, what centre does their summary support, and how well does that prediction agree with the target?
-"""
-text = """
-The six IDs become six vectors of eight numbers. The model averages those vectors into a single context vector. A linear head turns that summary into 20 scores, one for each candidate centre residue. [[06-multiclass|Softmax]] turns the scores into probabilities, and a loss measures how much probability was assigned to the recorded centre. Each part answers a different question: what numbers represent the neighbours, what centre does their summary support, and how well does that prediction agree with the target?
-"""
 
 [[steps]]
 claim = "Cosine distance compares directions while ignoring vector length."
-source = "week09_embedding/lab.md, 5. Read the table"
-source_passage = """
-After training, rows can be compared using **cosine distance**, $1-\\cos$: 0 means the same direction, 1 means perpendicular, and 2 means opposite directions. For instance, `[1, 0]` and `[0, 1]` have cosine distance 1. Cosine ignores vector length, so it answers a different question from Euclidean distance.
-"""
-text = """
-After training, rows can be compared using **cosine distance**, $1-\\cos$: 0 means the same direction, 1 means perpendicular, and 2 means opposite directions. For instance, `[1, 0]` and `[0, 1]` have cosine distance 1. Cosine ignores vector length, so it answers a different question from Euclidean distance.
-"""
 figure = "eq-cosine-similarity"
 
 [[steps]]
 claim = "A two-coordinate view can hide which rows are nearest in full space."
 see = ["07-generalization"]
-source = "week09_embedding/lab.md, 6. Draw the table"
-source_passage = """
-The following numerical example shows why a two-dimensional view can be misleading. A, B and C name invented vectors, not residues or trained results. Only their first two coordinates appear in the picture: B looks closer to A than C does, but C has the higher cosine similarity to A in eight dimensions.
-
-"""
-text = """
-The following numerical example shows why a two-dimensional view can be misleading. A, B and C name invented vectors, not residues or trained results. Only their first two coordinates appear in the picture: B looks closer to A than C does, but C has the higher cosine similarity to A in eight dimensions.
-
-"""
 figure = "plot-similarity"
 
 [[steps]]
 claim = "Each occurrence of a residue gets the same row, whatever its context."
 see = ["11-attention"]
-source = "week09_embedding/lecture.md, What the table cannot see"
-source_passage = """
-Every L retrieves the same row, whether it occurs near one set of residues or another. The averaged context can change the centre prediction, but it does not make the original lookup row for L context-dependent. Averaging also forgets neighbour order: `A L V D K G` and `G K D V L A` have the same mean. Long-range residues outside the window are absent altogether.
-
-"""
-text = """
-Every L retrieves the same row, whether it occurs near one set of residues or another. The averaged context can change the centre prediction, but it does not make the original lookup row for L context-dependent. Averaging also forgets neighbour order: `A L V D K G` and `G K D V L A` have the same mean. Long-range residues outside the window are absent altogether.
-
-"""
 
 [[code]]
 label = "A lookup table, an averaged context and a linear head, in plain Python"

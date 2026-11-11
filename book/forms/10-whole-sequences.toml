@@ -18,122 +18,31 @@ source = "411/curriculum.toml week10_attention_implement (stale); delivered week
 [[steps]]
 claim = "A classifier wants a fixed-width vector, but sequence length varies."
 see = ["09-embeddings"]
-source = "week 10 lecture, The shape of the object"
-source_passage = """
-Row `i` is the vector for whatever residue sits at position `i`; columns are the learned features. `L` varies — sixty for a peptide, a few thousand for a kinase. A classifier is a stack of matrix multiplies ending in a fixed number of logits, so it consumes a vector of fixed width. The mismatch is a shape mismatch: `(L, d)` with variable `L` against an interface that wants a fixed-size vector. Every remedy is a map from variable-length grids to fixed vectors, and the choice of map is a claim about what in the sequence carries the answer.
-"""
-text = """
-Row `i` is the vector for whatever residue sits at position `i`; columns are the learned features. `L` varies — sixty for a peptide, a few thousand for a kinase. A classifier is a stack of matrix multiplies ending in a fixed number of logits, so it consumes a [[08-fixed-size-inputs|vector of fixed width]]. The mismatch is a shape mismatch: `(L, d)` with variable `L` against an interface that wants a fixed-size vector. Every remedy is a map from variable-length grids to fixed vectors, and the choice of map is a claim about what in the sequence carries the answer.
-"""
 
 [[steps]]
 claim = "Averaging rows makes every length fit, but erases their order."
 see = ["08-fixed-size-inputs"]
-source = "week 10 lecture, Average the rows"
-source_passage = """
-The case for it is real: the output has `d` numbers whatever `L` is, it costs almost nothing, and every position contributes. A sum over positions does not care what order the terms arrive in, and that indifference is the defect. Permute the rows of `X` and the column means do not change.
-
-Consider two strings of the same length. The first holds three tryptophans contiguously at positions 2–4 and three cysteines at 44–46, with filler elsewhere. The second is that same string with its rows permuted so the tryptophans land at 2, 20 and 33 and the cysteines at 5, 25 and 45. The multiset of rows is identical, so `X.mean(axis=0)` is identical, bit for bit. Any classifier is a function of its input, so the two strings receive the same output. No weight, no depth, no quantity of data can separate them. This is not a claim that averaging performs poorly; it is a proof that the pooled vector does not contain the distinction. Mean is not special — sum, max, and any function of the row multiset alone inherit the same blind spot.
-"""
-text = """
-The case for it is real: the output has `d` numbers whatever `L` is, it costs almost nothing, and every position contributes. A sum over positions does not care what order the terms arrive in, and that indifference is the defect. Permute the rows of `X` and the column means do not change.
-
-Consider two strings of the same length. The first holds three tryptophans contiguously at positions 2–4 and three cysteines at 44–46, with filler elsewhere. The second is that same string with its rows permuted so the tryptophans land at 2, 20 and 33 and the cysteines at 5, 25 and 45. The multiset of rows is identical, so `X.mean(axis=0)` is identical, bit for bit. Any classifier is a function of its input, so the two strings receive the same output. No weight, no depth, no quantity of data can separate them. This is not a claim that averaging performs poorly; it is a proof that the pooled vector does not contain the distinction. Mean is not special — sum, max, and any function of the row multiset alone inherit the same blind spot.
-"""
 
 [[steps]]
 claim = "Flattening preserves order but fixes the width and gives positions private weights."
-source = "week 10 lecture, Flatten"
-source_passage = """
-The case for it: order is preserved exactly, nothing is discarded, and a linear layer on top can in principle compute any function of the ordered grid. Two costs come with that.
-
-The width is fixed at construction. `nn.Linear(L*d, h)` commits to one `L`. A protein of another length does not fit the matrix; padding to a chosen maximum discards residues past it, and truncating a two-thousand-residue protein to 512 throws away most of it.
-
-The parameters scale with length. The first weight matrix holds `L*d*h` numbers, and every position gets its own private block of them. At `L = 48`, `d = 20`, `h = 64` that is 61,440 weights in the first layer; at `L = 1024` it is 1.3 million. The count grows with `L` indefinitely. Those weights are also unshared, so a motif learned at positions 2–4 must be learned again from scratch at 40–42, each copy needing its own examples. Position pairs compound it: a label that conjoins an event at `i` with an event at `j` is a distinct conjunction for each of the `O(L²)` pairs, and the training set has to cover them. Nothing in the architecture states that two positions play the same role.
-"""
-text = """
-The case for it: order is preserved exactly, nothing is discarded, and a linear layer on top can in principle compute any function of the ordered grid. Two costs come with that.
-
-The width is fixed at construction. `nn.Linear(L*d, h)` commits to one `L`. A protein of another length does not fit the matrix; padding to a chosen maximum discards residues past it, and truncating a two-thousand-residue protein to 512 throws away most of it.
-
-The parameters scale with length. The first weight matrix holds `L*d*h` numbers, and every position gets its own private block of them. At `L = 48`, `d = 20`, `h = 64` that is 61,440 weights in the first layer; at `L = 1024` it is 1.3 million. The count grows with `L` indefinitely. Those weights are also unshared, so a motif learned at positions 2–4 must be learned again from scratch at 40–42, each copy needing its own examples. Position pairs compound it: a label that conjoins an event at `i` with an event at `j` is a distinct conjunction for each of the `O(L²)` pairs, and the training set has to cover them. Nothing in the architecture states that two positions play the same role.
-"""
 
 [[steps]]
 claim = "A shared filter finds a local motif wherever it occurs."
 see = ["architectures"]
 figure = "convolutional"
-source = "week 10 lecture, Slide a window"
-source_passage = """
-This is the right tool for the local job. A kernel slid along the grid, with its weights shared across positions, detects a motif wherever it occurs, at the cost of one detector rather than `L` of them. Stationarity and position-equivariance are exactly the assumptions a sequence motif licenses.
-"""
-text = """
-This is the right tool for the local job. A kernel slid along the grid, with its weights shared across positions, detects a motif wherever it occurs, at the cost of one detector rather than `L` of them. Stationarity and position-equivariance are exactly the assumptions a sequence motif licenses.
-"""
 
 [[steps]]
 claim = "A convolution's receptive field grows with each stacked layer."
 see = ["11-attention"]
 figure = "eq-conv-window"
-source = "week 10 lecture, Slide a window"
-source_passage = """
-The limit is the receptive field. One convolution of width `k` lets each output position depend on `k` input positions. Stacking layers of width `k` adds `k - 1` positions per layer:
-
-```python
-def receptive_field(depth, k):
-    return 1 + depth * (k - 1)    # k=5: depth 1 -> 5, depth 10 -> 41
-```
-
-A single output depends only on positions inside that span. With `k = 5` and two motifs whose starts differ by 40 positions, at least ten layers must sit between the input and any output that sees both, and each of those layers is a mixing step whose weights must learn to carry both signals forward intact. It can be done; dilated convolutions widen the span faster. But the depth needed is set by the longest distance in the data, which is neither known at construction nor bounded by anything in the layer. The locality that makes the window good at motifs is the same property that makes binding distant positions a matter of piling up layers.
-"""
-text = """
-The limit is the receptive field. One convolution of width `k` lets each output position depend on `k` input positions. Stacking layers of width `k` adds `k - 1` positions per layer:
-
-```python
-def receptive_field(depth, k):
-    return 1 + depth * (k - 1)    # k=5: depth 1 -> 5, depth 10 -> 41
-```
-
-A single output depends only on positions inside that span. With `k = 5` and two motifs whose starts differ by 40 positions, at least ten layers must sit between the input and any output that sees both, and each of those layers is a mixing step whose weights must learn to carry both signals forward intact. It can be done; dilated convolutions widen the span faster. But the depth needed is set by the longest distance in the data, which is neither known at construction nor bounded by anything in the layer. The locality that makes the window good at motifs is the same property that makes binding distant positions a matter of piling up layers.
-"""
 
 [[steps]]
 claim = "A matching pair of sequences can carry opposite labels in a different order."
 figure = "compare-three-reductions"
-source = "week 10 lecture, A controlled toy"
-source_passage = """
-That last sentence is the whole design. A positive and the matching negative are permutations of each other, ingredient for ingredient. Anything reading the multiset of rows cannot tell them apart, and anything reading only a local neighbourhood sees one motif at a time with no way to compare the two.
-
-All three candidates fail for the reasons already given. The average maps the pair to the same vector, by construction. Flattening can represent the order, since the two placements occupy different coordinates, but each offset carries its own weights, so the network learns where the motifs sit rather than which came first. The window learns `WWW` and it learns `CCC`, then pools over positions and loses which one came first; relaying between them costs depth proportional to the gap.
-"""
-text = """
-That last sentence is the whole design. A positive and the matching negative are permutations of each other, ingredient for ingredient. Anything reading the multiset of rows cannot tell them apart, and anything reading only a local neighbourhood sees one motif at a time with no way to compare the two.
-
-All three candidates fail for the reasons already given. The average maps the pair to the same vector, by construction. Flattening can represent the order, since the two placements occupy different coordinates, but each offset carries its own weights, so the network learns where the motifs sit rather than which came first. The window learns `WWW` and it learns `CCC`, then pools over positions and loses which one came first; relaying between them costs depth proportional to the gap.
-"""
 
 [[steps]]
 claim = "Biological dependencies can join positions far apart in the sequence."
 see = ["11-attention"]
-source = "week 10 lecture, Where biology does this"
-source_passage = """
-Two cases, stated as narrowly as the evidence supports them.
-
-Enhancers regulate promoters across tens of thousands of base pairs, with much of the intervening sequence irrelevant to the regulation. A dependency holds between two short elements far apart on the linear genome; a window of a few dozen bases sitting on one of them sees nothing of the other.
-
-In a folded protein, residues that sit in contact are frequently far apart in the chain: the tertiary contacts holding a domain together can join positions a hundred or more residues apart, while chain neighbours may be close in space and unrelated in function. What matters here is distance along the sequence, not any claim that sequence alone determines structure.
-
-Both cases have the structure the toy encodes. The label depends on a relation between two positions, and that distance is large.
-"""
-text = """
-Two cases, stated as narrowly as the evidence supports them.
-
-Enhancers regulate promoters across tens of thousands of base pairs, with much of the intervening sequence irrelevant to the regulation. A dependency holds between two short elements far apart on the linear genome; a window of a few dozen bases sitting on one of them sees nothing of the other.
-
-In a folded protein, residues that sit in contact are frequently far apart in the chain: the tertiary contacts holding a domain together can join positions a hundred or more residues apart, while chain neighbours may be close in space and unrelated in function. What matters here is distance along the sequence, not any claim that sequence alone determines structure.
-
-Both cases have the structure the toy encodes. The label depends on a relation between two positions, and that distance is large.
-"""
 
 [[code]]
 label = "Three reductions, one sequence pair"

@@ -17,176 +17,39 @@ source = "411/curriculum.toml week01_tensors; 411/admin/BOOK.md row 1 (orientati
 
 [[steps]]
 claim = "Some questions have a rule; others have examples."
-source = "week01_tensors/lecture.md, What machine learning is"
-source_passage = """
-Converting units, computing tax, checking a DNA string for a start codon. You can state those rules exactly. State them. A learned model would be slower, worse, and harder to debug.
-
-Now write a rule for whether an email is spam. You can gesture at one, and every version you write has thousands of exceptions. But you have a hundred thousand emails that people already sorted.
-
-**You cannot state the rule, but you have examples of it being followed.** That gap is the entire field.
-"""
-text = """
-Converting units, computing tax, checking a DNA string for a start codon. You can state those rules exactly. State them. A learned model would be slower, worse, and harder to debug.
-
-Now write a rule for whether an email is spam. You can gesture at one, and every version you write has thousands of exceptions. But you have a hundred thousand emails that people already sorted.
-
-**You cannot state the rule, but you have examples of it being followed.** That gap is the entire field.
-"""
 
 [[steps]]
 claim = "Data, a model, and a measure of wrong make a fitting problem."
 see = ["02-autodifferentiation#1"]
-source = "week01_tensors/lecture.md, Data, a model, and a measure of wrong"
-source_passage = """
-**The data.** Examples, usually with the right answer attached to each one.
-
-**The model.** The shape of the rule, with the numbers left blank.
-
-**A measure of wrong.** One number saying how badly a particular set of blanks does.
-
-*Fitting* is choosing the blanks so that number gets small.
-"""
-text = """
-**The data.** Examples, usually with the right answer attached to each one.
-
-**The model.** The shape of the rule, with the numbers left blank.
-
-**A [[02-autodifferentiation#1|measure of wrong]].** One number saying how badly a particular set of blanks does.
-
-*Fitting* is choosing the blanks so that number gets small.
-"""
 
 [[steps]]
 claim = "The next example must be data the model has never seen."
 figure = "split-train-only"
-source = "week01_tensors/lecture.md, What machine learning offers that statistics does not"
-source_passage = """
-Machine learning is built to answer *what happens with the next one?* The score is performance on data the model has never seen.
-"""
-text = """
-Machine learning is built to answer *what happens with the next one?* The score is performance on data the model has never seen.
-"""
 
 [[steps]]
 claim = "Two penguins define a slope, and the intercept sets the line's height."
 see = ["02-autodifferentiation#2"]
-source = "02_autodiff_lecture.ipynb, A line and the two numbers in it; Two penguins"
-source_passage = '''
-This dataset records 333 penguins. Take two:
-
-| | species | flipper length | body mass |
-|---|---|---|---|
-| Bird A | Adelie | 192 mm | 3.725 kg |
-| Bird B | Gentoo | 212 mm | 4.725 kg |
-
-From A to B the mass rises by $4.725 - 3.725 = 1.000$ kg while the flipper lengthens by $212 - 192 = 20$ mm:
-
-$$m = \frac{1.000 \text{ kg}}{20 \text{ mm}} = 0.0500 \text{ kg/mm}$$
-
-Out loud: every extra millimetre of flipper goes with 50 more grams of penguin.
-
-The slope fixes the tilt but not the height. Rearranging $y = mx + b$ gives $b = y - mx$, and using Bird A:
-
-$$b = 3.725 - (0.0500)(192) = 3.725 - 9.600 = -5.875 \text{ kg}$$
-'''
-text = '''
-This dataset records 333 penguins. Take two:
-
-| | species | flipper length | body mass |
-|---|---|---|---|
-| Bird A | Adelie | 192 mm | 3.725 kg |
-| Bird B | Gentoo | 212 mm | 4.725 kg |
-
-From A to B the mass rises by $4.725 - 3.725 = 1.000$ kg while the flipper lengthens by $212 - 192 = 20$ mm:
-
-$$m = \frac{1.000 \text{ kg}}{20 \text{ mm}} = 0.0500 \text{ kg/mm}$$
-
-Out loud: every extra millimetre of flipper goes with 50 more grams of penguin.
-
-The slope fixes the tilt but not the height. Rearranging $y = mx + b$ gives $b = y - mx$, and using Bird A:
-
-$$b = 3.725 - (0.0500)(192) = 3.725 - 9.600 = -5.875 \text{ kg}$$
-'''
 
 [[steps]]
 claim = "A dot product multiplies matching entries, then adds them."
 see = ["06-multiclass#3"]
-source = "week01_tensors/lab.md, 4. Weighted sums"
 figure = "eq-dot-product"
-source_passage = """
-A prediction is each feature times a weight, all added up. Invent four weights and try one penguin.
-
-`@` is the dot product: multiply matching slots, add them up.
-"""
-text = """
-A prediction is each feature times a weight, all added up. Invent four weights and try one penguin.
-
-`@` is the [[06-multiclass#3|dot product]]: multiply matching slots, add them up.
-"""
 
 [[steps]]
 claim = "A matrix applies one rule to every row at once."
-source = "week01_tensors/lab.md, 6. What a matrix does"
 figure = "eq-matrix-multiply"
-source_passage = """
-A matrix applies one rule to every row at once.
-"""
-text = """
-A matrix applies one rule to every row at once.
-"""
 
 [[steps]]
 claim = "A shape records the size of each dimension."
-source = "week01_tensors/lab.md, 5. Shape drills"
 figure = "trace-shape"
-source_passage = """
-A shape is a tuple read left to right, one number per dimension. `(333, 4)` is 333 rows of 4. `(2, 5, 3)` is 2 blocks of 5 rows of 3.
-
-The dim you name is the axis that disappears. `dim=0` collapses the 4 rows and leaves 3. `dim=1` collapses the 3 columns and leaves 4.
-"""
-text = """
-A shape is a tuple read left to right, one number per dimension. `(333, 4)` is 333 rows of 4. `(2, 5, 3)` is 2 blocks of 5 rows of 3.
-
-The dim you name is the axis that disappears. `dim=0` collapses the 4 rows and leaves 3. `dim=1` collapses the 3 columns and leaves 4.
-"""
 
 [[steps]]
 claim = "A category needs a representation that does not invent an order."
 see = ["06-multiclass#1"]
-source = "week01_tensors/lab.md, 7. Encoding a category"
-source_passage = """
-You can average flipper lengths. You cannot average Adelie and Gentoo, and a model only does arithmetic, so this column has to become numbers.
-
-The fix is one column per category, with a single 1 marking which applies. That is **one-hot encoding**.
-
-`pd.get_dummies` is what you use in practice. Building it once by hand is how you know what it did.
-
-Every dot product is 0 and every distance is $\\sqrt{2}$. The encoding says any two species have nothing in common and are all exactly equally far apart.
-
-No amount of training recovers what the encoding refused to write down. **How you write your data down is its representation, and choosing one is already a modeling decision.**
-"""
-text = """
-You can average flipper lengths. You cannot average Adelie and Gentoo, and a model only does arithmetic, so this column has to become numbers.
-
-The fix is one column per category, with a single 1 marking which applies. That is **one-hot encoding**.
-
-`pd.get_dummies` is what you use in practice. Building it once by hand is how you know what it did.
-
-Every dot product is 0 and every distance is $\\sqrt{2}$. The encoding says any two species have nothing in common and are all exactly equally far apart.
-
-No amount of training recovers what the encoding refused to write down. **How you write your data down is its representation, and choosing one is already a modeling decision.**
-"""
 
 [[steps]]
 claim = "Standardization shifts each column by its mean and rescales it by its spread."
 figure = "eq-mean-variance"
-source = "week01_tensors/lab.md, 9. Make"
-source_passage = """
-**1.** Write `standardize(T)`, returning `T` with every column shifted to mean 0 and scaled to standard deviation 1. Use broadcasting, no loops. Check it on `X` by printing the resulting means and standard deviations.
-"""
-text = """
-**1.** Write `standardize(T)`, returning `T` with every column shifted to mean 0 and scaled to standard deviation 1. Use broadcasting, no loops. Check it on `X` by printing the resulting means and standard deviations.
-"""
 
 [[code]]
 label = "A line through two points, then shapes, dot product and matrix multiply"

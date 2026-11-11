@@ -1,0 +1,505 @@
+# Atoms for chapter 2, Autodifferentiation. One statement each, one primary verifier.
+# [atom.source] is provenance only: where in the delivered course the atom was
+# written from. See atoms/README.md.
+
+# ── The loss ─────────────────────────────────────────────────────────────
+
+[[atom]]
+id = "ch2.loss"
+kind = "term"
+term = "loss"
+text = "One number that scores a model against all of its data at once; smaller is better."
+see = ["ch2.mse", "ch2.mae"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "What the loss measures"
+sha1 = "a4d329033821"
+
+[[atom]]
+id = "ch2.mse"
+kind = "term"
+term = "mean squared error"
+text = "The average, over all points, of (prediction − truth)²."
+uses = ["ch2.loss"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "What the loss measures"
+sha1 = "a4d329033821"
+
+[[atom]]
+id = "ch2.signs-cancel"
+kind = "example"
+text = "Errors of +2 and −2 average to 0, so an unsquared average can call a wrong model perfect."
+uses = ["ch2.mse"]
+[atom.verify]
+method = "computed"
+expr = "(2 + -2) / 2"
+number = "0"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "What the loss measures"
+sha1 = "a4d329033821"
+
+[[atom]]
+id = "ch2.squares-grow"
+kind = "example"
+text = "Errors of −1, +2 and −3 square to 1, 4 and 9: three times the miss costs nine times as much."
+uses = ["ch2.mse"]
+see = ["ch2.big-miss"]
+[atom.verify]
+method = "computed"
+expr = "[e ** 2 for e in (-1, 2, -3)] == [1, 4, 9] and (-3) ** 2 / (-1) ** 2 == 9"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "What the loss measures"
+sha1 = "a4d329033821"
+
+[[atom]]
+id = "ch2.big-miss"
+kind = "claim"
+text = "A squared-error fit will move to shrink one large miss even if every other point gets slightly worse."
+uses = ["ch2.squares-grow"]
+see = ["ch2.mean-median"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "What the loss measures"
+sha1 = "a4d329033821"
+
+[[atom]]
+id = "ch2.mse-worked"
+kind = "figure-fact"
+text = "On four noise-free points of y = 3x + 7 with b held at 7.000, the loss at w = 2.600 is 6.2568."
+uses = ["ch2.mse"]
+[atom.verify]
+method = "plate"
+plate = "eq-mse"
+
+[[atom]]
+id = "ch2.mse-run"
+kind = "code"
+text = "The same four points in pure Python: loss 6.2568 and dL/dw −31.284 at w = 2.6."
+uses = ["ch2.mse-worked"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/one_step.py"
+expect = "loss 6.2568   dL/dw -31.284"
+
+# ── The loss as a function of the weight ─────────────────────────────────
+
+[[atom]]
+id = "ch2.point-is-model"
+kind = "claim"
+text = "Each point on a loss-against-weight curve is a whole model, scored on all the data."
+uses = ["ch2.loss"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "The loss as a function of the weight"
+sha1 = "54eebbef1bb4"
+
+[[atom]]
+id = "ch2.bottom-at-3"
+kind = "figure-fact"
+text = "The loss is 6.2568 at w = 2.600 and at w = 3.400, and 0.0000 at w = 3.000."
+uses = ["ch2.mse-worked"]
+[atom.verify]
+method = "plate"
+plate = "eq-mse"
+
+[[atom]]
+id = "ch2.scan-cost"
+kind = "example"
+text = "Scanning 11 candidate values per parameter costs 121 models for two parameters and over a million for six."
+[atom.verify]
+method = "computed"
+expr = "11 ** 2 == 121 and 11 ** 6 > 1_000_000"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "Finding the direction"
+sha1 = "35d03ec70fbf"
+
+# ── Finding the direction ────────────────────────────────────────────────
+
+[[atom]]
+id = "ch2.derivative"
+kind = "term"
+term = "derivative"
+text = "How fast the loss changes as one parameter moves, measured at the current value."
+uses = ["ch2.loss"]
+see = ["ch2.gradient"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "Finding the direction"
+sha1 = "35d03ec70fbf"
+
+[[atom]]
+id = "ch2.gradient"
+kind = "term"
+term = "gradient"
+text = "All of a model's derivatives together, one per parameter; PyTorch stores each in .grad."
+uses = ["ch2.derivative"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "Finding the direction"
+sha1 = "35d03ec70fbf"
+
+[[atom]]
+id = "ch2.sign-orders"
+kind = "figure-fact"
+text = "The slope is −31.284 at w = 2.600, 0.000 at w = 3.000 and 31.284 at w = 3.400: its sign says which way the bottom is."
+uses = ["ch2.derivative", "ch2.bottom-at-3"]
+[atom.verify]
+method = "plate"
+plate = "eq-mse"
+
+[[atom]]
+id = "ch2.slope-sum"
+kind = "figure-fact"
+text = "At w = 2.600 the errors weighted by x sum to −62.5680, and two over n times that is −31.284."
+uses = ["ch2.sign-orders"]
+[atom.verify]
+method = "plate"
+plate = "eq-mse"
+
+[[atom]]
+id = "ch2.slope-check"
+kind = "example"
+text = "Two over four times −62.568 is −31.284."
+uses = ["ch2.slope-sum"]
+[atom.verify]
+method = "computed"
+expr = "2 / 4 * -62.568"
+number = "-31.284"
+
+# ── One step, and then many ──────────────────────────────────────────────
+
+[[atom]]
+id = "ch2.update-rule"
+kind = "term"
+term = "update rule"
+text = "w ← w − lr × dloss/dw: subtracting the derivative moves w downhill."
+uses = ["ch2.derivative", "ch2.learning-rate"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/one_step.py"
+expect = "w after one step: 2.9128"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "One step, and then many"
+sha1 = "a6c072c36c6d"
+
+[[atom]]
+id = "ch2.one-step"
+kind = "figure-fact"
+text = "A step size of 0.010 times the slope moves w from 2.600 to 2.9128, short of the bottom."
+uses = ["ch2.update-rule", "ch2.sign-orders"]
+[atom.verify]
+method = "plate"
+plate = "eq-mse"
+
+[[atom]]
+id = "ch2.one-step-check"
+kind = "example"
+text = "2.6 − 0.01 × (−31.284) = 2.91284."
+uses = ["ch2.one-step"]
+[atom.verify]
+method = "computed"
+expr = "2.6 - 0.01 * -31.284"
+number = "2.91284"
+
+[[atom]]
+id = "ch2.gradient-descent"
+kind = "term"
+term = "gradient descent"
+text = "The update rule applied again and again until the loss stops falling."
+uses = ["ch2.update-rule"]
+see = ["ch2.converging"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "One step, and then many"
+sha1 = "a6c072c36c6d"
+
+[[atom]]
+id = "ch2.walk-shrinks"
+kind = "figure-fact"
+text = "On L = θ² with step size 0.1, θ goes 2.000, 1.600, 1.280, 1.024, 0.819: each step 0.8 of the last."
+uses = ["ch2.gradient-descent"]
+[atom.verify]
+method = "plate"
+plate = "gradient-descent"
+
+[[atom]]
+id = "ch2.walk-check"
+kind = "example"
+text = "Each step multiplies θ by 1 − 2 × 0.1 = 0.8, so four steps from 2 give 0.8192."
+uses = ["ch2.walk-shrinks"]
+[atom.verify]
+method = "computed"
+expr = "2 * (1 - 2 * 0.1) ** 4"
+number = "0.8192"
+
+[[atom]]
+id = "ch2.loop-halves"
+kind = "figure-fact"
+text = "With target 4 and step size 0.1, the weight goes 0.0000, 2.0000, 3.0000, 3.5000, 3.7500: each gain half the last."
+uses = ["ch2.gradient-descent"]
+[atom.verify]
+method = "plate"
+plate = "loop-gradient-descent"
+
+[[atom]]
+id = "ch2.loop-run"
+kind = "code"
+text = "With both w and b free and lr 0.01, 3,000 steps reach w 3.000 and b 7.000."
+uses = ["ch2.gradient-descent"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/loop.py"
+expect = "lr 0.01  step 3000  loss 2.028e-15  w 3.000  b 7.000"
+
+[[atom]]
+id = "ch2.converging"
+kind = "term"
+term = "converging"
+text = "Settling at one value and staying there as the steps continue."
+uses = ["ch2.gradient-descent"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/loop.py"
+expect = ["step 1000  loss 7.425e-05  w 3.002  b 6.984", "step 3000  loss 2.028e-15  w 3.000  b 7.000"]
+
+[[atom]]
+id = "ch2.grad-adds"
+kind = "claim"
+text = "backward() adds into .grad: −67.5 already there plus −40.2 new leaves −107.7."
+uses = ["ch2.gradient"]
+see = ["ch2.forgot-zero"]
+[atom.verify]
+method = "computed"
+expr = "-67.5 + -40.2"
+number = "-107.7"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "One step, and then many"
+sha1 = "a6c072c36c6d"
+
+[[atom]]
+id = "ch2.forgot-zero"
+kind = "code"
+text = "Without clearing .grad, lr 0.01 gives loss 17.19 at step 50 and 92.96 at step 200: it gets worse."
+uses = ["ch2.grad-adds"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/loop.py"
+expect = ["lr 0.01  step   50  loss 17.19", "lr 0.01  step  200  loss 92.96"]
+
+[[atom]]
+id = "ch2.no-grad"
+kind = "claim"
+text = "The update is wrapped in no_grad() so it is not recorded as part of the model's calculation."
+see = ["03-backpropagation"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "One step, and then many"
+sha1 = "a6c072c36c6d"
+
+# ── The learning rate ────────────────────────────────────────────────────
+
+[[atom]]
+id = "ch2.learning-rate"
+kind = "term"
+term = "learning rate"
+text = "The fraction of the gradient applied in one step; chosen, not learned."
+uses = ["ch2.gradient"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "One step, and then many"
+sha1 = "a6c072c36c6d"
+
+[[atom]]
+id = "ch2.overshoot"
+kind = "term"
+term = "overshoot"
+text = "A step so large that the weight lands past the minimum, higher than it started."
+uses = ["ch2.learning-rate"]
+see = ["ch2.lr-large"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "The learning rate"
+sha1 = "1abcdcc94c3e"
+
+[[atom]]
+id = "ch2.lr-large"
+kind = "code"
+text = "At lr 0.03 the loss rises from 160.9 to 5.378e+04 in ten steps."
+uses = ["ch2.overshoot"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/loop.py"
+expect = ["lr 0.03  step    1  loss 160.9", "lr 0.03  step   10  loss 5.378e+04"]
+
+[[atom]]
+id = "ch2.lr-small"
+kind = "code"
+text = "At lr 0.0005 the loss is still 12.44 after 200 steps: right direction, too slow."
+uses = ["ch2.learning-rate"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/loop.py"
+expect = "lr 0.0005  step  200  loss 12.44"
+
+[[atom]]
+id = "ch2.lr-no-formula"
+kind = "claim"
+text = "No formula gives the right learning rate; it depends on the scale of the data."
+uses = ["ch2.learning-rate"]
+see = ["ch2.scale"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "The learning rate"
+sha1 = "1abcdcc94c3e"
+
+# ── Choosing a loss ──────────────────────────────────────────────────────
+
+[[atom]]
+id = "ch2.mae"
+kind = "term"
+term = "mean absolute error"
+text = "The average, over all points, of |prediction − truth|."
+uses = ["ch2.loss"]
+see = ["ch2.mse"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "Choosing a loss"
+sha1 = "a95a979868f5"
+
+[[atom]]
+id = "ch2.mean-median"
+kind = "code"
+text = "For readings 4.0, 4.2, 4.1, 4.3 and 12.0, squared error is smallest at the mean, 5.72, and absolute error at the median, 4.20."
+uses = ["ch2.mse", "ch2.mae"]
+[atom.verify]
+method = "run"
+script = "02-autodifferentiation/mean_median.py"
+expect = ["squared error is smallest at 5.72   (mean 5.72)", "absolute error is smallest at 4.20   (median 4.20)"]
+
+[[atom]]
+id = "ch2.big-miss-costs"
+kind = "example"
+text = "Under squared error one miss of 10 costs 100, while ten misses of 1 cost 10."
+uses = ["ch2.mse"]
+[atom.verify]
+method = "computed"
+expr = "10 ** 2 == 100 and 10 * 1 ** 2 == 10"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "Which one should you actually use?"
+sha1 = "6c69ade5c616"
+
+[[atom]]
+id = "ch2.loss-is-a-choice"
+kind = "claim"
+text = "Choosing the loss is choosing what counts as wrong: an outlier you distrust argues for absolute error, one you believe argues for squared."
+uses = ["ch2.mean-median"]
+see = ["06-multiclass"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "Which one should you actually use?"
+sha1 = "6c69ade5c616"
+
+# ── One weight's gradient ────────────────────────────────────────────────
+
+[[atom]]
+id = "ch2.weight-gradient"
+kind = "figure-fact"
+text = "With error 3 and inputs 2, 0 and 3, the weights' gradients are 6, 0 and 9."
+uses = ["ch2.gradient"]
+see = ["03-backpropagation"]
+[atom.verify]
+method = "plate"
+plate = "eq-weight-gradient"
+
+[[atom]]
+id = "ch2.zero-input"
+kind = "figure-fact"
+text = "The weight whose input is 0 gets gradient 0 and stays at 5, though it is the largest weight."
+uses = ["ch2.weight-gradient"]
+[atom.verify]
+method = "plate"
+plate = "eq-weight-gradient"
+
+[[atom]]
+id = "ch2.scale"
+kind = "claim"
+text = "When inputs are near 200 the weight's gradient is about 200 times the bias's, so no single learning rate suits both."
+uses = ["ch2.weight-gradient", "ch2.learning-rate"]
+[atom.verify]
+method = "hand"
+[atom.source]
+file = "411/weeks/week02_autodifferentiation/lab.md"
+heading = "The same loop on real measurements"
+sha1 = "6775c5b04b53"
+
+# ── Questions ────────────────────────────────────────────────────────────
+
+[[atom]]
+id = "ch2.q-what-changes"
+kind = "question"
+text = "Fitting y = wx + b involves x, y, w and b: which two does training change?"
+answer = "w and b, the parameters. x and y are the data and are given."
+uses = ["ch2.update-rule"]
+[atom.verify]
+method = "hand"
+
+[[atom]]
+id = "ch2.q-negative-grad"
+kind = "question"
+text = "w.grad is negative and the step is w − lr × w.grad: does w go up or down?"
+answer = "Up. Subtracting a negative number adds, and a negative derivative means the loss falls as w rises."
+uses = ["ch2.update-rule"]
+[atom.verify]
+method = "computed"
+expr = "2.6 - 0.01 * -31.284 > 2.6"
+
+[[atom]]
+id = "ch2.q-still-falling"
+kind = "question"
+text = "A loss curve is smooth and still falling when the run ends: what should change?"
+answer = "More steps or a larger learning rate. A smooth fall rules out overshoot; the steps are too small to arrive in time."
+uses = ["ch2.lr-small"]
+[atom.verify]
+method = "hand"
+
+[[atom]]
+id = "ch2.q-outlier"
+kind = "question"
+text = "One added outlier pulls a squared-error line and barely moves an absolute-error line: why?"
+answer = "Squared error adds the square of the outlier's miss, so it dominates the sum; absolute error counts it at its own size, like any other point."
+uses = ["ch2.mean-median", "ch2.big-miss-costs"]
+[atom.verify]
+method = "hand"

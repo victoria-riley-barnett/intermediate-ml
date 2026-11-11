@@ -17,108 +17,34 @@ source = "411 curriculum week 11, corrected by week11_attention/lab.md and admin
 
 [[steps]]
 claim = "The task depends on where the motifs sit, not which residues they contain."
-source = "week 11 lab, 1. A task with two motifs"
-source_passage = """
-The alphabet is the twenty residues. Two triples are held back from the filler, `WWW` and `CCC`, so the filler draws only from the other eighteen. Each string is 48 positions long. One motif starts uniformly in 0..11, the other uniformly in 36..44, so one of them is early and the other late. The label is 1 when `WWW` comes first and 0 when `CCC` does.
-
-Nothing about a single position decides the label. The residue counts are the same in both classes; only the arrangement differs. The generator returns integer ids in [0, 20) with shape (batch, 48) and labels with shape (batch,).
-"""
-text = """
-The alphabet is the twenty residues. Two triples are held back from the filler, `WWW` and `CCC`, so the filler draws only from the other eighteen. Each string is 48 positions long. One motif starts uniformly in 0..11, the other uniformly in 36..44, so one of them is early and the other late. The label is 1 when `WWW` comes first and 0 when `CCC` does.
-
-Nothing about a single position decides the label. The residue counts are the same in both classes; only the arrangement differs. The generator returns integer ids in [0, 20) with shape (batch, 48) and labels with shape (batch,).
-"""
 
 [[steps]]
 claim = "The dot product gives a content-based score between two rows."
-source = "week 11 lab, 2. Step one: relevance as a dot product"
 figure = "eq-dot-product"
-source_passage = """
-Take a grid of six rows and eight columns. The score between two rows is their dot product, s_ij = x_i . x_j, which is large when two rows point the same way. Each row of scores is turned into shares by a softmax along that row, and the output row is the share-weighted average of all rows. A row whose scores are all similar spreads its shares evenly and returns something close to the plain mean; a row with one large score returns mostly that row.
-
-There is nothing to train here. The shares are a function of the numbers that went in.
-
-The wiring is visible without any training: editing row 3 changes which column row 0 attends to. The weakness is equally visible. The score is symmetric, s_ij = s_ji, so if row i finds row j relevant then row j finds row i equally relevant, and relevance is pinned to raw content similarity.
-"""
-text = """
-Take a grid of six rows and eight columns. The score between two rows is their dot product, s_ij = x_i . x_j, which is large when two rows point the same way. Each row of scores is turned into shares by a softmax along that row, and the output row is the share-weighted average of all rows. A row whose scores are all similar spreads its shares evenly and returns something close to the plain mean; a row with one large score returns mostly that row.
-
-There is nothing to train here. The shares are a function of the numbers that went in.
-
-The wiring is visible without any training: editing row 3 changes which column row 0 attends to. The weakness is equally visible. The score is symmetric, s_ij = s_ji, so if row i finds row j relevant then row j finds row i equally relevant, and relevance is pinned to raw content similarity.
-"""
 
 [[steps]]
 claim = "Separate query, key, and value projections learn what to match and what to pass on."
 see = ["09-embeddings"]
-source = "week 11 lab, 3. Step two: queries, keys and values"
 figure = "attention-worked"
-source_passage = """
-Three learned maps fix that. Each position produces a query, a key and a value. The score comes from a query against a key, and the mixture is taken over values. The query asks a question, the key advertises what a position offers, and the value is what gets handed over if the answer matches. With separate maps for queries and keys the score is no longer symmetric, because q_i . k_j and q_j . k_i are different numbers.
-"""
-text = """
-Three learned maps fix that. Each position produces a query, a key and a value. The score comes from a query against a key, and the mixture is taken over values. The query asks a question, the key advertises what a position offers, and the value is what gets handed over if the answer matches. With separate maps for queries and keys the score is no longer symmetric, because q_i . k_j and q_j . k_i are different numbers.
-"""
 
 [[steps]]
 claim = "Dividing by the root of the width keeps the softmax from saturating."
-source = "week 11 lab, 4. Step 3a: divide by the root of the width"
 figure = "eq-scaled-dot-product"
-source_passage = """
-A dot product of d terms has a spread that grows like sqrt(d). Wide keys therefore produce scores that are already far apart before the softmax sees them, and a softmax given far-apart scores puts nearly all of its mass on one entry. The shares then look decisive but carry almost no gradient, because the derivative of a saturated softmax is close to zero everywhere.
-
-Dividing by sqrt(width) holds the spread roughly fixed as the width grows, which keeps the softmax in the range where it still passes gradient.
-"""
-text = """
-A dot product of d terms has a spread that grows like sqrt(d). Wide keys therefore produce scores that are already far apart before the softmax sees them, and a softmax given far-apart scores puts nearly all of its mass on one entry. The shares then look decisive but carry almost no gradient, because the derivative of a saturated softmax is close to zero everywhere.
-
-Dividing by sqrt(width) holds the spread roughly fixed as the width grows, which keeps the softmax in the range where it still passes gradient.
-"""
 
 [[steps]]
 claim = "Several heads let the model learn distinct comparisons in parallel."
-source = "week 11 lab, 5. Step 3b: several heads"
-source_passage = """
-One set of shares can track one relation. Several heads of width d/h run that many relations in parallel, each with its own projections, and the concatenated results are projected back to width d. The output shape must match the input shape, so a block of this kind can be stacked.
-"""
-text = """
-One set of shares can track one relation. Several heads of width d/h run that many relations in parallel, each with its own projections, and the concatenated results are projected back to width d. The output shape must match the input shape, so a block of this kind can be stacked.
-"""
 
 [[steps]]
 claim = "Position must enter before attention can solve an order-dependent task."
 see = ["10-whole-sequences"]
-source = "week 11 lab, 6. Step 3c: position"
-source_passage = """
-Attention as built so far is permutation-equivariant: reorder the input rows and the output rows come back in the same reordered order, with the same numbers. Nothing in the score depends on where a row sits. A pooled summary of such a model is therefore blind to order, and the label here is exactly an ordering fact. The repair is to add a learned position vector to each row before the projections, so the score can see where a position is as well as what it holds.
-"""
-text = """
-Attention as built so far is permutation-equivariant: reorder the input rows and the output rows come back in the same reordered order, with the same numbers. Nothing in the score depends on where a row sits. A pooled summary of such a model is therefore blind to order, and the label here is exactly an ordering fact. The repair is to add a learned position vector to each row before the projections, so the score can see where a position is as well as what it holds.
-"""
 
 [[steps]]
 claim = "All-pairs scores reach across the sequence, with the number of comparisons growing quadratically."
-source = "week 11 lecture, The whole operation"
 figure = "budget-t2"
-source_passage = """
-The three projections are the three roles, one matrix multiply each, and they are the only places training acts on the comparison. `Q @ K.T` is the matrix of all pairwise dot products $q_i \\cdot k_j$ — $n^2$ numbers, every position against every other, which is where the reach across the whole sequence comes from. Dividing by the square root of the key width is the variance correction, and `Q.shape[-1]` is that width $d_k$. Subtracting the row maximum before exponentiating changes nothing, because softmax is invariant to a constant shift within a row, and it prevents overflow. `A @ V` is the weighted average, one row of $A$ against the columns of $V$; it is the only step where information moves between positions. `H @ Wo` is the output projection that rejoins the heads when the width is split, and the identity otherwise. No loop over positions appears anywhere.
-"""
-text = """
-The three projections are the three roles, one matrix multiply each, and they are the only places training acts on the comparison. `Q @ K.T` is the matrix of all pairwise dot products $q_i \\cdot k_j$ — $n^2$ numbers, every position against every other, which is where the reach across the whole sequence comes from. Dividing by the square root of the key width is the variance correction, and `Q.shape[-1]` is that width $d_k$. Subtracting the row maximum before exponentiating changes nothing, because softmax is invariant to a constant shift within a row, and it prevents overflow. `A @ V` is the weighted average, one row of $A$ against the columns of $V$; it is the only step where information moves between positions. `H @ Wo` is the output projection that rejoins the heads when the width is split, and the identity otherwise. No loop over positions appears anywhere.
-
-At length 12, this is 144 comparisons rather than 12 one-at-a-time steps.
-"""
 
 [[steps]]
 claim = "A mask removes contributors, then the remaining weights are renormalised."
-source = "week 11 lab, introduction; plate description for the masked weights"
 figure = "arch-mask"
-source_passage = """
-y_i = sum_j a_ij x_j, with a_ij >= 0 and every row of shares summing to one. The first version has no learned parameters at all, and the mixture is already useful, because a row that came in carrying only itself now carries something from every row in the grid. Everything after that is a decision about what the shares should depend on.
-"""
-text = """
-y_i = sum_j a_ij x_j, with a_ij >= 0 and every row of shares summing to one. The first version has no learned parameters at all, and the mixture is already useful, because a row that came in carrying only itself now carries something from every row in the grid. Everything after that is a decision about what the shares should depend on. A mask changes which contributors remain, and the kept weights are renormalised to sum to one.
-"""
 
 [[code]]
 label = "One head in pure Python"

@@ -16,135 +16,32 @@ source = "411 curriculum.toml week08, corrected by admin/BOOK.md and the deliver
 
 [[steps]]
 claim = "A count cannot distinguish two strings whose order gives opposite answers."
-source = "week 8 lecture, What the input decides; The pair one representation cannot separate"
-source_passage = """
-A model's answer is a function of those numbers, so two examples that arrive as the same numbers get the same answer. Supply one example with each of the two answers and no learning procedure can satisfy both, because nothing left in the input tells them apart.
-
-**Many to one.** A representation that sends two different examples to the same numbers is **many-to-one**, and the information it drops is gone before the model begins. This is the property to check first, and the check needs no training: name two examples the question treats differently, and ask whether the representation gives them the same numbers.
-"""
-text = """
-A model's answer is a function of those numbers, so two examples that arrive as the same numbers get the same answer. Supply one example with each of the two answers and no learning procedure can satisfy both, because nothing left in the input tells them apart.
-
-**Many to one.** A representation that sends two different examples to the same numbers is **many-to-one**, and the information it drops is gone before the model begins. This is the property to check first, and the check needs no training: name two examples the question treats differently, and ask whether the representation gives them the same numbers.
-"""
 
 [[steps]]
 claim = "A wider window keeps local order but not distant pairs."
 see = ["06-multiclass"]
-source = "week 8 lecture, What the k-mer tally keeps, and what it costs"
-source_passage = """
-### What the k-mer tally keeps, and what it costs
-
-A tally of wider windows is not order-blind. Counted in two-letter windows, `SxxT` gives `Sx`, `xx`, `xT` and `TxxS` gives `Tx`, `xx`, `xS`, so the tallies differ and a model can tell the reads apart. Each window holds a symbol together with its neighbour.
-
-Position beyond the window is gone, and reaching a pair that sits far apart is what costs. A window has to be at least as long as the distance between the two symbols before it can hold them both: a read with twelve symbols between `S` and `T` needs windows of thirteen letters or more.
-
-Four bases give $4^k$ possible windows — 256 at $k = 4$, 1,024 at $k = 5$, more than sixty-seven million at $k = 13$ — so a wider window carries more order and leaves far more of the tally at zero. A fixed window is a wager on how far apart the symbols that matter will be, and a task declares that distance only by asking its question.
-"""
-text = """
-A [[06-multiclass|k-mer]] tally of wider windows is not order-blind. Counted in two-letter windows, `SxxT` gives `Sx`, `xx`, `xT` and `TxxS` gives `Tx`, `xx`, `xS`, so the tallies differ and a model can tell the reads apart. Each window holds a symbol together with its neighbour.
-
-Position beyond the window is gone, and reaching a pair that sits far apart is what costs. A window has to be at least as long as the distance between the two symbols before it can hold them both: a read with twelve symbols between `S` and `T` needs windows of thirteen letters or more.
-
-Four bases give $4^k$ possible windows — 256 at $k = 4$, 1,024 at $k = 5$, more than sixty-seven million at $k = 13$ — so a wider window carries more order and leaves far more of the tally at zero. A fixed window is a wager on how far apart the symbols that matter will be, and a task declares that distance only by asking its question.
-"""
 
 [[steps]]
 claim = "A recurrent reader applies the same weights at every step."
 see = ["10-whole-sequences", "11-attention"]
-source = "week 8 lecture, Three ways to turn a string into numbers; Reading a list"
-source_passage = """
-**Recurrent.** The same twelve slots, read one after another. One small set of weights — the learned numbers that multiply the input — is updated at each step, and a sixty-four-number summary of everything read so far is carried forward.
-
-**Carry a summary.** Keep a short list of numbers, the **hidden state**, update it at every step from the new symbol and the previous state, and predict from it. The same weights do the update at every step, so any length works. The price is a bottleneck: a fixed number of numbers stands in for everything read so far, however long the string was, and attention is the answer the field settled on.
-"""
-text = """
-**Recurrent.** The same twelve slots, read one after another. One small set of weights — the learned numbers that multiply the input — is updated at each step, and a sixty-four-number summary of everything read so far is carried forward.
-
-**Carry a summary.** Keep a short list of numbers, the **hidden state**, update it at every step from the new symbol and the previous state, and predict from it. The same weights do the update at every step, so any length works. The price is a bottleneck: a fixed number of numbers stands in for everything read so far, however long the string was, and [[11-attention|attention]] is the answer the field settled on.
-"""
 figure = "recurrent"
 
 [[steps]]
 claim = "Padding carries length and position into the input."
 see = ["12-encoder"]
-source = "week 8 lecture, Padding gives a batch one shape"
-source_passage = """
-Strings of different lengths cannot be one array, so the shorter ones are filled up with a **pad** symbol until every string in the batch has the same length. Here that length is twelve.
-
-The pad is a symbol like any other. It goes through the same weights as `S` and `T`, and it sits in a slot the model can see. How many pads a string carries, and where they sit, is therefore a fact the model can read: padding carries length and position, and a model does read it ([Islam, Jia & Bruce, 2020](https://arxiv.org/abs/2001.08248)). The same string padded on the other side is a different input, and for a model whose weights are tied to slot numbers it is as different as a different string.
-
-The pads also have to be marked, so that a model can tell a real symbol from a pad. A **mask** is a second input, one flag per slot, marking which slots hold a real symbol.
-"""
-text = """
-Strings of different lengths cannot be one array, so the shorter ones are filled up with a **pad** symbol until every string in the batch has the same length. Here that length is twelve.
-
-The pad is a symbol like any other. It goes through the same weights as `S` and `T`, and it sits in a slot the model can see. How many pads a string carries, and where they sit, is therefore a fact the model can read: padding carries length and position, and a model does read it ([Islam, Jia & Bruce, 2020](https://arxiv.org/abs/2001.08248)). The same string padded on the other side is a different input, and for a model whose weights are tied to slot numbers it is as different as a different string.
-
-The pads also have to be marked, so that a model can tell a real symbol from a pad. A **mask** is a second input, one flag per slot, marking which slots hold a real symbol.
-"""
 figure = "trace-padding-shifts"
 
 [[steps]]
 claim = "Five tests separate fitting, length, and position failures."
 see = ["07-generalization"]
-source = "week 8 lecture, Five tests for a model that reads strings"
-source_passage = """
-A test set built like the training set answers one question: does the model work on new examples of the kind it saw. It cannot show what happens when the length or the position changes, because those cases are not in it. The awkward cases are built by hand:
-
-- **the training strings** — how well the model fits what it was shown; nothing about new data.
-- **new strings, same lengths** — can it answer for strings it has never seen?
-- **new strings, longer** — does what it learned hold at a length it never saw?
-- **the same strings, padded on the left** — the symbols and their order are unchanged, every symbol sits in a different slot; does the answer depend on the symbols or on the slots?
-- **the same strings, shifted one slot** — the smallest change of position there is.
-
-Three models share the task and the 4,000 training strings: the flattened model, a counting model with the same 64 units, and a recurrent model (a GRU). The recurrent model reads the symbols one at a time and uses the mask to find the last real slot. A score is the share of a set that the model answers correctly. Each row is an average over 10 runs from different random starting points, and the spread across those runs appears beside the score in brackets.
-
-The counting model scores about 0.50 on every column, which is where a model lands when it cannot tell the two answers apart. The flattened model is perfect on the two columns that use the lengths it trained on and lower on the two that move position, so what it learned does not travel. The recurrent model is perfect on longer strings, because its weights do not depend on the length, and it loses on both columns that move position.
-"""
-text = """
-A test set built like the training set answers one question: does the model work on new examples of the kind it saw. It cannot show what happens when the length or the position changes, because those cases are not in it. The awkward cases are built by hand:
-
-- **the training strings** — how well the model fits what it was shown; nothing about new data.
-- **new strings, same lengths** — can it answer for strings it has never seen?
-- **new strings, longer** — does what it learned hold at a length it never saw?
-- **the same strings, padded on the left** — the symbols and their order are unchanged, every symbol sits in a different slot; does the answer depend on the symbols or on the slots?
-- **the same strings, shifted one slot** — the smallest change of position there is.
-
-Three models share the task and the 4,000 training strings: the flattened model, a counting model with the same 64 units, and a recurrent model (a GRU). The recurrent model reads the symbols one at a time and uses the mask to find the last real slot. A score is the share of a set that the model answers correctly. Each row is an average over 10 runs from different random starting points, and the spread across those runs appears beside the score in brackets.
-
-The counting model scores about 0.50 on every column, which is where a model lands when it cannot tell the two answers apart. The flattened model is perfect on the two columns that use the lengths it trained on and lower on the two that move position, so what it learned does not travel. The recurrent model is perfect on longer strings, because its weights do not depend on the length, and it loses on both columns that move position.
-"""
 figure = "compare-three-readers"
 
 [[steps]]
 claim = "The flattened reader guesses where training never put a symbol."
-source = "week 8 lecture, Why the flattened model scores 0.78 on longer strings"
-source_passage = """
-That 0.78 averages two kinds of longer string. Training strings are 4 to 8 symbols padded on the right, so slots 9 to 12 only ever held pads, and what those weights learned is about pads rather than about symbols.
-
-When both `S` and `T` of a longer string land in slots 1 to 8, the model answers a question it trained on and is right on essentially every one. When one lands further out, part of the answer comes from weights that never saw a symbol and the result is close to guessing. Of the longer strings, 57 per cent are the first case and 43 per cent the second, which is how the two combine into 0.78.
-
-Training longer does not change it: from 200 strings to 4,000 the score moves from about 0.71 to about 0.79. No string of length 4 to 8 puts a symbol in slot 11. What is missing is not data but an input that does not fix the length in advance. The weights of each slot can be read one number at a time, and the four that never held a symbol keep the values they started from — 1.4 against 2.7 on the same scale — which is the arithmetic behind the failure.
-"""
-text = """
-That 0.78 averages two kinds of longer string. Training strings are 4 to 8 symbols padded on the right, so slots 9 to 12 only ever held pads, and what those weights learned is about pads rather than about symbols.
-
-When both `S` and `T` of a longer string land in slots 1 to 8, the model answers a question it trained on and is right on essentially every one. When one lands further out, part of the answer comes from weights that never saw a symbol and the result is close to guessing. Of the longer strings, 57 per cent are the first case and 43 per cent the second, which is how the two combine into 0.78.
-
-Training longer does not change it: from 200 strings to 4,000 the score moves from about 0.71 to about 0.79. No string of length 4 to 8 puts a symbol in slot 11. What is missing is not data but an input that does not fix the length in advance. The weights of each slot can be read one number at a time, and the four that never held a symbol keep the values they started from — 1.4 against 2.7 on the same scale — which is the arithmetic behind the failure.
-"""
 
 [[steps]]
 claim = "Length flexibility does not guarantee position flexibility."
 see = ["11-attention"]
-source = "week 8 lecture, Position is part of the input"
-source_passage = """
-The recurrent model makes the same point from the other side, and it is the least stable row in the table. A longer string costs it nothing, and on the left-padded strings it averages 0.64 with a spread of 0.23 over ten runs from different starting points. A rate that moves that far between runs is not one behaviour: the symbols are identical in every run, and the pads are the only thing that moved. A model trained under a single padding convention handles the one it was taught and stumbles on the other. A spread nearly as wide as the distance from chance cannot carry more.
-"""
-text = """
-The recurrent model makes the same point from the other side, and it is the least stable row in the table. A longer string costs it nothing, and on the left-padded strings it averages 0.64 with a spread of 0.23 over ten runs from different starting points. A rate that moves that far between runs is not one behaviour: the symbols are identical in every run, and the pads are the only thing that moved. A model trained under a single padding convention handles the one it was taught and stumbles on the other. A spread nearly as wide as the distance from chance cannot carry more.
-"""
 
 [[code]]
 label = "One string through counts and padding"
