@@ -1,0 +1,26 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 13
+label = "Chapter 12"
+title = "The full encoder"
+gist = "What attention cannot do alone, the pre-norm block, shapes, and an ablation."
+
+pages = [
+  "motif-order-task",
+  "residual-connection",
+  "layer-norm",
+  "encoder-block",
+  "positional-vectors",
+  "attention-map-and-ablation",
+  "code-layernorm-residual",
+]
+
+[frame]
+data = "3,000 training and 500 test sequences of 48 residues, each with WWW and CCC motifs; the label is which comes first."
+representation = "token ids, learned residue and position vectors, and 32-feature sequence states"
+transformation = "three pre-norm encoder blocks; mean pooling and a linear two-score head"
+evidence = "shape checks, attention-row sums, held-out accuracy, and motif-attention ablation"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

@@ -1,0 +1,29 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 0
+label = "Opening"
+title = "Architectures, and where each one came from"
+gist = "Each era changes either the block or the input; 2017 to 2022 changes both."
+
+pages = [
+  "lineage-1943-1997",
+  "the-quiet-years",
+  "lineage-2012-2022",
+  "feedforward-network",
+  "convolutional-network",
+  "sliding-window",
+  "recurrent-network",
+  "autoencoder",
+  "queries-keys-values",
+  "encoder-block",
+]
+
+[frame]
+data = "one grid, sequence or protein, drawn small enough to check by hand"
+representation = "the block (what the weights are) and the input (what the first layer is handed)"
+transformation = "one architecture per plate"
+evidence = "each plate's shapes agree with its code"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

@@ -1,0 +1,30 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 5
+label = "Chapter 4"
+title = "Neural networks"
+gist = "Neurons, width versus depth, one problem in three representations, and the climb to nn.Module."
+
+pages = [
+  "neuron",
+  "layer",
+  "width-and-depth",
+  "activation",
+  "feedforward-network",
+  "three-representations",
+  "nn-module",
+  "dataset-and-dataloader",
+  "optimizer",
+  "training-loop",
+  "code-xor",
+]
+
+[frame]
+data = "800 points generated around the origin; class 1 is the ring between radii 0.9 and 2.0."
+representation = "two features, two classes, and learned hidden features"
+transformation = "Linear \u2192 ReLU \u2192 Linear \u2192 sigmoid, held by nn.Module"
+evidence = "decision behavior and loss compared across a line, crossed features, and a network"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

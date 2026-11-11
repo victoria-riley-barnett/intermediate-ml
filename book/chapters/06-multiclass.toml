@@ -1,0 +1,29 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 7
+label = "Chapter 6"
+title = "Multiclass and softmax"
+gist = "k-mers, logits, softmax and cross-entropy, on genes."
+
+pages = [
+  "gene-family-data",
+  "class-label",
+  "k-mer-counts",
+  "logits",
+  "argmax",
+  "softmax",
+  "cross-entropy",
+  "softmax-gradient",
+  "decision-and-distribution",
+  "code-kmer-softmax",
+]
+
+[frame]
+data = "4,380 human gene sequences in seven gene families, with 1,682 chimp and 820 dog sequences from other species."
+representation = "k-mer counts: one column per possible window of k bases, 4^k columns"
+transformation = "z = xW + b, seven logits; q = softmax(z); L = -log q_c"
+evidence = "cross-entropy while training; held-out accuracy against naming the largest family for every gene"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

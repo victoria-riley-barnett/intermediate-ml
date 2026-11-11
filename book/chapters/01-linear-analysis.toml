@@ -1,0 +1,28 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 2
+label = "Chapter 1"
+title = "Linear analysis"
+gist = "Course orientation, what a model is for, and the split between training and testing."
+
+pages = [
+  "what-ml-is",
+  "form-of-a-relationship",
+  "data-splits",
+  "dot-product",
+  "matrix-multiply",
+  "tensor-shape",
+  "one-hot-encoding",
+  "standardization",
+  "code-line-and-shapes",
+]
+
+[frame]
+data = "Palmer penguin flipper lengths paired with body masses"
+representation = "paired measurements: flipper length as x, body mass as y"
+transformation = "y = mx + b: a weighted sum with an intercept"
+evidence = "performance on data the model has never seen"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

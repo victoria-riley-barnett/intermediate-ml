@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 CODE = Path(__file__).resolve().parent / "code"
-INK, SOFT, FAINT, ACCENT = "#2d3142", "#6b7180", "#c9c6bd", "#bf4520"
+INK, SOFT, FAINT, ACCENT = "#1a1a1a", "#6b6b6b", "#d4d4d4", "#1a5fd0"
 FONT = "'Geist', system-ui, sans-serif"
 
 # ── the runs ───────────────────────────────────────────────────────────────

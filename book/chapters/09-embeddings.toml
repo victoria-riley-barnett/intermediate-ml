@@ -1,0 +1,28 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 10
+label = "Chapter 9"
+title = "Giving tokens meaningful numbers"
+gist = "Embeddings: a table and a head, a similarity map, and the catch."
+
+pages = [
+  "embedding",
+  "context-window",
+  "mean-pooling",
+  "cross-entropy",
+  "cosine-similarity",
+  "similarity-map",
+  "blosum",
+  "one-row-per-residue",
+  "code-lookup-and-mean",
+]
+
+[frame]
+data = "Reviewed UniProt protein sequences, represented as six-neighbour windows."
+representation = "Residue IDs, learned embedding rows, and averaged context vectors."
+transformation = "E[ids] -> mean(dim=1) -> nn.Linear(8, 20)"
+evidence = "Hand-calculated prediction; cross-entropy trend; full-space cosine distances and nearest rows."
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

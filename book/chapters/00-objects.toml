@@ -1,0 +1,24 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 1
+label = "Chapter 0"
+title = "Objects, and the shape of the work"
+gist = "Data, model, evaluate. A rule you cannot write down, and classes as the way to hold it."
+
+pages = [
+  "learned-model",
+  "data-model-evaluate",
+  "program-state",
+  "class-and-object",
+  "code-objects",
+]
+
+[frame]
+data = "small scientific records and Palmer penguin examples"
+representation = "Python values, tables, and objects"
+transformation = "a plain Python class with state and methods"
+evidence = "the program's output matches a stated expectation"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

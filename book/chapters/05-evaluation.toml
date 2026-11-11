@@ -1,0 +1,29 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 6
+label = "Chapter 5"
+title = "Evaluation: how you know a model works"
+gist = "The two jobs of evaluation, the four counts, accuracy that is high and useless, and which error is expensive."
+
+pages = [
+  "three-things",
+  "parameter",
+  "evaluation-and-analysis",
+  "data-splits",
+  "confusion-counts",
+  "accuracy-precision-recall",
+  "baseline",
+  "decision-threshold",
+  "the-unexamined-column",
+  "code-metrics",
+]
+
+[frame]
+data = "1,000 generated rows with four measurements: two signal, two noise; binary labels from a noisy rule"
+representation = "predictions, labels, probabilities, and confusion counts"
+transformation = "MLP(4 -> 64 -> 1) with ReLU and sigmoid; cutoff p > 0.5; metrics from TP, FP, FN, TN"
+evidence = "metrics on 750 rows held out from training, compared with baselines and an explicit error cost"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

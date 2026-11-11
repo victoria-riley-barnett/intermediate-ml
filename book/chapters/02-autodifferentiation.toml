@@ -1,0 +1,32 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 3
+label = "Chapter 2"
+title = "Autodifferentiation"
+gist = "Loss, direction, the update, learning rate; mean squared versus mean absolute error."
+
+pages = [
+  "loss",
+  "mean-squared-error",
+  "derivative",
+  "gradient-descent",
+  "training-loop",
+  "gradient-accumulation",
+  "learning-rate",
+  "mean-absolute-error",
+  "feature-scale",
+  "weight-gradient",
+  "code-one-step",
+  "code-loop",
+  "code-mean-median",
+]
+
+[frame]
+data = "Points on y = 3x + 7, so the right answer is known."
+representation = "parameters, predictions, errors, and loss"
+transformation = "w <- w - lr * dloss/dw, repeated"
+evidence = "loss decreases for the right reason and gradients agree"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

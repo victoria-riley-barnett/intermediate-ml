@@ -1,0 +1,25 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 8
+label = "Chapter 7"
+title = "Does the model work on new data?"
+gist = "What each split is for, learning curves, what \"new\" means, dropout and seeds, and a leakage case."
+
+pages = [
+  "overfitting",
+  "data-splits",
+  "learning-curves",
+  "homology-leakage",
+  "dropout-and-seeds",
+  "code-split-dropout",
+]
+
+[frame]
+data = "4,380 human gene sequences in seven families, split into 2,628 training, 876 validation, and 876 test sequences"
+representation = "1,024 normalized shares of overlapping 5-mers; one prediction per gene"
+transformation = "stratified 60/20/20 split; GeneNet with optional dropout; keep the lowest-validation-loss parameters"
+evidence = "training and held-out loss and accuracy; repeated-seed spread; twin audit; one final test score"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

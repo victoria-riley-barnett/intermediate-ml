@@ -1,0 +1,28 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 9
+label = "Chapter 8"
+title = "What a fixed-size input can and cannot learn"
+gist = "Three readers of one string task, padding, and five tests that separate kinds of failure."
+
+pages = [
+  "order-blind-counts",
+  "k-mer-counts",
+  "three-readers",
+  "embedding",
+  "recurrent-network",
+  "padding",
+  "position",
+  "lightning",
+  "code-same-counts",
+]
+
+[frame]
+data = "4,000 generated strings of length 4\u20138, each with one S, one T, and x elsewhere."
+representation = "symbol counts, twelve fixed positions, or a padded sequence with a mask"
+transformation = "counting; twelve-slot flattening; shared recurrent weights"
+evidence = "accuracy on training, same-length and longer strings, left padding, and a one-slot shift, over ten runs"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

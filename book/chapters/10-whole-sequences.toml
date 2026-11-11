@@ -1,0 +1,27 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 11
+label = "Chapter 10"
+title = "Why whole sequences are hard"
+gist = "Three reductions to a fixed width: average, flatten, slide a window."
+
+pages = [
+  "fixed-width",
+  "mean-pooling",
+  "flatten",
+  "sliding-window",
+  "convolutional-network",
+  "three-reductions",
+  "long-range-dependencies",
+  "code-reductions",
+]
+
+[frame]
+data = "Balanced synthetic sequences of 48 amino-acid residues, each with one WWW and one CCC motif."
+representation = "One row per residue; 20 one-hot features in the controlled task."
+transformation = "Average rows; flatten; slide a shared filter and pool positions."
+evidence = "Held-out accuracy against chance, parameter count, and acceptance of a new sequence length."
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

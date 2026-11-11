@@ -1,0 +1,30 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 12
+label = "Chapter 11"
+title = "Attention"
+gist = "A weighted average over positions: queries, keys, heads, order, and what attention repairs."
+
+pages = [
+  "motif-order-task",
+  "attention",
+  "dot-product",
+  "queries-keys-values",
+  "scaled-dot-product",
+  "softmax",
+  "attention-heads",
+  "positional-vectors",
+  "attention-cost",
+  "attention-mask",
+  "code-one-head",
+]
+
+[frame]
+data = "48-position strings of twenty residues, with WWW and CCC motifs in early and late positions; the label says which comes first."
+representation = "Integer residue IDs embedded as 48 position vectors, with learned position vectors added before attention."
+transformation = "Multi-head self-attention: softmax(QK\u1d40/\u221ad\u2095)V, followed by concatenation and an output projection."
+evidence = "Shape and row-sum checks, a permutation check without position, and held-out accuracy on the motif-order task."
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""

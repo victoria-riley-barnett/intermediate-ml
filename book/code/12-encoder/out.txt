@@ -1,3 +1,0 @@
-mean 0.0 var 1.0
-plain stack,    d output / d input = 1.0000000000000006e-10
-residual stack, d output / d input = 2.5937

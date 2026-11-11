@@ -1,0 +1,24 @@
+# Chapter: composed from the pages listed, in order. See WRITING-PAGES.md.
+order = 4
+label = "Chapter 3"
+title = "Backpropagation"
+gist = "The chain rule applied where the values were recorded, then the backward pass."
+
+pages = [
+  "chain-rule",
+  "computation-graph",
+  "weight-gradient",
+  "backward-cost",
+  "code-trace",
+]
+
+[frame]
+data = "a tiny two-layer model, evaluated on a tiny fixed batch"
+representation = "a computation graph with forward values saved at each operation"
+transformation = "multiply local derivatives in reverse along the graph"
+evidence = "local derivatives compose to the observed gradient"
+
+# Glue: the author's own sentences between pages. Empty glue is not shown.
+# [[glue]]
+# after = "<page slug>"   # "" for before the first page
+# text = ""
