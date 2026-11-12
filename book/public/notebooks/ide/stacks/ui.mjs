@@ -63,8 +63,15 @@ async function boot(opts = {}) {
   build();
   refresh();
   wire();
+  // a notebook opens with its outputs in place: run each cell once the page has painted, so the numbers are
+  // already there to read and Run is for trying something else
+  setTimeout(() => {
+    let touched = false;
+    for (const r of [...S.runsOf.values()].flat()) if (!r.done) { r.toEnd(); touched = true; }
+    if (touched) refresh();
+  }, 0);
   // the proposals have already run in a fork when you get to them: do it once the page is drawn
-  setTimeout(async () => { for (const c of S.doc.cards) for (const b of blocksOf(c)) if (b.type === 'proposal') await runProposal(c, b); refresh(); }, 60);
+  setTimeout(async () => { for (const c of S.doc.cards) for (const b of blocksOf(c)) if (b.type === 'proposal') await runProposal(c, b); refresh(); }, STUDENT ? 150 : 60);
 }
 
 // the card's names the views read: tokens, features, and the tables by name
@@ -107,7 +114,7 @@ const wasEvents = (r) => S.wasOf.get(r.id) ?? (r.parent ? r.parent.events : null
 // how many numbers the reader has seen: the notes recorded up to where the run is
 const seen = (r) => r.events.filter((e) => e.idx <= r.idx && e.kind !== 'tokens').length;
 
-const PLAIN = { back: '◀ back', step: 'next number ▶', score: 'next score', row: 'next row', end: 'run to the end', fork: 'try a different value here' };
+const PLAIN = { back: '‹ previous', step: 'next ›', end: 'Run ▶', fork: 'what if this were different?' };
 const ACTIONS = {
   back: { label: '◀', title: 'Back one step (←)', go: (r) => r.back() },
   step: { label: '▶', title: 'One step (→)', go: (r) => r.step() },
@@ -433,7 +440,7 @@ function drawResult(b, card) {
   el.classList.toggle('sel', selected);
   const n = selected ? S.now : r.now();
   const chips = runs.filter((x) => !x.retired || x === r).map((x) => `<button class="branch${x === r ? ' on' : ''}" data-selrun="${x.id}" title="${x.parent ? `forked at state ${x.forkAt.toLocaleString('en-US')}` : ''}">${esc(x.label)}</button>`).join('');
-  const btn = (k) => `<button class="btn${k === 'step' ? ' pri' : ''}" data-act="${k}" data-run="${r.id}" title="${esc(ACTIONS[k].title)}">${ACTIONS[k].label}</button>`;
+  const btn = (k) => `<button class="btn${k === (STUDENT ? 'end' : 'step') ? ' pri' : ''}" data-act="${k}" data-run="${r.id}" title="${esc(ACTIONS[k].title)}">${ACTIONS[k].label}</button>`;
   const clip = (t, n) => (t.length > n ? `${t.slice(0, n)} …` : t);
   const where = r.done ? `<b>${esc(clip(pretty(r.value), 240))}</b>` : STUDENT ? '' : `${esc(n.label)} <b>${esc(pretty(n.code).slice(0, 160))}</b>`;
   const forkbox = S.forking && S.forking.runId === r.id
@@ -442,7 +449,7 @@ function drawResult(b, card) {
   const views = b.args.view === 'reads' ? readsView({ ...S.data.get(card.id), events: r.events.filter((e) => e.idx <= r.idx) }) : '';
   const many = chips.split('</button>').length > 2;
   el.innerHTML = `<div class="row">${STUDENT ? (many ? `<span class="branches">${chips}</span>` : '') : `<span class="lab">#+results: ${selected ? 'selected' : 'click to select'}</span><span class="branches">${chips}</span>`}</div>
-    <div class="row">${(STUDENT ? ['back', 'step', 'score', 'row', 'end', 'fork'] : ['back', 'step', 'over', 'out', 'score', 'row', 'end', 'fork']).map(btn).join('')}<button class="btn" data-act="restart" data-run="${r.id}" title="A new run from the first state">${STUDENT ? 'start over' : '⟲'}</button></div>
+    <div class="row">${(STUDENT ? ['end', 'step', 'back', 'fork'] : ['back', 'step', 'over', 'out', 'score', 'row', 'end', 'fork']).map(btn).join('')}<button class="btn" data-act="restart" data-run="${r.id}" title="A new run from the first state">${STUDENT ? '↺' : '⟲'}</button></div>
     <div class="val">${r.done ? (STUDENT ? where : `value · ${where}`) : `${STUDENT ? `number ${seen(r)}` : `state ${r.idx.toLocaleString('en-US')}`}${where ? ` · ${where}` : ''}`}</div>${forkbox}${stop}${views}`;
   el.dataset.resrun = r.id;
 }
@@ -601,7 +608,7 @@ function drawDiagramBlock(b, card) {
   const sel = S.dsel.get(b.id) ?? null;
   el.className = 'blk dgm';
   const r = st.r;
-  const ctl = r ? `<div class="row dg-ctl">${['back', 'step', 'score', 'row', 'end'].filter((k) => k !== 'score' || st.d.boxes.size).map((k) => `<button class="btn${k === 'step' ? ' pri' : ''}" data-act="${k}" data-run="${r.id}" title="${esc(ACTIONS[k].title)}">${ACTIONS[k].label}</button>`).join('')}<span class="lab">${r.done ? 'finished' : STUDENT ? `number ${seen(r)}` : `step ${r.idx.toLocaleString('en-US')} · ${esc(blockOfRun(r)?.name ?? r.label)}`}</span></div>` : '';
+  const ctl = r ? `<div class="row dg-ctl">${(STUDENT ? ['end', 'step', 'back'] : ['back', 'step', 'score', 'row', 'end'].filter((k) => k !== 'score' || st.d.boxes.size)).map((k) => `<button class="btn${k === (STUDENT ? 'end' : 'step') ? ' pri' : ''}" data-act="${k}" data-run="${r.id}" title="${esc(ACTIONS[k].title)}">${ACTIONS[k].label}</button>`).join('')}<span class="lab">${r.done ? 'finished' : STUDENT ? `number ${seen(r)}` : `step ${r.idx.toLocaleString('en-US')} · ${esc(blockOfRun(r)?.name ?? r.label)}`}</span></div>` : '';
   S.headCount = new Set(st.events.filter((e) => e.kind === 'weights').map((e) => e.info[0])).size;
   el.innerHTML = `${STUDENT
     ? ''
