@@ -66,7 +66,7 @@
   },
   {
    "kind": "prose",
-   "html": "<p>What each word is before it reads its neighbours. Edit a cell and the next number the run produces will use it.</p>"
+   "html": "<p>What each word is before it reads its neighbours.</p>"
   },
   {
    "kind": "table",

@@ -56,7 +56,6 @@ Y = F.scaled_dot_product_attention(Q, K, V, scale=1/2)
 
 ** Q, K, V :data:
 
-Edit any number: the next score computed reads it.
 
 #+name: Q
 | i | q1 | q2 | q3 | q4 |

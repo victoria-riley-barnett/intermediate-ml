@@ -78,7 +78,7 @@ Seven words. Every word gets a row of named features.
 #+begin_view tokens
 #+end_view
 
-What each word is before it reads its neighbours. Edit a cell and the next number the run produces will use it.
+What each word is before it reads its neighbours.
 
 #+name: embedding
 | word    | animate | noun | verb | pronoun | state | function | acts | described | subject | pos-sin | pos-cos |

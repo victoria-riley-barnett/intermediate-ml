@@ -606,7 +606,7 @@ function drawDiagramBlock(b, card) {
   el.innerHTML = `${STUDENT
     ? ''
     : `<div class="blk-h"><b>${esc(b.args.title ?? 'diagram')}</b> <span>· click a box to see its numbers; the lit box is the step you are on</span><span class="r"><button class="btn" data-dedit="${b.id}">${S.open.has(`${b.id}:text`) ? 'hide the text' : 'the text'}</button></span></div>`}
-    ${STUDENT ? '' : ctl}<div class="dg-wrap">${drawDiagram(st.d, { ...st, selected: sel })}</div>${STUDENT ? ctl : ''}${STUDENT && r && !r.done && !st.events.length ? '<div class="dg-wait">computing the first number…</div>' : ''}${sel ? diagramDetail(b, card, st, sel) : ''}
+    ${STUDENT ? '' : ctl}<div class="dg-wrap">${drawDiagram(st.d, { ...st, selected: sel })}</div>${STUDENT ? ctl : ''}${sel ? diagramDetail(b, card, st, sel) : ''}
     ${!STUDENT && S.open.has(`${b.id}:text`) ? `<textarea class="code dg-text" data-dtext="${b.id}" spellcheck="false" wrap="off" rows="${b.text.split('\n').length + 1}">${esc(b.text)}</textarea>` : ''}`;
 }
 function diagramDetail(b, card, st, sel) {
