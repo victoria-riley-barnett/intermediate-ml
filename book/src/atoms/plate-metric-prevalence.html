@@ -1,0 +1,123 @@
+<figure data-atom="metric-prevalence" data-source="admin/diagrams/metric-prevalence.html" aria-label="Accuracy is the commonest family’s share of the rows: 0.307 on 4,380 gene sequences" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 936" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="metric-prevalence-title metric-prevalence-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="metric-prevalence-title">Accuracy is the commonest family&#8217;s share of the rows: 0.307 on 4,380 gene sequences</title>
+        <desc id="metric-prevalence-desc">The seven gene families of a 4,380-row human gene artifact, as counts and as the share a no-model rule names right. Read from weeks/week06_multiclass/gene_family_data/human_data.txt and counted by the generator: class 0 GPCR 531, class 1 tyrosine kinase 534, class 2 tyrosine phosphatase 349, class 3 synthetase 672, class 4 synthase 711, class 5 ion channel 240, class 6 transcription factor 1343; the seven sum to 4,380. The left panel draws each count on an axis whose full length is all 4,380 rows, so a bar's length is also that family's share: 30.7% for the largest, 5.5% for the smallest. The right panel draws, for each family, the share of its rows that the null rule names right: that rule answers class 6 for every row and fits nothing, so its recall is 1.000 in that family and 0.000 in the other six, and its accuracy pooled over all rows is 1,343 / 4,380 = 0.3066, drawn as the bottom bar and rounded to 0.307 in the drawing. That pooled number is the prevalence-weighted mean of the seven recalls, 0.307 times 1.000 plus 0.693 times 0.000, so accuracy here is the commonest family's share of the rows. The rule is given the class counts of the same rows it is scored on: no split is drawn, so 0.3066 is the size of the floor, not a score on unseen rows. Every class has rows, so every 0.000 is measured and scikit-learn's 0/0 rule never fires. The uneven counts are the composition of the sample, not a defect in it, and no correction to the metric is drawn or recommended.</desc>
+        <rect width="1280" height="936" fill="#f5f5f5"/>
+        <text x="120" y="52" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SEVEN FAMILIES, ONE FILE, SORTED BY ROWS</text>
+        <text x="1160" y="52" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">BAR LENGTH = ROWS, THEN THE SHARE NAMED RIGHT</text>
+        <text x="300" y="80" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">ROWS IN THE FILE</text>
+        <text x="850" y="80" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">SHARE NAMED RIGHT</text>
+        <line x1="826" y1="88" x2="826" y2="386" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+        <text x="120" y="111.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">6</text>
+        <text x="142" y="111.5" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">transcription factor</text>
+        <rect x="300" y="98" width="131.847" height="20" fill="#bf4520"/>
+        <text x="800" y="112.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">1,343</text>
+        <rect x="850" y="98" width="220.000" height="20" fill="#bf4520"/>
+        <text x="1140" y="112.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">1.000</text>
+        <text x="120" y="141.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">4</text>
+        <text x="142" y="141.5" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">synthase</text>
+        <rect x="300" y="128" width="69.801" height="20" fill="#d5d5db"/>
+        <text x="800" y="142.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end" font-weight="500">711</text>
+        <rect x="849.000" y="128" width="2" height="20" fill="#2d3142"/>
+        <text x="1140" y="142.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">0.000</text>
+        <text x="120" y="171.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">3</text>
+        <text x="142" y="171.5" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">synthetase</text>
+        <rect x="300" y="158" width="65.973" height="20" fill="#d5d5db"/>
+        <text x="800" y="172.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end" font-weight="500">672</text>
+        <rect x="849.000" y="158" width="2" height="20" fill="#2d3142"/>
+        <text x="1140" y="172.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">0.000</text>
+        <text x="120" y="201.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">1</text>
+        <text x="142" y="201.5" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">tyrosine kinase</text>
+        <rect x="300" y="188" width="52.425" height="20" fill="#d5d5db"/>
+        <text x="800" y="202.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end" font-weight="500">534</text>
+        <rect x="849.000" y="188" width="2" height="20" fill="#2d3142"/>
+        <text x="1140" y="202.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">0.000</text>
+        <text x="120" y="231.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">0</text>
+        <text x="142" y="231.5" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">GPCR</text>
+        <rect x="300" y="218" width="52.130" height="20" fill="#d5d5db"/>
+        <text x="800" y="232.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end" font-weight="500">531</text>
+        <rect x="849.000" y="218" width="2" height="20" fill="#2d3142"/>
+        <text x="1140" y="232.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">0.000</text>
+        <text x="120" y="261.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">2</text>
+        <text x="142" y="261.5" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">tyrosine phosphatase</text>
+        <rect x="300" y="248" width="34.263" height="20" fill="#d5d5db"/>
+        <text x="800" y="262.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end" font-weight="500">349</text>
+        <rect x="849.000" y="248" width="2" height="20" fill="#2d3142"/>
+        <text x="1140" y="262.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">0.000</text>
+        <text x="120" y="291.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">5</text>
+        <text x="142" y="291.5" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">ion channel</text>
+        <rect x="300" y="278" width="23.562" height="20" fill="#d5d5db"/>
+        <text x="800" y="292.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end" font-weight="500">240</text>
+        <rect x="849.000" y="278" width="2" height="20" fill="#2d3142"/>
+        <text x="1140" y="292.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">0.000</text>
+        <line x1="120" y1="319" x2="1160" y2="319" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="343.5" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.10em">ALL ROWS</text>
+        <rect x="300" y="330" width="430.000" height="20" fill="#f5f5f5" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="800" y="344.0" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">4,380</text>
+        <rect x="850" y="330" width="67.457" height="20" fill="#d5d5db"/>
+        <text x="1140" y="345.0" font-size="14.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.307</text>
+        <line x1="300" y1="362" x2="730" y2="362" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <line x1="850" y1="362" x2="1070" y2="362" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="296" y="376" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">0</text>
+        <text x="730" y="376" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">every row in the file</text>
+        <text x="850" y="376" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">0</text>
+        <text x="1070" y="376" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">1.000</text>
+        <line x1="120" y1="404" x2="1160" y2="404" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="120" y="428" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">NULL RULE ACCURACY</text>
+        <text x="300" y="428" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">rows named right &#247; all rows = 1,343 &#247; 4,380</text>
+        <text x="300" y="450" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">= 0.307 &#183; 1.000 + 0.693 &#183; 0.000</text>
+        <text x="560" y="450" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">each family&#8217;s share of the rows times its recall, summed</text>
+        <text x="300" y="470" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">the trade: recall 1.000 in the family it names, 0.000 in the other six, so the pooled number is exactly that family&#8217;s share of the rows</text>
+        <text x="120" y="498" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">a model is read against 0.307, not against zero &#183; it is the baseline every model has to beat, and it fits nothing</text>
+        <text x="120" y="518" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">the six families it never names hold 3,037 rows, 69.3%, and no right answer: one number over all rows does not say where its right answers came from</text>
+        <line x1="120" y1="576" x2="1160" y2="576" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="120" y="600" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MODEL</text>
+        <text x="208" y="600" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">n = 4,380 human gene sequences in 7 families &#183; not split: every row is scored on itself</text>
+        <text x="208" y="616" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">the null rule names class 6 (transcription factor) for every row and fits nothing &#183; it is given these rows&#8217; own class counts</text>
+        <line x1="120" y1="640" x2="1160" y2="640" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="664" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MARKS</text>
+        <rect x="208" y="655" width="26" height="12" fill="#bf4520"/>
+        <text x="242" y="665" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the family the rule names</text>
+        <rect x="386" y="655" width="26" height="12" fill="#d5d5db"/>
+        <text x="420" y="665" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a family it never names</text>
+        <rect x="564" y="655" width="26" height="12" fill="#f5f5f5" stroke="#2d3142" stroke-width="1.6"/>
+        <text x="598" y="665" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the total: every row</text>
+        <rect x="752.000" y="655" width="2" height="20" fill="#2d3142"/>
+        <text x="766" y="665" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a measured 0.000, not a gap</text>
+        <line x1="120" y1="688" x2="1160" y2="688" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="712" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SOURCE</text>
+        <text x="208" y="712" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">weeks/week06_multiclass/gene_family_data/human_data.txt &#183; 4,380 records, column class = 0&#8211;6, counted by the generator</text>
+        <line x1="120" y1="736" x2="1160" y2="736" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="760" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SYMBOLS</text>
+        <text x="120" y="786" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">class 0&#8211;6</text>
+        <text x="230" y="786" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the family id in the file</text>
+        <text x="470" y="786" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">row</text>
+        <text x="558" y="786" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one gene sequence</text>
+        <text x="120" y="812" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">prevalence</text>
+        <text x="230" y="812" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a family&#8217;s share of the rows</text>
+        <text x="470" y="812" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">recall</text>
+        <text x="558" y="812" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">rows of a family named right &#247; its rows</text>
+        <text x="120" y="838" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">accuracy</text>
+        <text x="230" y="838" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">rows named right &#247; all rows</text>
+        <text x="470" y="838" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">null rule</text>
+        <text x="558" y="838" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one answer for every row, no fit</text>
+        <line x1="780" y1="742" x2="780" y2="864" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="812" y="760" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">SCIKIT-LEARN</text>
+        <text x="800" y="778" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">DummyClassifier(</text>
+        <text x="1010" y="778" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># the null rule</text>
+        <text x="800" y="791" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">    strategy="most_frequent")</text>
+        <text x="1010" y="791" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># no model fitted</text>
+        <text x="800" y="804" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">accuracy_score(y, pred)</text>
+        <text x="1010" y="804" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># 0.307; no split drawn</text>
+        <text x="800" y="817" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">recall_score(y, pred,</text>
+        <text x="1010" y="817" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># one value per class</text>
+        <text x="800" y="830" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">    average=None,</text>
+        <text x="800" y="843" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">    zero_division=0.0)</text>
+        <text x="1010" y="843" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># 0/0 -> 0.0; never here</text>
+        <text x="800" y="856" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">confusion_matrix(y, pred)</text>
+        <text x="1010" y="856" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580"># rows true, cols pred</text>
+        <text x="120" y="882" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">counted from the course artifact by the generator, not typed &#183; no model is fitted, no split drawn &#183; 0.3066 is the size of the floor, not a score on unseen rows</text>
+        <text x="120" y="900" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">every class has rows, so all seven recalls are measured and the 0/0 rule never fires &#183; uneven counts are the sample&#8217;s composition, not a fault in the file</text>
+      </svg>
+
+</figure>

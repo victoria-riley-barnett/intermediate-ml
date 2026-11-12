@@ -1,0 +1,154 @@
+<figure data-atom="autoencoder" data-source="admin/diagrams/autoencoder.html" aria-label="An autoencoder" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 824" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="autoencoder-title autoencoder-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="autoencoder-title">An autoencoder</title>
+        <desc id="autoencoder-desc">An autoencoder read left to right: the input x, B×512, passes into the encoder and the envelope narrows through a 256-wide layer to the code z, 64 wide, drawn in accent at the waist, then the decoder widens back out to the reconstruction x̂, B×512. Each layer is a vertical bar whose height is that layer's width, so the silhouette is two tapers meeting at the narrowest point. An accent path carries x itself from the far left, around under the figure, to a difference circle where it is compared with x̂; the residual feeds an MSE capsule and the loss L comes out. The key gives the model widths, four equations, a twelve-entry symbol glossary, and the equivalent nn.Sequential encoder and decoder with F.mse_loss.</desc>
+        <defs>
+          <marker id="autoencoder-arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#4f5d75"/></marker>
+          <marker id="autoencoder-arrow-accent" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#bf4520"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+        <!-- ══ THE ENVELOPE. Two tapers meeting at the waist: the region a
+             weight matrix maps between two layer bars. Fill #eaeaee is the
+             ground the white bars sit on, so a bar reads at 1.20 across a
+             dim room; the 1.6 muted edge keeps the silhouette legible. -->
+        <path d="M 189,24 H 211 L 440,84 H 462 L 629,129 H 651 L 818,84 H 840 L 1069,24 H 1091
+                 V 264 H 1069 L 840,204 H 818 L 651,159 H 629 L 462,204 H 440 L 211,264 H 189 Z"
+              fill="#eaeaee" stroke="#4f5d75" stroke-width="1.6" stroke-linejoin="round"/>
+
+        <!-- ══ STREAM (drawn before the bars so every tip lands on an edge) -->
+        <line x1="64"   y1="144" x2="189"  y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+        <line x1="211"  y1="144" x2="440"  y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+        <line x1="462"  y1="144" x2="629"  y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+        <line x1="651"  y1="144" x2="818"  y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+        <line x1="840"  y1="144" x2="1069" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+        <line x1="1091" y1="144" x2="1216" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+
+        <!-- ══ ONE LAYER = ONE BAR. Height carries the width: d = 240px tall,
+             h = 120, z = 30, so the ratios are exactly 512 : 256 : 64. -->
+        <rect x="189"  y="24"  width="22" height="240" rx="3" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="440"  y="84"  width="22" height="120" rx="3" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="629"  y="129" width="22" height="30"  rx="3" fill="#bf4520"/>
+        <rect x="818"  y="84"  width="22" height="120" rx="3" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <rect x="1069" y="24"  width="22" height="240" rx="3" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+
+        <!-- ══ THE TARGET PATH (accent 2.0). x leaves the input wire, runs
+             under the figure and meets x̂ at the difference circle: the
+             network is scored against its own input. -->
+        <circle cx="88" cy="144" r="4" fill="#bf4520"/>
+        <path d="M 88,148 V 292 Q 88,300 96,300 H 622"
+              fill="none" stroke="#bf4520" stroke-width="2" marker-end="url(#autoencoder-arrow-accent)"/>
+        <circle cx="1180" cy="144" r="4" fill="#bf4520"/>
+        <path d="M 1180,148 V 292 Q 1180,300 1172,300 H 658"
+              fill="none" stroke="#bf4520" stroke-width="2" marker-end="url(#autoencoder-arrow-accent)"/>
+
+        <!-- ══ COMBINES TWO STREAMS. A circled sign has no glyph in Geist
+             Mono, so the difference is drawn: circle plus one line. -->
+        <circle cx="640" cy="300" r="18" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+        <path d="M 632,300 H 648" fill="none" stroke="#2d3142" stroke-width="1.8"/>
+        <line x1="640" y1="318" x2="640" y2="340" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+
+        <!-- ══ APPLIED TO THE RESIDUAL STREAM: a capsule, not a box. -->
+        <rect x="608" y="341" width="64" height="34" rx="17" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <text x="640" y="363" fill="#2d3142" font-size="13" font-weight="500"
+              font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">MSE</text>
+        <line x1="640" y1="375" x2="640" y2="396" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#autoencoder-arrow)"/>
+        <text x="640" y="412" fill="#2d3142" font-size="12"
+              font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">L</text>
+
+        <!-- ══ STREAM NAMES AND SHAPES ═════════════════════════════════════ -->
+        <text x="128" y="130" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">x</text>
+        <text x="128" y="166" fill="#5a6580" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">B×512</text>
+        <text x="1152" y="130" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">x̂</text>
+        <text x="1152" y="166" fill="#5a6580" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">B×512</text>
+
+        <!-- layer names, sitting on the shoulder of each bar -->
+        <text x="200"  y="17"  fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">d 512</text>
+        <text x="451"  y="72"  fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">h 256</text>
+        <text x="640"  y="116" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">z 64</text>
+        <text x="829"  y="72"  fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">h 256</text>
+        <text x="1080" y="17"  fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">d 512</text>
+
+        <!-- the two halves -->
+        <text x="350" y="44" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.14em">ENCODER</text>
+        <text x="930" y="44" fill="#4f5d75" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.14em">DECODER</text>
+        <text x="100" y="248" fill="#bf4520" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">t = x</text>
+
+        <!-- ══ KEY: widths, equations, reference call ══════════════════════ -->
+        <line x1="120" y1="464" x2="1160" y2="464" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+
+        <text x="120" y="488" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">MODEL</text>
+        <text x="208" y="488" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">d = 512 input · h = 256 hidden · z = 64 code · B = batch</text>
+
+        <line x1="120" y1="512" x2="1160" y2="512" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+
+        <text x="120" y="536" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">TERM</text>
+        <text x="200" y="536" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">EQUATION</text>
+
+        <text x="120" y="562" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">Encoder</text>
+        <text x="200" y="562" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">z = ReLU(x W₁+b₁) W₂+b₂</text>
+
+        <text x="120" y="588" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">Decoder</text>
+        <text x="200" y="588" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">x̂ = ReLU(z W₃+b₃) W₄+b₄</text>
+
+        <text x="120" y="614" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">Loss</text>
+        <text x="200" y="614" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">L = mean((x − x̂)²)</text>
+
+        <text x="120" y="640" fill="#2d3142" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace">Target</text>
+        <text x="200" y="640" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">t = x · the input, not a label</text>
+
+        <!-- ══ REFERENCE: the two Linear stacks, kept apart from the key ═══ -->
+        <line x1="780" y1="548" x2="780" y2="660" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="812" y="536" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">PYTORCH</text>
+
+        <text x="812" y="562" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">enc = nn.Sequential(</text>
+        <text x="1044" y="562" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># x → z</text>
+        <text xml:space="preserve" x="812" y="577" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">    nn.Linear(512, 256), nn.ReLU(),</text>
+        <text x="1044" y="577" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># d → h</text>
+        <text xml:space="preserve" x="812" y="592" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">    nn.Linear(256, 64))</text>
+        <text x="1044" y="592" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># h → z</text>
+        <text x="812" y="607" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">dec = nn.Sequential(</text>
+        <text x="1044" y="607" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># z → x̂</text>
+        <text xml:space="preserve" x="812" y="622" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">    nn.Linear(64, 256), nn.ReLU(),</text>
+        <text x="1044" y="622" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># z → h</text>
+        <text xml:space="preserve" x="812" y="637" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">    nn.Linear(256, 512))</text>
+        <text x="1044" y="637" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># h → d</text>
+        <text x="812" y="652" fill="#2d3142" font-size="10" font-family="'Geist Mono', ui-monospace, monospace">loss = F.mse_loss(x_hat, x)</text>
+        <text x="1044" y="652" fill="#4f5d75" font-size="10" font-family="'Geist Mono', ui-monospace, monospace"># x̂ vs x</text>
+
+        <!-- ══ SYMBOLS ═════════════════════════════════════════════════════ -->
+        <line x1="120" y1="668" x2="1160" y2="668" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+        <text x="120" y="692" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">SYMBOLS</text>
+
+        <text x="120" y="718" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">x, x̂</text>
+        <text x="190" y="718" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">input and its reconstruction</text>
+        <text x="470" y="718" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">mean</text>
+        <text x="540" y="718" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">average over the batch</text>
+        <text x="820" y="718" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">t</text>
+        <text x="890" y="718" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">the target; t is the input x</text>
+
+        <text x="120" y="742" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">W₁–W₄</text>
+        <text x="190" y="742" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">512×256, 256×64, 64×256, 256×512</text>
+        <circle cx="476" cy="738" r="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+        <path d="M 472,738 H 480" fill="none" stroke="#2d3142" stroke-width="1.2"/>
+        <text x="540" y="742" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">x − x̂, the residual</text>
+        <text x="820" y="742" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">bar</text>
+        <text x="890" y="742" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">a layer; height = its width</text>
+
+        <text x="120" y="766" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">b₁–b₄</text>
+        <text x="190" y="766" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">one bias vector per Linear</text>
+        <text x="470" y="766" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">MSE</text>
+        <text x="540" y="766" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">mean of the squared residual</text>
+        <text x="820" y="766" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">wedge</text>
+        <text x="890" y="766" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">one learned map, e.g. W₁</text>
+
+        <text x="120" y="790" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">ReLU</text>
+        <text x="190" y="790" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">max(0, a)</text>
+        <text x="470" y="790" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">L</text>
+        <text x="540" y="790" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">the loss, one number</text>
+        <text x="820" y="790" fill="#2d3142" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">accent</text>
+        <text x="890" y="790" fill="#4f5d75" font-size="11" font-family="'Geist', system-ui, sans-serif">the path carrying x to the loss</text>
+      </svg>
+
+</figure>

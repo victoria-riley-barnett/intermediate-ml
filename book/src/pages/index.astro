@@ -1,0 +1,36 @@
+---
+import Book from '../layouts/Book.astro';
+import { chapterUrl, chapters, pageUrl, pages, url } from '../lib/book';
+const cs = await chapters();
+const ps = await pages();
+---
+<Book title="Intermediate Machine Learning">
+  <h1>Intermediate Machine Learning</h1>
+  <p class="lede">From tensors to the transformer encoder: what each piece represents, how it transforms what it receives, and the evidence that it works.</p>
+  <h2>Notebooks</h2>
+  <ul>
+    <li><a href={url('notebooks/')}>Attention notebooks</a>: the slide's attention head and one pre-norm encoder block, worked through number by number, running in the browser.</li>
+  </ul>
+  {cs.length > 0 && (
+    <>
+      <h2>Chapters</h2>
+      <ol class="toc">
+        {cs.map((c) => (
+          <li>
+            <span class="num">{c.data.number}</span><a href={chapterUrl(c.id)}>{c.data.title}</a>
+            {c.data.draft && <span class="meta"> · draft</span>}
+            <span class="desc">{c.data.description}</span>
+          </li>
+        ))}
+      </ol>
+    </>
+  )}
+  {ps.length > 0 && (
+    <>
+      <h2>Reference pages</h2>
+      <ul>
+        {ps.map((p) => <li><a href={pageUrl(p.id)}>{p.data.title}</a>: {p.data.description}</li>)}
+      </ul>
+    </>
+  )}
+</Book>

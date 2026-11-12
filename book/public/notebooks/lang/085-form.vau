@@ -1,0 +1,146 @@
+; forms, in the language: the request side of html. A form is a page string
+; (080-html) plus the values a person typed. Nothing here touches a DOM or a
+; socket: the host brings the bytes, the language decides what they mean.
+;
+; (url-decode s)                 %XX and + decoded; a bad escape is kept as it was
+; (parse-params s)               "a=1&b=two+words" -> (("a" . "1") ("b" . "two words")); a leading ? is ignored, empty fields dropped
+; (param p name)                 the last value for name, or ""
+; (form action method . kids)    <form action=... method=...>kids</form>; kids are strings
+; (option value label selected)  <option value=... [selected]>label</option>; selected is #t or #f
+; (form-field label control)     <label>label control</label>; `field` is ask's alist reader (050)
+; (input name [value]) (input-as type name value) (hidden name value) (textarea name value)
+; (select name options) (submit label)   each builds its element; select wraps options already built
+;
+; A byte is the kernel's integer->char (0..255); UTF-8 is its bytes appended,
+; so %C3%A9 decodes to é. Needs core, cek (map, rev), html (el, join, text).
+
+; ---- a byte from two hex digits: -1 when the character is no hex digit
+($define! f-lower "0123456789abcdef")
+($define! f-upper "0123456789ABCDEF")
+($define! f-index
+  ($lambda (c s i)
+    ($if (>= i 16)
+      -1
+      ($if (string=? c (substring s i (+ i 1))) i (f-index c s (+ i 1))))))
+($define! f-hex
+  ($lambda (c)
+    (($lambda (lo) ($if (>= lo 0) lo (f-index c f-upper 0)))
+     (f-index c f-lower 0))))
+
+; the byte a %XX at i makes, or "" when it is not hex digits: the % stays
+($define! f-byte
+  ($lambda (s i n)
+    ($if (< (+ i 2) n)
+      (($lambda (hi lo)
+         ($if ($and (>= hi 0) (>= lo 0))
+           (integer->char (+ (* hi 16) lo))
+           ""))
+       (f-hex (substring s (+ i 1) (+ i 2)))
+       (f-hex (substring s (+ i 2) (+ i 3))))
+      "")))
+
+($define! f-decode
+  ($lambda (s i n acc)
+    ($if (>= i n)
+      acc
+      (($lambda (c)
+         ($if (string=? c "+")
+           (f-decode s (+ i 1) n (string-append acc " "))
+           ($if (string=? c "%")
+             (($lambda (b)
+                ($if (string=? b "")
+                  (f-decode s (+ i 1) n (string-append acc "%"))
+                  (f-decode s (+ i 3) n (string-append acc b))))
+              (f-byte s i n))
+             (f-decode s (+ i 1) n (string-append acc c)))))
+       (substring s i (+ i 1))))))
+($define! url-decode ($lambda (s) (f-decode s 0 (string-length s) "")))
+
+; ---- fields split on every c, in order: empty pieces kept, f-keep drops them
+($define! f-split
+  ($lambda (s c i start acc)
+    ($if (>= i (string-length s))
+      (rev (cons (substring s start i) acc))
+      ($if (string=? c (substring s i (+ i 1)))
+        (f-split s c (+ i 1) (+ i 1) (cons (substring s start i) acc))
+        (f-split s c (+ i 1) start acc)))))
+($define! f-first
+  ($lambda (s c i)
+    ($if (>= i (string-length s))
+      (cons s "")
+      ($if (string=? c (substring s i (+ i 1)))
+        (cons (substring s 0 i) (substring s (+ i 1) (string-length s)))
+        (f-first s c (+ i 1))))))
+($define! f-keep
+  ($lambda (xs)
+    ($if (null? xs)
+      ()
+      ($if (string=? (car xs) "")
+        (f-keep (cdr xs))
+        (cons (car xs) (f-keep (cdr xs)))))))
+($define! f-pair
+  ($lambda (s)
+    (($lambda (kv) (cons (url-decode (car kv)) (url-decode (cdr kv))))
+     (f-first s "=" 0))))
+($define! f-query
+  ($lambda (s)
+    ($if (> (string-length s) 0)
+      ($if (string=? (substring s 0 1) "?")
+        (substring s 1 (string-length s))
+        s)
+      s)))
+($define! parse-params
+  ($lambda (s) (map f-pair (f-keep (f-split (f-query s) "&" 0 0 ())))))
+
+($define! f-lookup
+  ($lambda (ps name found)
+    ($if (null? ps)
+      found
+      ($if (string=? (car (car ps)) name)
+        (f-lookup (cdr ps) name (cdr (car ps)))
+        (f-lookup (cdr ps) name found)))))
+($define! param
+  ($lambda (ps name)
+    (($lambda (v) ($if (string? v) v "")) (f-lookup ps name #f))))
+
+($define! form
+  ($lambda (action method . kids)
+    (el ($quote form)
+      (list (cons ($quote action) action) (cons ($quote method) method))
+      (join kids))))
+
+($define! input-as
+  ($lambda (type name value)
+    (el ($quote input)
+      (list (cons ($quote type) type)
+        (cons ($quote name) name)
+        (cons ($quote value) value)))))
+($define! input
+  ($lambda (name . rest)
+    (input-as "text" name ($if (null? rest) "" (car rest)))))
+($define! hidden ($lambda (name value) (input-as "hidden" name value)))
+
+($define! textarea
+  ($lambda (name value)
+    (el ($quote textarea) (list (cons ($quote name) name)) (text value))))
+
+($define! option
+  ($lambda (value label . rest)
+    (el ($quote option)
+      ($if ($and (not (null? rest)) (car rest))
+        (list (cons ($quote value) value)
+          (cons ($quote selected) "selected"))
+        (list (cons ($quote value) value)))
+      (text label))))
+($define! select
+  ($lambda (name options)
+    (el ($quote select) (list (cons ($quote name) name)) (join options))))
+
+($define! submit
+  ($lambda (label)
+    (el ($quote button)
+      (list (cons ($quote type) "submit"))
+      (text label))))
+($define! form-field
+  ($lambda (label control)
+    (el ($quote label) () (text label) " " control)))

@@ -1,0 +1,298 @@
+; agents, in the language: a person calls one from a form, with a steer and the
+; names it may define; it answers forms as a PROPOSAL.
+;
+;   ($agent steer name...)   yield (agent steer context prompt writes), the host
+;                            answering (propose form...); steer evals, names do not
+;   ($accept proposal)       judged again here, then run, or refused
+;   (agent-context env)      ((name head) ...), nearest first, each once, clipped
+;   (agent-prompt steer ctx writes vocabulary defs)
+;   (proposal-* p)           steer, forms, value, failures, writes
+;
+; An agent sees the page's frames as one-line heads, never a history and never
+; another scope: it reads only what it was shown. A proposal runs in a fork
+; under the caller's declared capability, and failures (055) are what the run
+; did beyond it. The language judges; the host (host/agent.mjs) only carries
+; the prompt out and the answer back, so a person's keyboard is the only thing
+; that changes an environment. Needs core, cek, page, ask (050), capability
+; (055), view (070); agent-session, load-forms (030).
+
+($define! ag-clip-to 120)
+($define! ag-clip
+  ($lambda (s)
+    ($if (> (string-length s) ag-clip-to)
+      (string-append (substring s 0 ag-clip-to) "...")
+      s)))
+($define! ag-frames
+  ($lambda (env) ($if (null? (cdr env)) () (cons (car env) (ag-frames (cdr env))))))
+($define! ag-take
+  ($lambda (l n)
+    ($if ($or (null? l) (<= n 0))
+      ()
+      (cons (car l) (ag-take (cdr l) (- n 1))))))
+
+($define! ag-walk
+  ($lambda (frames bs seen acc)
+    ($cond ((null? bs)
+            ($if (null? frames)
+              (rev acc)
+              (ag-walk (cdr frames) (cdr (car frames)) seen acc)))
+      ((named? (car (car bs)) seen) (ag-walk frames (cdr bs) seen acc))
+      (#t (ag-walk frames
+            (cdr bs)
+            (cons (car (car bs)) seen)
+            (cons (list (car (car bs))
+                    (ag-clip (ag-head (cdr (car bs)))))
+              acc))))))
+($define! agent-context
+  ($lambda (env)
+    (($lambda (frames)
+       ($if (null? frames)
+         ()
+         (ag-take (ag-walk (cdr frames) (cdr (car frames)) () ())
+           v-names)))
+     (ag-frames env))))
+
+; a head is what a person reading the name needs first: a combiner's parameters,
+; not <ap>. A $lambda is (%c ap ...), a $vau the inner (%c op ...) -- the layout
+; 098 reads back as source.
+($define! ag-op
+  ($lambda (c) ($if (eq? (v-kind c) ($quote ap)) (v-nth c 2) c)))
+; #t is a combiner the session derived at 020, so it is said as the name a person writes
+($define! ag-same?
+  ($lambda (a b)
+    ($if (pair? a)
+      ($and (pair? b)
+        ($and (ag-same? (car a) (car b)) (ag-same? (cdr a) (cdr b))))
+      (eq? a b))))
+($define! ag-boolean
+  ($lambda (v)
+    ($if ($and (v-closure? v) (eq? (v-kind v) ($quote op)))
+      (($lambda (shape)
+         ($cond ((ag-same? shape ($quote ((a b) e ((eval a e))))) "#t")
+           ((ag-same? shape ($quote ((a b) e ((eval b e))))) "#f")
+           (#t ())))
+       (list (v-nth v 2) (v-nth v 3) (v-nth v 4)))
+      ())))
+($define! ag-head
+  ($lambda (v)
+    ($if (string? (ag-boolean v))
+      (ag-boolean v)
+      ($if (v-closure? v)
+        ($if (eq? (v-kind v) ($quote ap))
+          (string-append "($lambda "
+            (string-append (show (v-nth (ag-op v) 2)) " …)"))
+          (string-append "($vau "
+            (string-append (show (v-nth v 2))
+              (string-append " "
+                (string-append (show (v-nth v 3)) " …)")))))
+        (show v)))))
+
+; the whole of a value as source, never clipped: the agent edits what it sees
+($define! ag-print
+  ($lambda (v)
+    ($cond ((string? (ag-boolean v)) (ag-boolean v))
+      ((v-closure? v) (ag-combiner-text v))
+      (($and (v-pair? v) (not (v-env? v)))
+       (string-append "(" (string-append (ag-print-items v) ")")))
+      (#t (show v)))))
+($define! ag-print-items
+  ($lambda (l)
+    (($lambda (head)
+       ($cond ((null? (cdr l)) head)
+         ((v-more? (cdr l))
+          (string-append head
+            (string-append " " (ag-print-items (cdr l)))))
+         (#t (string-append head
+               (string-append " . " (ag-print (cdr l)))))))
+     (ag-print (car l)))))
+($define! ag-body
+  ($lambda (body)
+    ($if (null? body) "" (string-append " " (ag-print-items body)))))
+($define! ag-combiner-text
+  ($lambda (c)
+    (($lambda (op)
+       ($if (eq? (v-kind c) ($quote ap))
+         (string-append "($lambda "
+           (string-append (ag-print (v-nth op 2))
+             (string-append (ag-body (v-nth op 4)) ")")))
+         (string-append "($vau "
+           (string-append (ag-print (v-nth op 2))
+             (string-append " "
+               (string-append (ag-print (v-nth op 3))
+                 (string-append (ag-body (v-nth op 4)) ")")))))))
+     (ag-op c))))
+($define! ag-quoted
+  ($lambda (v)
+    ($if ($or (v-pair? v) ($or (null? v) (v-sym? v)))
+      ($if (v-closure? v)
+        (ag-print v)
+        (string-append "($quote " (string-append (ag-print v) ")")))
+      (ag-print v))))
+
+; the names the agent may write, as ($define! name value), nearest binding
+($define! ag-find
+  ($lambda (frames bs name)
+    ($cond ((null? bs)
+            ($if (null? frames)
+              ()
+              (ag-find (cdr frames) (cdr (car frames)) name)))
+      ((eq? (car (car bs)) name) (list (cdr (car bs))))
+      (#t (ag-find frames (cdr bs) name)))))
+($define! ag-defs
+  ($lambda (writes env)
+    (($lambda (frames)
+       ($if ($or (null? frames) (null? writes))
+         ()
+         (($lambda (hit rest)
+            ($if (null? hit)
+              rest
+              (cons (string-append "($define! "
+                      (string-append (show (car writes))
+                        (string-append " "
+                          (string-append (ag-quoted (car hit)) ")"))))
+                rest)))
+          (ag-find (cdr frames) (cdr (car frames)) (car writes))
+          (ag-defs (cdr writes) env))))
+     (ag-frames env))))
+
+($define! ag-line
+  ($lambda (row)
+    (string-append "  "
+      (string-append (show (car row)) (string-append "  " (cadr row))))))
+($define! ag-lines
+  ($lambda (rows)
+    ($if (null? rows) "  (none)" (v-join (map ag-line rows) "\n"))))
+($define! ag-names
+  ($lambda (names)
+    ($if (null? names) "(none)" (v-join (map show names) " "))))
+($define! ag-current
+  ($lambda (defs)
+    ($if (null? defs)
+      ""
+      (string-append "\nAs they are now, the names you may change:\n"
+        (v-join defs "\n")))))
+; THE WORDS A PROPOSAL IS WRITTEN IN. ag-frames stops at the ground, so without
+; this the agent sees none of the language it writes in and hand-rolls with car
+; and cdr what $let, el and attrs already do. Filtered to the names this env
+; really binds, so it cannot drift from the machine.
+($define! ag-vocabulary
+  ($quote ($vau $lambda $define! $if $cond $let $sequence $and $or $quote eval
+            list cons car cdr pair? null? eq? = < <= + - * not
+            el attrs esc text join)))
+($define! ag-bound
+  ($lambda (names env acc)
+    ($if (null? names)
+      (rev acc)
+      (ag-bound (cdr names)
+        env
+        ($if (null? (owner (car names) env)) acc (cons (car names) acc))))))
+
+($define! agent-prompt
+  ($lambda (steer ctx writes vocabulary defs)
+    (string-append "You are asked to propose forms in Vau. Reach for these, which this page binds, before writing the same thing by hand: "
+      (string-append (ag-names vocabulary)
+        ".\n"
+        "You see only the names below, each with a one-line head, and you may define or change only: "
+        (string-append (ag-names writes)
+          (string-append ".\nNames you can see:\n"
+            (string-append (ag-lines ctx)
+              (string-append (ag-current defs)
+                (string-append "\nThe person's steer: "
+                  (string-append steer
+                    "\nAnswer with Vau forms only: no prose, no code fences. Your forms are a proposal; the person decides."))))))))))
+
+($define! proposal-steer cadr)
+($define! proposal-forms caddr)
+($define! proposal-value cadddr)
+($define! proposal-failures ($lambda (p) (car (cddr (cddr p)))))
+($define! proposal-writes ($lambda (p) (cadr (cddr (cddr p)))))
+
+; the forms run in a fork: the agent reads what it was shown and may write only what it was given
+($define! ag-judge
+  ($lambda (steer forms writes ctx env)
+    (($lambda (run)
+       (list ($quote proposal) steer forms (car run) (cadr run) writes))
+     ($if (null? forms)
+       (list ()
+         (list (list ($quote problem) ($quote agent) "no forms")))
+       (ask-within (cons ($quote $sequence) forms)
+         (fork env)
+         (cat (map car ctx) writes)
+         writes)))))
+
+; the host's half, native on the session's data: the request a form stops at
+($define! agent-request
+  ($lambda (steer writes env)
+    (($lambda (ctx)
+       (list ($quote agent)
+         steer
+         ctx
+         (agent-prompt steer ctx writes (ag-bound ag-vocabulary env ()) (ag-defs writes env))
+         writes))
+     (agent-context env))))
+($define! agent-answer
+  ($lambda (steer writes env answer)
+    (ag-judge steer
+      ($if (pair? answer)
+        ($if (eq? (car answer) ($quote propose)) (cdr answer) ())
+        ())
+      writes
+      (agent-context env)
+      env)))
+($define! agent-check
+  ($lambda (p env)
+    (proposal-failures (ag-judge (proposal-steer p)
+                         (proposal-forms p)
+                         (proposal-writes p)
+                         (agent-context env)
+                         env))))
+
+; the REPL's session is a ground of the machine in the language (030), so the
+; agent's words are written in that language and loaded into it: $agent yields
+; where the person's form is, $accept evals in the caller's environment, and the
+; natives judge.
+($define! agent-forms
+  ($quote (($define! $sequence
+             ($vau forms
+               env
+               ($if (null? forms)
+                 ()
+                 ($if (null? (cdr forms))
+                   (eval (car forms) env)
+                   (($lambda (first)
+                      (eval (cons $sequence (cdr forms)) env))
+                    (eval (car forms) env))))))
+           ($define! $agent
+             ($vau (steer . writes)
+               env
+               (($lambda (steer)
+                  (agent-answer steer
+                    writes
+                    env
+                    (yield (agent-request steer writes env))))
+                (eval steer env))))
+           ($define! $accept
+             ($vau (p)
+               env
+               (($lambda (p)
+                  (($lambda (failures)
+                     ($if (null? failures)
+                       (eval (cons $sequence (proposal-forms p)) env)
+                       (list ($quote problem)
+                         ($quote agent)
+                         ($quote refused)
+                         failures)))
+                   (agent-check p env)))
+                (eval p env)))))))
+($define! agent-session
+  ($lambda (env)
+    (progn (native! env ($quote agent-request) agent-request)
+      (native! env ($quote agent-answer) agent-answer)
+      (native! env ($quote agent-check) agent-check)
+      (native! env ($quote proposal-forms) proposal-forms)
+      (native! env ($quote proposal-failures) proposal-failures)
+      (native! env ($quote proposal-value) proposal-value)
+      (native! env ($quote proposal-steer) proposal-steer)
+      (native! env ($quote proposal-writes) proposal-writes)
+      (load-forms agent-forms env)
+      (child-env env))))

@@ -1,0 +1,96 @@
+; The surface the desk's own layers are written in: Bel's (lang/045-bel.vau),
+; with its names and shapes. This frame is a layer of the ground, so the two
+; places it must part from a person's session are these.
+;
+; Kernel's `not` applies its argument as a combiner, so (not ()) is a problem --
+; and () is the false value here, which makes that the first thing a person types.
+; `not` is bound below as bel-false?: it answers #t for () and #f, #f for anything
+; else, and calls nothing. And #f counts as false beside (): these layers test the
+; Kernel's predicates, which answer #f, and a form that read #f as true would take
+; every then.
+;
+; Everything else is 045-bel's: if is n-ary, and/or answer () or the last value,
+; def and fn build the forms the machine already knows.
+
+($define! bel-false?
+  ($lambda (x) ($or (null? x) (eq? x #f))))
+
+($define! not ($lambda (x) (bel-false? x)))
+
+; ---- truth and branching
+($define! if
+  ($vau clauses env
+    ($if (null? clauses) ()
+      ($if (null? (cdr clauses)) (eval (car clauses) env)
+        ($if (bel-false? (eval (car clauses) env))
+          (eval (cons if (cdr (cdr clauses))) env)
+          (eval (car (cdr clauses)) env))))))
+
+($define! and
+  ($vau args env
+    ($if (null? args) #t
+      ($if (null? (cdr args)) (eval (car args) env)
+        ($if (bel-false? (eval (car args) env)) ()
+          (eval (cons and (cdr args)) env))))))
+
+($define! or
+  ($vau args env
+    ($if (null? args) ()
+      ($if (null? (cdr args)) (eval (car args) env)
+        (($lambda (v) ($if (bel-false? v) (eval (cons or (cdr args)) env) v))
+         (eval (car args) env))))))
+
+($define! when
+  ($vau (test . body) env
+    ($if (bel-false? (eval test env)) () (eval (cons $sequence body) env))))
+($define! unless
+  ($vau (test . body) env
+    ($if (bel-false? (eval test env)) (eval (cons $sequence body) env) ())))
+($define! aif
+  ($vau (test then . else) env
+    (($lambda (v)
+       ($if (bel-false? v)
+         (eval (cons $sequence else) env)
+         (eval (list $let (list (list ($quote it) v)) then) env)))
+     (eval test env))))
+($define! iflet
+  ($vau (name expr then . else) env
+    (($lambda (v)
+       ($if (bel-false? v)
+         (eval (cons $sequence else) env)
+         (eval (list $let (list (list name v)) then) env)))
+     (eval expr env))))
+
+; ---- definition and binding
+($define! fn
+  ($vau (parms . body) env
+    (eval (cons $lambda (cons parms body)) env)))
+($define! mac
+  ($vau (parms . body) env
+    (eval (cons $vau (cons parms (cons #ignore body))) env)))
+($define! def
+  ($vau (name . rest) env
+    ($if (pair? name)
+      (eval (list $define! (car name) (cons fn (cons (cdr name) rest))) env)
+      (eval (list $define! name (car rest)) env))))
+
+($define! bel-zip
+  ($lambda (names vals)
+    ($if (null? names) ()
+      (cons (list (car names) (car vals)) (bel-zip (cdr names) (cdr vals))))))
+($define! let
+  ($vau (names vals . body) env
+    ($if (pair? names)
+      (eval (list $let (bel-zip names (eval vals env)) (cons $sequence body)) env)
+      (eval (list $let (list (list names vals)) (cons $sequence body)) env))))
+($define! with
+  ($vau (name val . body) env
+    (eval (list $let (list (list name val)) (cons $sequence body)) env)))
+
+; ---- iteration
+($define! each
+  ($lambda (f xs)
+    ($if (null? xs) () (($lambda (#ignore) (each f (cdr xs))) (f (car xs))))))
+($define! accum
+  ($lambda (f xs)
+    ($if (null? xs) () (f (car xs) (accum f (cdr xs))))))

@@ -1,0 +1,316 @@
+; Pairs and lists: R-1RK §5.7 and the §6.3, §6.4, §6.9 names 025-library
+; does not bind. 025's walks end on nil, so a cyclic list loops in them;
+; everything here counts pairs with get-list-metrics instead, since the
+; Report asks filter, append! and list-neighbors to end on a cycle.
+;
+; for-each (§6.9.1) walks for itself: the Report derives it as
+; (apply map x env), and 020's map takes one list.
+;
+; Needs 010-core ($lambda, wrap, $vau, $let, $sequence), 020-cek (map,
+; set-car!, set-cdr!, cadr, rev), 025-library (apply, equal?, not?, $let*).
+; Nothing here is a primitive; there is no immutable pair.
+
+; ---- §5.2.2 list*, §5.4.2 caar ... cddddr
+; each accessor is the composition its name spells, a's and d's read outside in.
+($define! list*
+  ($lambda (head . tail)
+    ($if (null? tail) head (cons head (apply list* tail)))))
+($define! caar ($lambda (x) (car (car x))))
+($define! cdar ($lambda (x) (cdr (car x))))
+($define! caaar ($lambda (x) (car (car (car x)))))
+($define! caadr ($lambda (x) (car (car (cdr x)))))
+($define! cadar ($lambda (x) (car (cdr (car x)))))
+($define! cdaar ($lambda (x) (cdr (car (car x)))))
+($define! cdadr ($lambda (x) (cdr (car (cdr x)))))
+($define! cddar ($lambda (x) (cdr (cdr (car x)))))
+($define! cdddr ($lambda (x) (cdr (cdr (cdr x)))))
+($define! caaaar ($lambda (x) (car (car (car (car x))))))
+($define! caaadr ($lambda (x) (car (car (car (cdr x))))))
+($define! caadar ($lambda (x) (car (car (cdr (car x))))))
+($define! caaddr ($lambda (x) (car (car (cdr (cdr x))))))
+($define! cadaar ($lambda (x) (car (cdr (car (car x))))))
+($define! cadadr ($lambda (x) (car (cdr (car (cdr x))))))
+($define! caddar ($lambda (x) (car (cdr (cdr (car x))))))
+($define! cdaaar ($lambda (x) (cdr (car (car (car x))))))
+($define! cdaadr ($lambda (x) (cdr (car (car (cdr x))))))
+($define! cdadar ($lambda (x) (cdr (car (cdr (car x))))))
+($define! cdaddr ($lambda (x) (cdr (car (cdr (cdr x))))))
+($define! cddaar ($lambda (x) (cdr (cdr (car (car x))))))
+($define! cddadr ($lambda (x) (cdr (cdr (car (cdr x))))))
+($define! cdddar ($lambda (x) (cdr (cdr (cdr (car x))))))
+($define! cddddr ($lambda (x) (cdr (cdr (cdr (cdr x))))))
+
+; ---- §5.7.1 get-list-metrics
+; (p n a c): pairs, nils (0 or 1), acyclic prefix length, cycle length. The
+; Report's quadratic derivation, kept because nothing here is hot: nth is the
+; furthest pair reached, kth walks a round, and they meet when the traversal
+; has closed a cycle of length n - k.
+($define! metrics-aux
+  ($lambda (start kth k nth n)
+    ($if (>= k n)
+      ($if (pair? (cdr nth))
+        (metrics-aux start start 0 (cdr nth) (+ n 1))
+        (list (+ n 1) ($if (null? (cdr nth)) 1 0) (+ n 1) 0))
+      ($if (eq? kth nth)
+        (list n 0 k (- n k))
+        (metrics-aux start (cdr kth) (+ k 1) nth n)))))
+($define! get-list-metrics
+  ($lambda (ls)
+    ($if (pair? ls)
+      (metrics-aux ls ls 0 ls 0)
+      (list 0 ($if (null? ls) 1 0) 0 0))))
+
+; ---- §5.8.1 encycle!
+; cdr of the (k1+k2)th pair points at the (k1+1)th, a tail cycle of length k2;
+; answers #inert, being called for effect.
+($define! encycle!
+  ($lambda (ls k1 k2)
+    ($if (> k2 0)
+      (set-cdr! (list-tail ls (+ k1 (- k2 1))) (list-tail ls k1))
+      #inert)))
+
+; ---- §6.3.3 append
+; The last argument is shared, not copied, so (append h) is h; every earlier
+; one is copied pair by pair. The cyclic branch is the Report's but unreachable
+; here: 025's apply walks its argument list with map.
+($define! set-last-pair!
+  ($lambda (ls tail)
+    ($let ((next (cdr ls)))
+      ($if (pair? next)
+        (set-last-pair! next tail)
+        (set-cdr! ls tail)))))
+($define! append-onto
+  ($lambda (ls tail)
+    ($if (null? ls) tail (cons (car ls) (append-onto (cdr ls) tail)))))
+($define! append-first
+  ($lambda (k lss tail)
+    ($if (> k 0)
+      (append-onto (car lss) (append-first (- k 1) (cdr lss) tail))
+      tail)))
+($define! append
+  ($lambda lss
+    ($if (null? lss)
+      ()
+      ($let (((#ignore #ignore a c) (get-list-metrics lss)))
+        ($if (> c 0)
+          ($let ((ring (append-first c (list-tail lss a) ())))
+            ($sequence
+              ($if (pair? ring) (set-last-pair! ring ring) #inert)
+              (append-first a lss ring)))
+          (append-first (- a 1) lss (list-ref lss (- a 1))))))))
+
+; ---- §6.3.4 list-neighbors
+; One neighbour fewer than there are pairs; a cyclic ls gives a cyclic answer
+; with the same prefix and cycle lengths, the cycle closed from last to first.
+($define! neighbors-of
+  ($lambda (ls n)
+    ($if (> n 0)
+      (cons (list (car ls) (cadr ls)) (neighbors-of (cdr ls) (- n 1)))
+      ())))
+($define! list-neighbors
+  ($lambda (ls)
+    ($let (((p #ignore a c) (get-list-metrics ls)))
+      ($if (= c 0)
+        (neighbors-of ls (- a 1))
+        ($let ((out (neighbors-of ls p)))
+          ($sequence (encycle! out a c) out))))))
+
+; ---- §6.3.5 filter
+; accept? is asked once per pair, so a cycle ends; kept cycle elements become a
+; cycle of their own, after the kept prefix. It travels through apply and must be
+; an applicative: 025's apply quotes arguments back into forms. No make-environment
+; here, so the call runs in apply's default, the current environment; a non-boolean
+; answer falls out at the $if as not-combiner.
+($define! keep-n
+  ($lambda (accept? ls n acc)
+    ($if (= n 0)
+      (rev acc)
+      ($if (apply accept? (list (car ls)))
+        (keep-n accept? (cdr ls) (- n 1) (cons (car ls) acc))
+        (keep-n accept? (cdr ls) (- n 1) acc)))))
+($define! filter
+  ($lambda (accept? ls)
+    ($let (((#ignore #ignore a c) (get-list-metrics ls)))
+      ($if (= c 0)
+        (keep-n accept? ls a ())
+        ($let ((front (keep-n accept? ls a ()))
+               (ring (keep-n accept? (list-tail ls a) c ())))
+          ($sequence
+            ($if (pair? ring) (set-last-pair! ring ring) #inert)
+            (append-onto front ring)))))))
+
+; ---- §6.3.6 assoc, §6.4.3 assq
+; Both are the Report's derivation (filter, then the first element), so both end
+; on a cyclic alist. Failure answers nil, not #f: an entry may be a boolean, and
+; a test would then lie.
+($define! assoc
+  ($lambda (object alist)
+    ($let ((found (filter ($lambda (r) (equal? object (car r))) alist)))
+      ($if (null? found) () (car found)))))
+($define! assq
+  ($lambda (object alist)
+    ($let ((found (filter ($lambda (r) (eq? object (car r))) alist)))
+      ($if (null? found) () (car found)))))
+
+; ---- §6.3.7 member?, §6.4.4 memq?
+($define! member?
+  ($lambda (object ls)
+    (not (null? (filter ($lambda (x) (equal? object x)) ls)))))
+($define! memq?
+  ($lambda (object ls)
+    (not (null? (filter ($lambda (x) (eq? object x)) ls)))))
+
+; ---- §6.3.10 reduce
+; bin is associative, so the grouping is open: a right fold here. A cycle has no
+; answer without the three-combiner syntax -- precycle, incycle, postcycle -- so
+; the first syntax signals a problem rather than guess one.
+($define! reduce-acyclic
+  ($lambda (ls bin id)
+    ($cond ((null? ls) id)
+      ((null? (cdr ls)) (car ls))
+      (#t (bin (car ls) (reduce-acyclic (cdr ls) bin id))))))
+($define! reduce-n
+  ($lambda (ls bin n)
+    ($if (= n 1)
+      (car ls)
+      (bin (car ls) (reduce-n (cdr ls) bin (- n 1))))))
+; a cycle is finite in elements yet endless to a walk that ends on nil: take the c of them by count
+($define! map-n
+  ($lambda (f ls n)
+    ($if (= n 0) () (cons (f (car ls)) (map-n f (cdr ls) (- n 1))))))
+; ---- §5.9.1 map: one applicative, one list per argument. One list calls the
+; applicative directly, so a closure still travels; two or more can only go through
+; apply and inherit its limit: an argument that does not read back cannot be one.
+; Lengths must match -- stopping at the shortest would hide the mistake.
+($define! all-same-length?
+  ($lambda (lists)
+    ($if (null? (cdr lists))
+      #t
+      ($if (= (length (car lists)) (length (cadr lists)))
+        (all-same-length? (cdr lists))
+        #f))))
+($define! map-walk
+  ($lambda (call lists acc)
+    ($if (null? (car lists))
+      (rev acc)
+      (map-walk call (cdrs-of lists) (cons (call (cars-of lists)) acc)))))
+($define! map1
+  ($lambda (f l) ($if (null? l) () (cons (f (car l)) (map1 f (cdr l))))))
+; a cyclic list maps to a cyclic list: prefix and cycle elements each called
+; once, the results joined with the same shape (§5.9.1)
+($define! map-cyclic
+  ($lambda (f ls)
+    ($let (((#ignore #ignore a c) (get-list-metrics ls)))
+      ($let ((front (map-n f ls a))
+             (ring (map-n f (list-tail ls a) c)))
+        ($sequence
+          (set-last-pair! ring ring)
+          (append-onto front ring))))))
+($define! map
+  ($lambda (applicative . lists)
+    ($let ((env (get-current-environment)))
+      ($cond ((null? lists) (problem ($quote type) (list applicative) ()))
+        ((null? (cdr lists))
+         ($if (eq? (list-kind (car lists) (car lists)) ($quote cyclic))
+           (map-cyclic applicative (car lists))
+           (map1 applicative (car lists))))
+        ((all-same-length? lists) (map-walk ($lambda (args) (apply applicative args env)) lists ()))
+        (#t (problem ($quote type) (list applicative) ()))))))
+
+; a combiner as called in a given dynamic environment: reduce and for-each owe
+; their combiners the caller's environment (§5.9.1, §6.3.10), not their own frame.
+($define! fixenv
+  ($lambda (appv env) ($lambda x (apply appv x env))))
+($define! reduce
+  (wrap ($vau (ls bin id . opt) env
+    ($let (((#ignore #ignore a c) (get-list-metrics ls))
+           (call (fixenv bin env)))
+      ($if (= c 0)
+        (reduce-acyclic ls call id)
+        ($if (null? opt)
+          (problem ($quote type) (list a c) ())  ; a cycle prints badly
+          ($let* (((pre in post) (map ($lambda (g) (fixenv g env)) opt))
+                  (ring (map-n pre (list-tail ls a) c)))
+            ($let ((folded (post (reduce-n ring in c))))
+              ($if (= a 0)
+                folded
+                (call (reduce-n ls call a) folded))))))))))
+
+; ---- §6.4.1 append!
+; The cdr of the last pair of each non-nil argument is set to the next, so the
+; first holds them all: every argument but the last must be acyclic. Answers #inert.
+($define! append!
+  ($lambda lss
+    ($sequence
+      (map ($lambda (pair) (apply set-last-pair! pair))
+        (list-neighbors (filter ($lambda (x) (not (null? x))) lss)))
+      #inert)))
+
+; ---- §6.4.2 copy-es, and §4.7.2 copy-es-immutable
+; A fresh tree of mutable pairs, sharing only what is not a pair. A pair is made
+; empty and recorded before either half is copied, so a reference back to it --
+; through a car or a cdr -- finds the pair that will be the answer; the two
+; set-car!/set-cdr! calls fill the placeholder. That is what makes an awkward
+; shape copy as itself rather than run away, and it needs both halves writable.
+; Records are walked with assq: assoc's equal? would take two equal pairs for one.
+($define! copy-es-aux
+  ($lambda (x alist)
+    ($if (pair? x)
+      ($let ((record (assq x alist)))
+        ($if (pair? record)
+          (list (cdr record) alist)
+          ($let* ((y (cons () ()))
+                  (alist (cons (cons x y) alist))
+                  ((car-copy alist) (copy-es-aux (car x) alist))
+                  (#ignore (set-car! y car-copy))
+                  ((cdr-copy alist) (copy-es-aux (cdr x) alist))
+                  (#ignore (set-cdr! y cdr-copy)))
+            (list y alist))))
+      (list x alist))))
+($define! copy-es
+  ($lambda (x) (car (copy-es-aux x ()))))
+; No immutable pair exists: set-cdr! always sets and no pair has the bit, so no
+; copy could refuse a mutation. copy-es-immutable is copy-es; the immutability
+; in its name is not promised.
+($define! copy-es-immutable copy-es)
+
+; ---- §6.9.1 for-each
+; Every argument must be a list of the same shape -- same length, or for a cycle
+; the same prefix and cycle lengths -- then f is called once per position in the
+; caller's environment and the answers dropped.
+($define! single-shape
+  ($lambda (x)
+    ($let (((p n a c) (get-list-metrics x)))
+      ($if ($or (> n 0) (> c 0)) (list p n a c) #f))))
+($define! all-same-shape?
+  ($lambda (shape ls)
+    ($if (null? ls)
+      #t
+      ($if (equal? shape (single-shape (car ls)))
+        (all-same-shape? shape (cdr ls))
+        #f))))
+($define! cars-of
+  ($lambda (ls)
+    ($if (null? ls) () (cons (car (car ls)) (cars-of (cdr ls))))))
+($define! cdrs-of
+  ($lambda (ls)
+    ($if (null? ls) () (cons (cdr (car ls)) (cdrs-of (cdr ls))))))
+($define! for-each-n
+  ($lambda (f ls n)
+    ($if (= n 0)
+      #inert
+      ($sequence
+        (apply f (cars-of ls))
+        (for-each-n f (cdrs-of ls) (- n 1))))))
+($define! for-each
+  (wrap ($vau (f . lists) env
+    ($if (null? lists)
+      (problem ($quote type) (list f) ())
+      ($let ((shape (single-shape (car lists))))
+        ($if (eq? shape #f)
+          (problem ($quote type) (list (car lists)) ())
+          ($if (all-same-shape? shape (cdr lists))
+            ($sequence
+              (for-each-n (fixenv f env) lists (car shape))
+              #inert)
+            (problem ($quote type) lists ()))))))))

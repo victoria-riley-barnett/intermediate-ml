@@ -1,0 +1,722 @@
+{
+ "title": "One encoder block, small enough to read",
+ "subtitle": "CSC 411 · machine learning architectures · slide XI",
+ "blocks": [
+  {
+   "kind": "prose",
+   "html": "<p>Every number in this block has a name, so each one is something you can say out loud. Step the run and watch each part fill in, or click a box in the diagram to see its numbers at the step you are on.</p>"
+  },
+  {
+   "kind": "heading",
+   "level": 1,
+   "text": "One encoder block (pre-norm)"
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "The block"
+  },
+  {
+   "kind": "diagram",
+   "id": "d4",
+   "title": "encoder block (pre-norm)",
+   "spec": "box x | x | io | embed | embed\nbox ln1 | LN | g | norm | norm:1\nbox mha | Multi-Head Attention | w+ | attention | score weights head attn | | Wq-1 Wk-1 Wv-1 Wq-2 Wk-2 Wv-2 Wo\nbox add1 | ⊕ | add | norm | resid:1\nbox ln2 | LN | g | norm | norm:2\nbox ffn | Feed Forward | w | ffn | ffn | | W1 W2\nbox add2 | ⊕ | add | norm | resid:2\nbox out | x2 | io | encoder | resid:2\nflow x ln1 mha add1 ln2 ffn add2 out\nskip x add1 x\nskip add1 add2 x1"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>MODEL  T = 7 positions · d = 11 named features · 2 heads · d_h = 2 · B = 1. Pre-norm, as on the slide and as PyTorch's =norm_first=True=: each sub-layer reads LN of the stream, and its result is added back to the stream.</p>"
+  },
+  {
+   "kind": "prose",
+   "html": "<table><thead><tr><th>term</th><th>equation</th></tr></thead><tbody><tr><td>layer norm</td><td>LN(x) = (x − μ) / σ · γ + β, with γ = 1, β = 0</td></tr><tr><td>attention</td><td>x1 = x + MHA(LN(x))</td></tr><tr><td>feed-forward</td><td>x2 = x1 + FFN(LN(x1))</td></tr><tr><td>FFN</td><td>FFN(x) = ReLU(x W1 + b1) W2 + b2</td></tr><tr><td>one head</td><td>Q = X W_Q, K = X W_K, V = X W_V; A = softmax over j (Q Kᵀ / √d_h); Y = A V</td></tr></tbody></table>"
+  },
+  {
+   "kind": "code",
+   "id": "s7",
+   "lang": "python",
+   "source": "import torch, torch.nn.functional as F\n\ndef block(x, Wq, Wk, Wv, Wo, W1, b1, W2, b2):\n    h = F.layer_norm(x, x.shape[-1:])          # LN, gamma = 1, beta = 0\n    heads = [F.scaled_dot_product_attention(h @ Wq[i], h @ Wk[i], h @ Wv[i],\n                                            scale=1 / 2**0.5)   # d_h = 2\n             for i in range(2)]\n    x1 = x + torch.cat(heads, -1) @ Wo         # x1 = x + MHA(LN(x))\n    h1 = F.layer_norm(x1, x1.shape[-1:])\n    return x1 + torch.relu(h1 @ W1 + b1) @ W2 + b2   # x2 = x1 + FFN(LN(x1))\n\n# nn.TransformerEncoderLayer(d_model, nhead, dim_feedforward, norm_first=True)\n# is this same order; it ties d_h to d_model / nhead, which named features can't.",
+   "caption": "the same block in PyTorch"
+  },
+  {
+   "kind": "prose",
+   "html": "<table><thead><tr><th>symbol</th><th>in plain words</th></tr></thead><tbody><tr><td>x</td><td>the stream: one row of 11 named features per word</td></tr><tr><td>LN(x)</td><td>layer norm: each row shifted to mean 0 and scaled to spread 1</td></tr><tr><td>i, j</td><td>the word asking (query position) and the word asked (key position)</td></tr><tr><td>Q</td><td>query; LN(x) W_Q; what i looks for</td></tr><tr><td>K</td><td>key; LN(x) W_K; what j offers</td></tr><tr><td>V</td><td>value; LN(x) W_V; what j passes on</td></tr><tr><td>A</td><td>weights; softmax over j of Q Kᵀ / √d_h; each row sums to 1</td></tr><tr><td>x1</td><td>the stream after attention: x plus what the heads wrote, through W_O</td></tr><tr><td>x2</td><td>the stream after the feed-forward: the block's output</td></tr><tr><td>d, d_h</td><td>11 features in the stream; each head is 2 wide</td></tr><tr><td>T</td><td>7 positions, one per word</td></tr></tbody></table>"
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "The sentence"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>Seven words. Every word gets a row of named features.</p>"
+  },
+  {
+   "kind": "code",
+   "id": "s11",
+   "lang": "vau",
+   "source": "(def features ($quote (animate noun verb pronoun state function acts described subject pos-sin pos-cos)))\n(def tokens ($quote (the cat sat because it was tired)))\n(def n 7)\n(def dk 2)\n(def heads ($quote (0 1)))",
+   "name": "data"
+  },
+  {
+   "kind": "result",
+   "id": "v12",
+   "view": "tokens",
+   "args": {},
+   "caption": ""
+  },
+  {
+   "kind": "prose",
+   "html": "<p>What each word is before it reads its neighbours. Edit a cell and the next number the run produces will use it.</p>"
+  },
+  {
+   "kind": "table",
+   "id": "t14",
+   "name": "embedding",
+   "header": [
+    "word",
+    "animate",
+    "noun",
+    "verb",
+    "pronoun",
+    "state",
+    "function",
+    "acts",
+    "described",
+    "subject",
+    "pos-sin",
+    "pos-cos"
+   ],
+   "rows": [
+    [
+     "the",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "1",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0"
+    ],
+    [
+     "cat",
+     "1",
+     "1",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0"
+    ],
+    [
+     "sat",
+     "0",
+     "0",
+     "1",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0"
+    ],
+    [
+     "because",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "1",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0"
+    ],
+    [
+     "it",
+     "0",
+     "1",
+     "0",
+     "1",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0"
+    ],
+    [
+     "was",
+     "0",
+     "0",
+     "0.5",
+     "0",
+     "0",
+     "0.5",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0"
+    ],
+    [
+     "tired",
+     "0",
+     "0",
+     "0",
+     "0",
+     "1",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0",
+     "0"
+    ]
+   ],
+   "editable": true,
+   "folded": false
+  },
+  {
+   "kind": "prose",
+   "html": "<p>A small position signal, a quarter of sin and cos of the word's place, written down to three places.</p>"
+  },
+  {
+   "kind": "table",
+   "id": "t16",
+   "name": "positions",
+   "header": [
+    "i",
+    "pos-sin",
+    "pos-cos"
+   ],
+   "rows": [
+    [
+     "0",
+     "0",
+     "0.25"
+    ],
+    [
+     "1",
+     "0.21",
+     "0.135"
+    ],
+    [
+     "2",
+     "0.227",
+     "-0.104"
+    ],
+    [
+     "3",
+     "0.035",
+     "-0.247"
+    ],
+    [
+     "4",
+     "-0.189",
+     "-0.163"
+    ],
+    [
+     "5",
+     "-0.24",
+     "0.071"
+    ],
+    [
+     "6",
+     "-0.07",
+     "0.24"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "Arithmetic"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>The arithmetic the model is made of. The numbers here are exact (whole numbers and fractions), so <code>fx</code> rounds to three places, and <code>exp</code> and <code>sqrt</code> are written out: a Taylor series and Newton's method. The step keys pass over this part.</p>"
+  },
+  {
+   "kind": "code",
+   "id": "s19",
+   "lang": "vau",
+   "source": "(def (fx x) (/ (round (* x 1000)) 1000))\n(def (fx6 x) (/ (round (* x 1000000)) 1000000))\n\n(def (at xs i) (if (= i 0) (car xs) (at (cdr xs) (- i 1))))\n(def (range n) (range-from 0 n))\n(def (range-from i n) (if (< i n) (cons i (range-from (+ i 1) n)) ()))\n(def (sum xs) (if (null? xs) 0 (+ (car xs) (sum (cdr xs)))))\n(def (zeros k) (if (= k 0) () (cons 0 (zeros (- k 1)))))\n(def (index-of xs x) (if (equal? (car xs) x) 0 (+ 1 (index-of (cdr xs) x))))\n(def (argmax xs) (index-of xs (apply max xs)))\n\n; the row of a table whose first element is key, or () when there is none\n(def (row-of table key)\n  (if (null? table) ()\n      (equal? (car (car table)) key) (car table)\n      (row-of (cdr table) key)))\n\n; the number a vector holds for a named feature\n(def (feat x f) (at x (index-of features f)))\n\n; the four weight tables of head h, h = 0 or 1\n(def (Wq h) (at (list Wq-1 Wq-2) h))\n(def (Wk h) (at (list Wk-1 Wk-2) h))\n(def (Wv h) (at (list Wv-1 Wv-2) h))\n\n; the 11-vector for a word, and the position's two numbers padded out to 11\n(def (E w) (cdr (row-of embedding w)))\n(def (P i) (append (zeros 9) (cdr (row-of positions i))))\n\n; exp, for x <= 0: halve until |y| <= 1/2, Taylor series, square back up\n(def (exp x)\n  (if (< x -20) 0 (exp-halved (fx6 x) 0)))\n(def (exp-halved y halvings)\n  (if (> (abs y) 1/2)\n      (exp-halved (/ y 2) (+ halvings 1))\n      (exp-squared (exp-taylor y 1 1 1) halvings)))\n(def (exp-taylor y k term acc)\n  (if (> k 8) acc\n      ($let* ((t (fx6 (/ (* term y) k))))\n        (exp-taylor y (+ k 1) t (+ acc t)))))\n(def (exp-squared e halvings)\n  (if (= halvings 0) (fx6 e) (exp-squared (fx6 (* e e)) (- halvings 1))))\n\n; sqrt by Newton's method on rationals, rounded each step\n(def (sqrt a)\n  (if (> a 0) (sqrt-newton a (/ (+ a 1) 2) 12) 0))\n(def (sqrt-newton a x k)\n  (if (= k 0) x\n      (sqrt-newton a (fx6 (/ (+ x (/ a x)) 2)) (- k 1))))\n\n; the sum, over the rows of a sparse input-keyed table, of (x[feature] * weights)\n(def (project x W)\n  (map fx (project-rows x W (zeros (- (length (car W)) 1)))))\n(def (project-rows x W acc)\n  (if (null? W) acc\n      (project-rows x (cdr W)\n        (map + acc (map (fn (w) (* (feat x (car (car W))) w)) (cdr (car W)))))))\n\n(def (dot a b) (fx (sum (map * a b))))\n\n(def (softmax xs)\n  ($let* ((m (apply max xs))\n          (es (map (fn (v) (exp (fx6 (- v m)))) xs))\n          (z (sum es)))\n    (map (fn (e) (fx (/ e z))) es)))\n\n; sum of w[j] * vs[j]\n(def (weighted-sum w vs)\n  (map fx (weighted-rows w vs (zeros (length (car vs))))))\n(def (weighted-rows w vs acc)\n  (if (null? w) acc\n      (weighted-rows (cdr w) (cdr vs)\n        (map + acc (map (fn (v) (* (car w) v)) (car vs))))))\n\n; the 4 head outputs, concatenated, through Wo: one number per feature\n(def (out-proj hs)\n  ($let* ((cat (apply append hs)))\n    (map (fn (f)\n           (fx (sum (map * cat (cdr-or-zeros (row-of Wo f) (length cat))))))\n         features)))\n(def (cdr-or-zeros row k) (if (null? row) (zeros k) (cdr row)))\n\n(def (layer-norm x)\n  ($let* ((d (length x))\n          (mu (/ (sum x) d))\n          (dev (map (fn (v) (fx (- v mu))) x))\n          (var (fx6 (+ (/ (sum (map (fn (v) (fx6 (* v v))) dev)) d) 1/100000)))\n          (sd (sqrt var)))\n    (map (fn (v) (fx (/ v sd))) dev)))\n\n; hidden = relu(x W1 + b1), out = hidden W2 + b2; answers (hidden out)\n(def (mlp W1 b1 W2 b2 x)\n  ($let* ((pre (map + (project x W1) b1))\n          (hidden (map (fn (v) (if (> v 0) v 0)) pre)))\n    (list hidden\n          (map + b2\n               (map (fn (f)\n                      (fx (sum (map * hidden (cdr-or-zeros (row-of W2 f) (length hidden))))))\n                    features)))))\n\n(def (vadd x y) (map + x y))\n\n; a trace event that is also a place to stop: (note kind info v) asks the host to go on with v, and answers what the\n; host gives back. The host gives v back -- unless you fork there with another value.\n(def (note kind info v) (yield (list ($quote %note) kind info v)))",
+   "folded": true
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "Embed"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>A word's row is its embedding plus its position signal in the last two columns.</p>"
+  },
+  {
+   "kind": "code",
+   "id": "s22",
+   "lang": "vau",
+   "source": "(def (embed i)\n  ($let* ((v (vadd (E (at tokens i)) (P i))))\n    (note ($quote embed) (list i v) v)))",
+   "name": "embed"
+  },
+  {
+   "kind": "result",
+   "id": "v23",
+   "view": "matrix",
+   "args": {
+    "of": "embed"
+   },
+   "caption": "x: one row per word"
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "LN, then multi-head attention"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>Each sub-layer reads the stream through a layer norm: every row shifted to mean 0 and scaled to spread 1. Zero features become slightly negative, so the weights below are smaller than they would be on raw rows.</p>"
+  },
+  {
+   "kind": "code",
+   "id": "s26",
+   "lang": "vau",
+   "source": "; PRE-norm: each sub-layer reads LN(x) and its result is ADDED to the un-normalised x.\n; which = 1 before attention, 2 before the feed-forward; i = the token\n(def (pre-norm which i x)\n  ($let* ((v (layer-norm x)))\n    (note ($quote norm) (list which i v) v)))\n\n; the residual stream after a sub-layer: x + sublayer(LN(x)); which = 1 is x1 (after attention), 2 is x2 (after the feed-forward)\n(def (add-resid which i x y)\n  ($let* ((v (vadd x y)))\n    (note ($quote resid) (list which i v) v)))",
+   "name": "norm"
+  },
+  {
+   "kind": "result",
+   "id": "v27",
+   "view": "matrix",
+   "args": {
+    "of": "norm",
+    "which": "1"
+   },
+   "caption": "LN(x): what attention reads"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>Each word asks a question (its query), every word offers an answer (its key), and the word takes a blend of the others' values, weighted by how well the answers fit. Two heads ask two different questions. The slider sets <code>temperature</code>; moving it re-runs what reads it. The card at the bottom of the page drops the <code>√d_h</code> scaling and runs the block without it, so you can see which words change their mind before you accept the change.</p>"
+  },
+  {
+   "kind": "control",
+   "id": "u29",
+   "controls": [
+    {
+     "kind": "slider",
+     "name": "temperature",
+     "min": "1/4",
+     "max": "2",
+     "step": "1/4",
+     "init": "1"
+    }
+   ]
+  },
+  {
+   "kind": "code",
+   "id": "s30",
+   "lang": "vau",
+   "source": "; X here is the pre-normalised rows LN(x), one per token\n(def (weights X h i)\n  ($let* ((q (project (at X i) (Wq h)))\n          (scores (map (fn (j)\n                         ($let* ((k (project (at X j) (Wk h)))\n                                 (raw (/ (dot q k) (* temperature (sqrt dk)))))\n                           (note ($quote score) (list h i j raw q k (map * q k)) raw)))\n                       (range n)))\n          (w (softmax scores)))\n    (note ($quote weights) (list h i scores w) w)))\n\n(def (attend X h i)\n  ($let* ((v (weighted-sum (weights X h i)\n                           (map (fn (j) (project (at X j) (Wv h)))\n                                (range n)))))\n    (note ($quote head) (list h i v) v)))\n\n(def (attention X i)\n  ($let* ((a (out-proj (map (fn (h) (attend X h i)) heads))))\n    (note ($quote attn) (list i a) a)))",
+   "name": "attention"
+  },
+  {
+   "kind": "heading",
+   "level": 3,
+   "text": "Head 1: who is \"it\"?"
+  },
+  {
+   "kind": "result",
+   "id": "v32",
+   "view": "attention",
+   "args": {
+    "head": "0"
+   },
+   "caption": "A, head 1: rows ask, columns answer"
+  },
+  {
+   "kind": "table",
+   "id": "t33",
+   "name": "Wq-1",
+   "header": [
+    "feature",
+    "seeks animate",
+    "seeks noun"
+   ],
+   "rows": [
+    [
+     "pronoun",
+     "0.75",
+     "0.5"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "table",
+   "id": "t34",
+   "name": "Wk-1",
+   "header": [
+    "feature",
+    "offers animate",
+    "offers noun"
+   ],
+   "rows": [
+    [
+     "animate",
+     "1",
+     "0"
+    ],
+    [
+     "noun",
+     "0",
+     "0.5"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "table",
+   "id": "t35",
+   "name": "Wv-1",
+   "header": [
+    "feature",
+    "animal",
+    "thing"
+   ],
+   "rows": [
+    [
+     "animate",
+     "1",
+     "0"
+    ],
+    [
+     "noun",
+     "0",
+     "1"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "heading",
+   "level": 3,
+   "text": "Head 2: what happened to it?"
+  },
+  {
+   "kind": "result",
+   "id": "v37",
+   "view": "attention",
+   "args": {
+    "head": "1"
+   },
+   "caption": "A, head 2: rows ask, columns answer"
+  },
+  {
+   "kind": "table",
+   "id": "t38",
+   "name": "Wq-2",
+   "header": [
+    "feature",
+    "seeks action",
+    "seeks state"
+   ],
+   "rows": [
+    [
+     "noun",
+     "0.75",
+     "0"
+    ],
+    [
+     "pronoun",
+     "-0.75",
+     "0.75"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "table",
+   "id": "t39",
+   "name": "Wk-2",
+   "header": [
+    "feature",
+    "offers action",
+    "offers state"
+   ],
+   "rows": [
+    [
+     "verb",
+     "1",
+     "0"
+    ],
+    [
+     "state",
+     "0",
+     "1"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "table",
+   "id": "t40",
+   "name": "Wv-2",
+   "header": [
+    "feature",
+    "action",
+    "state"
+   ],
+   "rows": [
+    [
+     "verb",
+     "1",
+     "0"
+    ],
+    [
+     "state",
+     "0",
+     "1"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "heading",
+   "level": 3,
+   "text": "Heads joined, and added back"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>W_O writes the heads' outputs into the word's own feature columns: head 1's <code>animal</code> lands in <code>animate</code>, head 2's <code>action</code> and <code>state</code> land in <code>acts</code> and <code>described</code>. Then x1 = x + that.</p>"
+  },
+  {
+   "kind": "table",
+   "id": "t43",
+   "name": "Wo",
+   "header": [
+    "feature",
+    "h1 animal",
+    "h1 thing",
+    "h2 action",
+    "h2 state"
+   ],
+   "rows": [
+    [
+     "animate",
+     "1",
+     "0",
+     "0",
+     "0"
+    ],
+    [
+     "acts",
+     "0",
+     "0",
+     "1",
+     "0"
+    ],
+    [
+     "described",
+     "0",
+     "0",
+     "0",
+     "1"
+    ]
+   ],
+   "editable": true,
+   "folded": false
+  },
+  {
+   "kind": "result",
+   "id": "v44",
+   "view": "matrix",
+   "args": {
+    "of": "attn"
+   },
+   "caption": "MHA(LN(x)): what attention adds to each word"
+  },
+  {
+   "kind": "result",
+   "id": "v45",
+   "view": "matrix",
+   "args": {
+    "of": "resid",
+    "which": "1"
+   },
+   "caption": "x1 = x + MHA(LN(x))"
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "LN, then feed-forward"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>Two hidden neurons look at each word on its own, through another layer norm. <b>doer</b> fires for an animate word that acts; <b>one described</b> fires for an animate word that has a state. Both write into <code>subject</code>. Here <b>doer</b> fires for &quot;cat&quot; and for &quot;it&quot; (which head 1 filled with cat's animacy), and <b>one described</b> fires for &quot;it&quot; once head 2 has brought in &quot;tired&quot;.</p>"
+  },
+  {
+   "kind": "result",
+   "id": "v48",
+   "view": "matrix",
+   "args": {
+    "of": "norm",
+    "which": "2"
+   },
+   "caption": "LN(x1): what the feed-forward reads"
+  },
+  {
+   "kind": "code",
+   "id": "s49",
+   "lang": "vau",
+   "source": "(def b1 ($quote (-1/2 -1)))\n(def b2 ($quote (0 0 0 0 0 0 0 0 0 0 0)))\n(def (ffn i x)\n  ($let* ((r (mlp W1 b1 W2 b2 x)))\n    (note ($quote ffn) (list i (car r) (car (cdr r))) (car (cdr r)))))",
+   "name": "ffn"
+  },
+  {
+   "kind": "result",
+   "id": "v50",
+   "view": "ffn",
+   "args": {},
+   "caption": "ReLU(x W1 + b1): the hidden neurons"
+  },
+  {
+   "kind": "table",
+   "id": "t51",
+   "name": "W1",
+   "header": [
+    "feature",
+    "doer",
+    "one-described"
+   ],
+   "rows": [
+    [
+     "animate",
+     "1",
+     "0"
+    ],
+    [
+     "acts",
+     "0.5",
+     "0"
+    ],
+    [
+     "described",
+     "0",
+     "1"
+    ]
+   ],
+   "editable": true,
+   "folded": true
+  },
+  {
+   "kind": "table",
+   "id": "t52",
+   "name": "W2",
+   "header": [
+    "feature",
+    "doer",
+    "one-described"
+   ],
+   "rows": [
+    [
+     "subject",
+     "3",
+     "5"
+    ]
+   ],
+   "editable": true,
+   "folded": false
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "The encoder block"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>LN, attention, add; LN, feed-forward, add; for every word. The run below walks the whole block: step it with the buttons on the result, or from the diagram at the top.</p>"
+  },
+  {
+   "kind": "code",
+   "id": "s55",
+   "lang": "vau",
+   "source": "(def (encoder X)\n  ($let* ((N1 (map (fn (i) (pre-norm 1 i (at X i))) (range n)))\n          (A (map (fn (i) (add-resid 1 i (at X i) (attention N1 i)))\n                  (range n)))\n          (N2 (map (fn (i) (pre-norm 2 i (at A i))) (range n)))\n          (F (map (fn (i) (add-resid 2 i (at A i) (ffn i (at N2 i))))\n                  (range n))))\n    F))",
+   "name": "encoder"
+  },
+  {
+   "kind": "code",
+   "id": "s56",
+   "lang": "vau",
+   "source": "(encoder (map embed (range n)))",
+   "run": true
+  },
+  {
+   "kind": "result",
+   "id": "v57",
+   "view": "matrix",
+   "args": {
+    "of": "resid",
+    "which": "2"
+   },
+   "caption": "x2: the block's output, one row per word"
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "Stop early with call/cc"
+  },
+  {
+   "kind": "prose",
+   "html": "<p><code>return</code> is the rest of the computation, held as a value. The scan calls it as soon as head 1 is sure about some word, and everything after is skipped.</p>"
+  },
+  {
+   "kind": "code",
+   "id": "s61",
+   "lang": "vau",
+   "source": "; X = the embedded rows; attention reads LN(x), so normalise them first (silently: no notes)\n(def (first-sure h X)\n  (call/cc (fn (k)\n    (with return (continuation->applicative k)\n      ($sequence\n        (map (fn (i)\n               ($let* ((w (weights (map layer-norm X) h i)))\n                 (if (> (apply max w) 3/5)\n                     (return (list (at tokens i) ($quote reads) (at tokens (argmax w))))\n                     0)))\n             (range n))\n        ($quote none))))))"
+  },
+  {
+   "kind": "code",
+   "id": "s62",
+   "lang": "vau",
+   "source": "(first-sure 0 (map embed (range n)))",
+   "run": true
+  },
+  {
+   "kind": "heading",
+   "level": 2,
+   "text": "A proposal"
+  },
+  {
+   "kind": "prose",
+   "html": "<p>Asked to &quot;try it without the √d_h scaling&quot;, a proposal arrives with the attention block changed. It has already run in a copy of this block, so you see what changes before you accept it.</p>"
+  },
+  {
+   "kind": "proposal",
+   "id": "p65",
+   "title": "drop the √d_h scaling",
+   "replaces": "attention",
+   "source": "; X here is the pre-normalised rows LN(x), one per token\n(def (weights X h i)\n  ($let* ((q (project (at X i) (Wq h)))\n          (scores (map (fn (j)\n                         ($let* ((k (project (at X j) (Wk h)))\n                                 (raw (/ (dot q k) temperature)))\n                           (note ($quote score) (list h i j raw q k (map * q k)) raw)))\n                       (range n)))\n          (w (softmax scores)))\n    (note ($quote weights) (list h i scores w) w)))\n\n(def (attend X h i)\n  ($let* ((v (weighted-sum (weights X h i)\n                           (map (fn (j) (project (at X j) (Wv h)))\n                                (range n)))))\n    (note ($quote head) (list h i v) v)))\n\n(def (attention X i)\n  ($let* ((a (out-proj (map (fn (h) (attend X h i)) heads))))\n    (note ($quote attn) (list i a) a)))"
+  }
+ ]
+}

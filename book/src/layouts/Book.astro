@@ -1,0 +1,32 @@
+---
+import 'katex/dist/katex.min.css';
+import '../atoms/atoms.css';
+import '../styles/book.css';
+import { url } from '../lib/book';
+
+interface Props {
+  title: string;
+  description?: string;
+  noindex?: boolean;
+}
+const { title, description = 'Intermediate machine learning, from tensors to the encoder.', noindex = false } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="stylesheet" href={url('fonts/fonts.css')} />
+  </head>
+  <body>
+    <header class="masthead">
+      <a href={url('/')}>Intermediate Machine Learning</a>
+    </header>
+    <main class="page">
+      <slot />
+    </main>
+  </body>
+</html>

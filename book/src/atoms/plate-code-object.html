@@ -1,0 +1,79 @@
+<figure data-atom="code-object" data-source="admin/diagrams/code-object.html" aria-label="The count outlives the call that changed it" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 655" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="code-object-title code-object-desc" style="display:block;width:100%;height:auto;max-width:100%">
+  <title id="code-object-title">The count outlives the call that changed it</title>
+  <desc id="code-object-desc">The week-00 lab's Counter class, 9 lines, beside a table of what its one attribute holds after each call. The listing is the lab's text verbatim; 3 of its lines read or write self.count and are marked with an accent bar and a note, and the other 6 are the class line, 3 signatures and 2 blank lines. Below a rule in the same panel, the same two operations are written as functions that take a count and return a new one. The table has 4 rows: the line that creates the count, then 3 calls. Its two call columns are the same calls written both ways, and its last column is the count before and after each call: 0, then 1, 2, 0. Each call finds the value the call above it left: row 3 finds 1; row 4 finds 2. Both columns give the same 3 counts. The call site with an object names the count 0 times; the call site passing it names it 2. Nothing here claims the class is the better answer, nothing about inheritance or visibility is drawn, and self.count is a plain attribute, not a hidden one.</desc>
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+  <text x="120" y="44" font-size="10" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">LISTING &middot; class Counter</text>
+  <rect x="120" y="56" width="580" height="346" rx="8" fill="#eaeaee"/>
+  <text x="152" y="86" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">1</text>
+  <text x="152" y="105" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">2</text>
+  <text x="152" y="124" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">3</text>
+  <text x="152" y="143" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">4</text>
+  <text x="152" y="162" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">5</text>
+  <text x="152" y="181" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">6</text>
+  <text x="152" y="200" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">7</text>
+  <text x="152" y="219" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">8</text>
+  <text x="152" y="238" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">9</text>
+  <text x="168" y="86" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">class</tspan> Counter:</text>
+  <text x="168" y="105" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">def</tspan> __init__(<tspan fill="#1f232f" font-weight="500">self</tspan>, start=<tspan fill="#4f5d75">0</tspan>):</text>
+  <text x="168" y="124" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">self</tspan>.count = start</text>
+  <text x="168" y="143" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"></text>
+  <text x="168" y="162" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">def</tspan> bump(<tspan fill="#1f232f" font-weight="500">self</tspan>):</text>
+  <text x="168" y="181" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">self</tspan>.count += <tspan fill="#4f5d75">1</tspan></text>
+  <text x="168" y="200" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"></text>
+  <text x="168" y="219" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">def</tspan> reset(<tspan fill="#1f232f" font-weight="500">self</tspan>):</text>
+  <text x="168" y="238" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">self</tspan>.count = <tspan fill="#4f5d75">0</tspan></text>
+  <rect x="132" y="113" width="3" height="15" fill="#bf4520"/>
+  <text x="470" y="124" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#bf4520">writes count</text>
+  <rect x="132" y="170" width="3" height="15" fill="#bf4520"/>
+  <text x="470" y="181" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#bf4520">reads count, writes it</text>
+  <rect x="132" y="227" width="3" height="15" fill="#bf4520"/>
+  <text x="470" y="238" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#bf4520">writes count</text>
+  <line x1="136" y1="258" x2="684" y2="258" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+  <text x="136" y="280" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">THE SAME COUNT, AS FUNCTIONS, PASSING IT ALONG</text>
+  <text x="168" y="304" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">def</tspan> bump(count):</text>
+  <text x="168" y="323" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">return</tspan> count + <tspan fill="#4f5d75">1</tspan></text>
+  <text x="168" y="342" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"></text>
+  <text x="168" y="361" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">def</tspan> reset(count):</text>
+  <text x="168" y="380" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">&#160;&#160;&#160;&#160;<tspan fill="#1f232f" font-weight="500">return</tspan> <tspan fill="#4f5d75">0</tspan></text>
+  <text x="740" y="44" font-size="10" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">STATE &middot; self.count AFTER EACH CALL</text>
+  <rect x="740" y="56" width="450" height="246" rx="8" fill="#eaeaee"/>
+  <text x="768" y="96" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">WITH AN OBJECT</text>
+  <text x="912" y="96" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">PASSING THE COUNT</text>
+  <text x="1170" y="96" text-anchor="end" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">COUNT &middot; BEFORE &rarr; AFTER</text>
+  <line x1="756" y1="112" x2="1174" y2="112" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+  <text x="768" y="146" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">c = Counter()</text>
+  <text x="912" y="146" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">count = 0</text>
+  <text x="1170" y="146" text-anchor="end" font-size="14" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">0</text>
+  <text x="768" y="190" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">c.bump()</text>
+  <text x="912" y="190" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">count = bump(count)</text>
+  <text x="1170" y="190" text-anchor="end" font-size="14" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">0 &rarr; 1</text>
+  <text x="768" y="234" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">c.bump()</text>
+  <text x="912" y="234" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">count = bump(count)</text>
+  <text x="1170" y="234" text-anchor="end" font-size="14" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">1 &rarr; 2</text>
+  <text x="768" y="278" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">c.reset()</text>
+  <text x="912" y="278" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">count = reset(count)</text>
+  <text x="1170" y="278" text-anchor="end" font-size="14" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">2 &rarr; 0</text>
+  <line x1="756" y1="168" x2="1174" y2="168" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+  <line x1="740" y1="320" x2="1190" y2="320" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+  <text x="740" y="342" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">WHAT THE TABLE SHOWS</text>
+  <text x="832" y="368" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">AFTER</text>
+  <text x="846" y="368" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the value the next call finds, directly below</text>
+  <text x="832" y="394" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">OBJECT</text>
+  <text x="846" y="394" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">c.bump() names no state; the class names it</text>
+  <text x="832" y="420" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">FUNCTION</text>
+  <text x="846" y="420" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">count = bump(count): in and back out</text>
+  <text x="120" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the class is verbatim from weeks/week00_oop/lab.md, 9 lines; the sequence it is called in here &mdash; bump, bump, reset &mdash; is this figure's, not the lab's</text>
+  <text x="120" y="471" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the function listing is not in the lab: it is the same two operations returning a value instead of storing one, and it is run, not asserted</text>
+  <text x="120" y="489" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">both columns give the same 3 counts; the figure compares where the count lives, not which version is right</text>
+  <text x="120" y="507" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">self.count is a plain attribute &mdash; set in __init__, assigned in both methods &mdash; and nothing hides it</text>
+  <text x="120" y="525" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">no base class and no other attribute in the listing, so the figure draws no inheritance and no visibility</text>
+  <line x1="120" y1="549" x2="1190" y2="549" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+  <text x="120" y="573" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">MARKS</text>
+  <rect x="120" y="585" width="3" height="15" fill="#bf4520"/>
+  <text x="176" y="597" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the 3 lines that read or write self.count; the other 6 are the class line, 3 signatures, 2 blank lines</text>
+  <text x="120" y="621" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">SELF</text>
+  <text x="176" y="621" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the instance the method was called on; count is the only attribute this class stores on it</text>
+</svg>
+
+</figure>

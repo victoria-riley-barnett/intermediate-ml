@@ -1,0 +1,222 @@
+; The edit surface for one outline item: its source as text, and a commit
+; redefining just that item in its own scope. Nothing else re-runs and state
+; survives: a fork (ask, 050) tries it first, and it is made only if that ends cleanly.
+;
+;   (item-editable? root path)       #t for a closure, a value, a string or a body form; #f for a scope and a path that leads nowhere
+;   (item-text root path)            the item's source, pretty-printed (width 72); "" if there is none; (pretty form [width]) is that layout,
+;                                    width 72 if none
+;   (try-commit root path form [budget])  "ok", or "stopped: <one line>"; a refused commit changes nothing. form is an already-read
+;                                    ($define! name expr) naming the path's last element; the fork runs budget steps (default 200000)
+;
+; TEXT: a closure prints as ($define! name ($lambda ptree body...)) or
+; ($vau ptree eparam body...), a body form as itself, a value as ($define!
+; name VALUE), VALUE $quote)d unless it reads back as itself (a symbol, ()
+; or any pair at any depth), and printed whole, which `show` does not do.
+; LIMITS: a closure or environment inside a value prints as <ap> <op>
+; <environment> and does not read back; a cyclic value never finishes; a
+; closure's environment is not part of its source, the edited one being
+; made in the scope it lives in. LAYOUT: one line if it fits the width,
+; else the head and its first argument on the first line and each other
+; argument 2 columns in, or one element a line, 1 column in, when the head
+; is no symbol. COMMIT: a second $define! would add a row beside the first,
+; so the value goes into the binding that is there; a name not there yet is
+; defined. ask runs in the language, SLOW (about 1 s per 10k steps): fine
+; for one definition, made and not run; not for a top-level expression.
+; Needs core, cek, page, ask (050), scope (090), view (070), primary (097).
+
+($define! it-rep
+  ($lambda (s n) ($if (> n 0) (string-append s (it-rep s (- n 1))) "")))
+($define! it-atom
+  ($lambda (v)
+    ($cond ((eq? v #t) "#t") ((eq? v #f) "#f") (#t (show v)))))
+; A FORM IS DATA: walk it as pairs, so a list that merely looks like a combiner is still a list; a real combiner is an atom (<ap>) here.
+($define! it-combiner?
+  ($lambda (v) ($and (v-closure? v) (v-sym? (v-kind v)))))
+($define! it-list? ($lambda (v) ($and (pair? v) (not (it-combiner? v)))))
+($define! it-flat
+  ($lambda (v) ($if (it-list? v) (it-flat-list v ()) (it-atom v))))
+($define! it-flat-list
+  ($lambda (rest parts)
+    ($if (it-list? rest)
+      (it-flat-list (cdr rest) (cons (it-flat (car rest)) parts))
+      (string-append "("
+        (string-append (v-join (rev parts) " ")
+          ($if (v-nil? rest)
+            ")"
+            (string-append " . " (string-append (it-atom rest) ")"))))))))
+; the elements of a proper list, or #f
+($define! it-proper
+  ($lambda (v acc)
+    ($if (it-list? v)
+      (it-proper (cdr v) (cons (car v) acc))
+      ($if (v-nil? v) (rev acc) #f))))
+($define! it-lines
+  ($lambda (xs col w)
+    ($if (null? xs)
+      ""
+      (string-append "\n"
+        (string-append (it-rep " " col)
+          (string-append (it-pp (car xs) col w)
+            (it-lines (cdr xs) col w)))))))
+($define! it-break
+  ($lambda (v col w)
+    (($lambda (xs)
+       ($cond ((not (it-list? v)) (it-atom v))
+         ((eq? xs #f) (it-flat v))
+         ((null? (cdr xs))
+          (string-append "("
+            (string-append (it-pp (car xs) (+ col 1) w) ")")))
+         ((it-list? (car xs))
+          (string-append "("
+            (string-append (it-pp (car xs) (+ col 1) w)
+              (string-append (it-lines (cdr xs) (+ col 1) w) ")"))))
+         (#t (string-append "("
+               (string-append (it-atom (car xs))
+                 (string-append " "
+                   (string-append (it-pp (cadr xs)
+                                    (+ col
+                                      (+ 2
+                                        (string-length (it-atom (car xs)))))
+                                    w)
+                     (string-append (it-lines (cdr (cdr xs))
+                                      (+ col 2)
+                                      w)
+                       ")"))))))))
+     (it-proper v ()))))
+($define! it-pp
+  ($lambda (v col w)
+    (($lambda (flat)
+       ($if (> (+ col (string-length flat)) w) (it-break v col w) flat))
+     (it-flat v))))
+($define! pretty
+  ($lambda (form . rest)
+    (it-pp form 0 ($if (null? rest) 72 (car rest)))))
+
+; ---- the item: (found kind value), kind one of scope closure string value form
+($define! it-lookup
+  ($lambda (root path)
+    ($if (null? path)
+      (list #f () ())
+      (($lambda (p n)
+         ($cond ((scope? p)
+                 ($if (it-has? (outline p) n)
+                   (($lambda (v)
+                      ($if ($or (eq? v #t) (eq? v #f))
+                        (list #t ($quote value) v)
+                        (list #t (kind-of v) v)))
+                    (value-in (cdr (car p)) n))
+                   (list #f () ())))
+           ((tagged-c? p)
+            ($if ($and (number? n)
+                   ($and (>= n 0)
+                     (< n (pm-len (entries-at root (pm-init path))))))
+              (list #t ($quote form) (pm-form p n))
+              (list #f () ())))
+           (#t (list #f () ()))))
+       (pm-resolve root (pm-init path))
+       (last path)))))
+($define! it-has?
+  ($lambda (es n)
+    ($if (null? es)
+      #f
+      ($if (eq? (car (car es)) n) #t (it-has? (cdr es) n)))))
+($define! item-editable?
+  ($lambda (root path)
+    (($lambda (r) ($and (car r) (not (eq? (cadr r) ($quote scope)))))
+     (it-lookup root path))))
+
+($define! it-define
+  ($lambda (name expr) (list ($quote $define!) name expr)))
+($define! it-quoted
+  ($lambda (v)
+    ($if ($or (it-list? v) ($or (v-nil? v) (v-sym? v)))
+      (list ($quote $quote) v)
+      v)))
+($define! it-closure-form
+  ($lambda (name c)
+    (($lambda (op)
+       ($if (eq? (cadr c) ($quote ap))
+         (it-define name
+           (cons ($quote $lambda) (cons (pm-nth op 2) (pm-nth op 4))))
+         (it-define name
+           (cons ($quote $vau)
+             (cons (pm-nth op 2) (cons (pm-nth op 3) (pm-nth op 4)))))))
+     (pm-op c))))
+($define! item-text
+  ($lambda (root path)
+    (($lambda (r)
+       ($cond ((not (car r)) "")
+         ((eq? (cadr r) ($quote form)) (pretty (caddr r) 72))
+         ((eq? (cadr r) ($quote closure))
+          (pretty (it-closure-form (last path) (caddr r)) 72))
+         ((eq? (cadr r) ($quote scope)) "")
+         (#t (pretty (it-define (last path) (it-quoted (caddr r))) 72))))
+     (it-lookup root path))))
+
+; ---- commit
+($define! it-clip
+  ($lambda (s)
+    ($if (> (string-length s) 80)
+      (string-append (substring s 0 77) "...")
+      s)))
+($define! it-describe
+  ($lambda (halt budget)
+    ($if (eq? (car halt) ($quote Y))
+      (($lambda (out)
+         ($cond ((not (pair? out))
+                 (string-append "waiting: " (it-clip (it-flat out))))
+           ((eq? (car out) ($quote unbound))
+            (string-append (symbol->string (cadr out))
+              " is not defined"))
+           ((eq? (car out) ($quote problem))
+            (it-clip (string-append "problem " (it-flat (cdr out)))))
+           (#t (string-append "waiting: " (it-clip (it-flat out))))))
+       (cadr halt))
+      (string-append "out of steps (budget "
+        (string-append (number->string budget) ")")))))
+($define! it-defines?
+  ($lambda (form name)
+    ($if (it-list? form)
+      ($if (eq? (car form) ($quote $define!))
+        ($if (it-list? (cdr form))
+          ($if (eq? (cadr form) name)
+            ($if (it-list? (cdr (cdr form)))
+              (v-nil? (cdr (cdr (cdr form))))
+              #f)
+            #f)
+          #f)
+        #f)
+      #f)))
+($define! it-binding
+  ($lambda (bs name)
+    ($if (null? bs)
+      ()
+      ($if (eq? (car (car bs)) name)
+        (car bs)
+        (it-binding (cdr bs) name)))))
+($define! it-install!
+  ($lambda (env name form)
+    (($lambda (b)
+       ($if (null? b)
+         (progn (eval form env) ())
+         (set-cdr! b (eval (caddr form) env))))
+     (it-binding (cdr (car env)) name))))
+($define! try-commit
+  ($lambda (root path form . rest)
+    (($lambda (budget)
+       ($cond ((null? path) "stopped: there is no item to commit to")
+         ((not (number? budget)) "stopped: the budget must be a number")
+         ((not (scope? (pm-resolve root (pm-init path))))
+          "stopped: its scope is not there")
+         ((not (it-defines? form (last path)))
+          (string-append "stopped: the form must define "
+            (pm-name (last path))))
+         (#t (($lambda (env)
+                (($lambda (halt)
+                   ($if (null? halt)
+                     (progn (it-install! env (last path) form) "ok")
+                     (string-append "stopped: "
+                       (it-describe halt budget))))
+                 (field (ask form (fork env) budget) ($quote halt))))
+              (env-at root (pm-init path))))))
+     ($if (null? rest) 200000 (car rest)))))

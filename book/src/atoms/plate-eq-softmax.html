@@ -1,0 +1,64 @@
+<figure data-atom="eq-softmax" data-source="admin/diagrams/eq-softmax.html" aria-label="Softmax" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 632" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-softmax--softmax-title eq-softmax--softmax-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="eq-softmax--softmax-title">Softmax</title>
+        <desc id="eq-softmax--softmax-desc">Softmax, p i equals e to the z i divided by the sum over j of e to the z j. Five symbols are defined: p i one probability, z i one score, e the base 2.718, the sum over j, and the two indices i and j. Worked on three scores 0, 1 and 2: the exponentials are 1.000, 2.718 and 7.389, they add to 11.107, and dividing each by 11.107 gives 0.090, 0.245 and 0.665, which add to 1.000. e to the z overflows to infinity, and infinity over infinity is not a number, so the largest score is subtracted first.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+                <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520">p</tspan><tspan font-size="19" dy="7" fill="#bf4520">i</tspan><tspan dy="-7"> = </tspan>e<tspan font-size="20" dy="-11">z</tspan><tspan font-size="16" dy="5">i</tspan><tspan font-size="30" dy="6"></tspan> / Σ<tspan font-size="19" dy="7">j</tspan><tspan dy="-7"> </tspan>e<tspan font-size="20" dy="-11">z</tspan><tspan font-size="16" dy="5">j</tspan><tspan font-size="30" dy="6"></tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">i is held fixed; j runs over every entry in the sum</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">SYMBOL</text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">NAME</text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WHAT IT IS</text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">p<tspan font-size="10" dy="4">i</tspan><tspan font-size="15" dy="-4"></tspan></text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">one probability</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number, at least 0 and at most 1 — this entry's share of the total</text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">z<tspan font-size="10" dy="4">i</tspan><tspan font-size="15" dy="-4"></tspan></text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">one score</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number, any size, positive or negative — what entry i is worth before normalising</text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">e</text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">base</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number, the constant 2.718 — what every score is raised to</text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">Σ<tspan font-size="10" dy="4">j</tspan><tspan font-size="15" dy="-4"></tspan></text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">sum over j</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a number — one term added per index j, over all three entries</text>
+        <text x="120" y="350" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">i, j</text>
+        <text x="200" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">indices</text>
+        <text x="380" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">indices — which entry is computed, which term is added</text>
+        <line x1="120" y1="372" x2="1160" y2="372" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="406" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">WORKED · THREE SCORES z = (0, 1, 2) · BOXES HOLD 3 DECIMALS, QUOTIENTS 5 · taken before rounding, so dividing the boxes is off in the last digit</text>
+        <text x="210" y="434" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end">z<tspan font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">  scores</tspan></text>
+        <rect x="224" y="418" width="92" height="24" rx="3" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="270.0" y="434" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0</text>
+        <rect x="324" y="418" width="92" height="24" rx="3" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="370.0" y="434" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1</text>
+        <rect x="424" y="418" width="92" height="24" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="470.0" y="434" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2</text>
+        <text x="270.0" y="456" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">i = 1</text>
+        <text x="370.0" y="456" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">i = 2</text>
+        <text x="470.0" y="456" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">i = 3</text>
+        <text x="210" y="484" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end">e<tspan font-size="9" dy="-4">z</tspan><tspan font-size="13" dy="4"></tspan><tspan font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">  exponentials</tspan></text>
+        <rect x="224" y="468" width="92" height="24" rx="3" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="270.0" y="484" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">1.000</text>
+        <rect x="324" y="468" width="92" height="24" rx="3" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="370.0" y="484" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2.718</text>
+        <rect x="424" y="468" width="92" height="24" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="470.0" y="484" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">7.389</text>
+        <text x="224" y="507" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">each exponential ÷ 11.107</text>
+        <rect x="218" y="514" width="304" height="36" rx="4" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="210" y="536" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end">p<tspan font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">  probabilities</tspan></text>
+        <rect x="224" y="520" width="92" height="24" rx="3" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="270.0" y="536" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">0.090</text>
+        <rect x="324" y="520" width="92" height="24" rx="3" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="370.0" y="536" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">0.245</text>
+        <rect x="424" y="520" width="92" height="24" rx="3" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1.2"/>
+        <text x="470.0" y="536" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="middle">0.665</text>
+        <text x="640" y="426" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">Σ<tspan font-size="8" dy="4">j</tspan><tspan font-size="12" dy="-4"></tspan> e<tspan font-size="8" dy="-5">z</tspan><tspan font-size="6" dy="2">j</tspan><tspan font-size="12" dy="3"></tspan> = 1.000 + 2.718 + 7.389 = 11.107</text>
+        <text x="640" y="462" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">p<tspan font-size="8" dy="4">1</tspan><tspan font-size="12" dy="-4"></tspan> = 1.000 / 11.107 = 0.09003</text>
+        <text x="640" y="486" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">p<tspan font-size="8" dy="4">2</tspan><tspan font-size="12" dy="-4"></tspan> = 2.718 / 11.107 = 0.24473</text>
+        <text x="640" y="510" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">p<tspan font-size="8" dy="4">3</tspan><tspan font-size="12" dy="-4"></tspan> = 7.389 / 11.107 = 0.66524</text>
+        <text x="640" y="542" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" font-weight="500">p<tspan font-size="8" dy="4">1</tspan><tspan font-size="12" dy="-4"></tspan> + p<tspan font-size="8" dy="4">2</tspan><tspan font-size="12" dy="-4"></tspan> + p<tspan font-size="8" dy="4">3</tspan><tspan font-size="12" dy="-4"></tspan> = 0.090 + 0.245 + 0.665 = 1.000</text>
+        <text x="120" y="586" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">but e<tspan font-size="9" dy="-5">z</tspan><tspan font-size="7" dy="2">i</tspan><tspan font-size="13" dy="3"></tspan> overflows to inf, and inf/inf = nan — so subtract the max first</text>
+      </svg>
+
+</figure>

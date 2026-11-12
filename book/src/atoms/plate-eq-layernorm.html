@@ -1,0 +1,377 @@
+<figure data-atom="eq-layernorm" data-source="admin/diagrams/eq-layernorm.html" aria-label="Layer normalisation" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 820" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-layernorm-title eq-layernorm-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="eq-layernorm-title">Layer normalisation</title>
+        <desc id="eq-layernorm-desc">Layer normalisation of one row of d = 32 features, and the two learned vectors it owns. The equation is: the i-th output equals gamma_i times (x_i minus mu) over sigma, plus beta_i. mu and sigma are one number each, the mean and population standard deviation of this one row's 32 features; gamma and beta are one number each per feature and are parameters. The width d = 32 is the width the delivered week-12 encoder block uses: it builds Block(32, 2), feeds it a (4, LENGTH, 32) tensor and constructs nn.LayerNorm(width). The row drawn is constructed rather than sampled, and its values were chosen so the printed arithmetic is exact: x_i = −1.5, 2.0, −1.0, 3.5, 0.0, 1.0, 2.0, 1.0, −0.5, 4.0, 5.5, 5.5, 5.0, −1.5, 5.0, −2.0, 5.5, 2.5, 4.5, −1.0, 4.0, −2.5, 2.5, 0.5, 0.0, 3.0, 5.5, 1.5, 5.0, −0.5, 3.5, 2.0. Their sum is 64.0, so mu = 64.0/32 = 2.0; the squared deviations sum to 200.0, so sigma = the square root of 200.0/32 = 6.25 = 2.5. The middle row is (x_i minus mu) over sigma: −1.4, 0.0, −1.2, 0.6, −0.8, −0.4, 0.0, −0.4, −1.0, 0.8, 1.4, 1.4, 1.2, −1.4, 1.2, −1.6, 1.4, 0.2, 1.0, −1.2, 0.8, −1.8, 0.2, −0.6, −0.8, 0.4, 1.4, −0.2, 1.2, −1.0, 0.6, 0.0. Its sum over the 32 cells is 0.0 and its sum of squares is 32.0, so its mean is 0.0 and its standard deviation is 1.0 — the standardisation is a property recomputed from the printed cells, not a claim. The learned vectors are gamma = 1.5, 2.0, 0.5, 1.5, 0.5, 2.5, 1.5, 1.0, 1.5, 1.5, 0.5, 2.5, 1.5, 1.5, 2.5, 2.5, 1.5, 1.5, 2.0, 0.5, 2.5, 2.0, 1.5, 0.5, 1.0, 1.0, 1.5, 2.0, 2.5, 1.5, 1.0, 2.5 and beta = −0.5, −0.5, 1.5, 0.5, −0.5, −0.5, 1.0, 2.0, 1.5, 2.0, 0.0, −0.5, 0.0, 0.0, −0.5, 0.5, 0.5, 1.0, 0.5, 0.0, 0.0, 2.0, 2.0, 2.0, 1.0, 0.5, 0.5, 1.5, 0.0, 2.0, 1.0, 0.5, constructed and not the identity: 2d = 64 parameters. The last row is gamma_i times the middle row plus beta_i, elementwise: −2.6, −0.5, 0.9, 1.4, −0.9, −1.5, 1.0, 1.6, 0.0, 3.2, 0.7, 3.0, 1.8, −2.1, 2.5, −3.5, 2.6, 1.3, 2.5, −0.6, 2.0, −1.6, 2.3, 1.7, 0.2, 0.9, 2.6, 1.1, 3.0, 0.5, 1.6, 0.5. Its mean is 0.8 and its standard deviation is 1.7, so the printed statistics of the output are the parameters' and not 0 and 1. At i = 12: x_i = 5.5, so (x_i minus mu) over sigma = (5.5 minus 2.0) over 2.5 = 1.4, and the output is 2.5 times 1.4, plus −0.5, is 3.0. mu and sigma are taken over the 32 features of this row; no other row enters any number on the page.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520" dy="0"><tspan dy="0">LN(x)</tspan><tspan font-size="19" dy="8">i</tspan></tspan><tspan dy="0"> = </tspan><tspan dy="0">γ</tspan><tspan font-size="19" dy="8">i</tspan><tspan dy="-8">·(</tspan><tspan dy="0">x</tspan><tspan font-size="19" dy="8">i</tspan><tspan dy="-8"> − μ)/σ + </tspan><tspan dy="0">β</tspan><tspan font-size="19" dy="8">i</tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">μ and σ: one per row. γ and β: one per feature.</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">SYMBOL</tspan></text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">NAME</tspan></text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WHAT IT IS</tspan></text>
+        <text x="940" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">IN THE EXAMPLE</tspan></text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">LN(x)</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the output</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — the row after its own μ and σ, then γ and β</text>
+        <text x="940" y="246" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">3.0</tspan></text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">x</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">one input feature</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — the i-th of the row's d = 32 features</text>
+        <text x="940" y="272" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">5.5</tspan></text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">μ, σ</tspan></text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the row's mean and std</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">two numbers over the row's d features, both divided by d</text>
+        <text x="940" y="298" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">μ = 2.0, σ = 2.5</tspan></text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">γ</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the learned scale</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — a fitted parameter, one per feature</text>
+        <text x="940" y="324" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">2.5</tspan></text>
+        <text x="120" y="350" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">β</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="200" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the learned shift</text>
+        <text x="380" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — a fitted parameter, one per feature</text>
+        <text x="940" y="350" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">−0.5</tspan></text>
+        <line x1="120" y1="372" x2="1160" y2="372" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="400" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WORKED · ONE ROW, d = 32 · CONSTRUCTED VALUES AND PARAMETERS, NOT SAMPLED · i = 12 EXPANDED BELOW</tspan></text>
+        <text x="120" y="428" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">x</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="230" y="428" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">ONE ROW OF THE STREAM, AS IT ARRIVES</tspan></text>
+        <text x="1142.0" y="428" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end"><tspan dy="0">μ = 2.0   σ = 2.5</tspan></text>
+        <rect x="120" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="135.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.5</tspan></text>
+        <rect x="152" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="167.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="184" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="199.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.0</tspan></text>
+        <rect x="216" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">3.5</tspan></text>
+        <rect x="248" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="263.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="280" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="295.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="312" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="327.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="344" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="359.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="376" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="391.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="408" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="423.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">4.0</tspan></text>
+        <rect x="440" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="455.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">5.5</tspan></text>
+        <rect x="472" y="438" width="30" height="22" fill="none" stroke="#2d3142" stroke-width="1.3"/>
+        <text x="487.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">5.5</tspan></text>
+        <rect x="504" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="519.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">5.0</tspan></text>
+        <rect x="536" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="551.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.5</tspan></text>
+        <rect x="568" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="583.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">5.0</tspan></text>
+        <rect x="600" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="615.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−2.0</tspan></text>
+        <rect x="632" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="647.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">5.5</tspan></text>
+        <rect x="664" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="679.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="696" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="711.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">4.5</tspan></text>
+        <rect x="728" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="743.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.0</tspan></text>
+        <rect x="760" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="775.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">4.0</tspan></text>
+        <rect x="792" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="807.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−2.5</tspan></text>
+        <rect x="824" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="839.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="856" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="871.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="888" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="903.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="920" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="935.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">3.0</tspan></text>
+        <rect x="952" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="967.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">5.5</tspan></text>
+        <rect x="984" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="999.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="1016" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1031.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">5.0</tspan></text>
+        <rect x="1048" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1063.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="1080" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1095.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">3.5</tspan></text>
+        <rect x="1112" y="438" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1127.0" y="453" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <text x="120" y="480" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(</tspan><tspan dy="0">x</tspan><tspan font-size="9" dy="4">i</tspan><tspan dy="-4"> − μ)/σ</tspan></text>
+        <text x="230" y="480" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">CENTRED BY THE ROW'S μ, THEN DIVIDED BY ITS σ</tspan></text>
+        <text x="1142.0" y="480" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end"><tspan dy="0">μ = 0.0   σ = 1.0</tspan></text>
+        <rect x="120" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="135.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.4</tspan></text>
+        <rect x="152" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="167.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="184" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="199.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.2</tspan></text>
+        <rect x="216" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.6</tspan></text>
+        <rect x="248" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="263.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.8</tspan></text>
+        <rect x="280" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="295.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.4</tspan></text>
+        <rect x="312" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="327.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="344" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="359.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.4</tspan></text>
+        <rect x="376" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="391.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.0</tspan></text>
+        <rect x="408" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="423.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.8</tspan></text>
+        <rect x="440" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="455.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.4</tspan></text>
+        <rect x="472" y="490" width="30" height="22" fill="none" stroke="#2d3142" stroke-width="1.3"/>
+        <text x="487.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.4</tspan></text>
+        <rect x="504" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="519.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.2</tspan></text>
+        <rect x="536" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="551.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.4</tspan></text>
+        <rect x="568" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="583.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.2</tspan></text>
+        <rect x="600" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="615.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.6</tspan></text>
+        <rect x="632" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="647.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.4</tspan></text>
+        <rect x="664" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="679.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.2</tspan></text>
+        <rect x="696" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="711.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="728" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="743.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.2</tspan></text>
+        <rect x="760" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="775.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.8</tspan></text>
+        <rect x="792" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="807.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.8</tspan></text>
+        <rect x="824" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="839.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.2</tspan></text>
+        <rect x="856" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="871.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.6</tspan></text>
+        <rect x="888" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="903.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.8</tspan></text>
+        <rect x="920" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="935.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.4</tspan></text>
+        <rect x="952" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="967.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.4</tspan></text>
+        <rect x="984" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="999.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.2</tspan></text>
+        <rect x="1016" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1031.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.2</tspan></text>
+        <rect x="1048" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1063.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.0</tspan></text>
+        <rect x="1080" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1095.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.6</tspan></text>
+        <rect x="1112" y="490" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1127.0" y="505" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <text x="120" y="532" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">γ</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="230" y="532" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">LEARNED SCALE · ONE PER FEATURE</tspan></text>
+        <rect x="120" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="135.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="152" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="167.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="184" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="199.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="216" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="248" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="263.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="280" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="295.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="312" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="327.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="344" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="359.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="376" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="391.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="408" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="423.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="440" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="455.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="472" y="542" width="30" height="22" fill="none" stroke="#2d3142" stroke-width="1.3"/>
+        <text x="487.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="504" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="519.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="536" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="551.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="568" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="583.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="600" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="615.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="632" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="647.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="664" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="679.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="696" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="711.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="728" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="743.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="760" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="775.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="792" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="807.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="824" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="839.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="856" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="871.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="888" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="903.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="920" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="935.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="952" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="967.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="984" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="999.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="1016" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1031.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="1048" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1063.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="1080" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1095.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="1112" y="542" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1127.0" y="557" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <text x="120" y="584" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">β</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="230" y="584" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">LEARNED SHIFT · ONE PER FEATURE</tspan></text>
+        <rect x="120" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="135.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="152" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="167.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="184" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="199.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="216" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="248" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="263.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="280" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="295.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="312" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="327.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="344" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="359.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="376" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="391.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="408" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="423.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="440" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="455.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="472" y="594" width="30" height="22" fill="none" stroke="#2d3142" stroke-width="1.3"/>
+        <text x="487.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="504" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="519.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="536" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="551.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="568" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="583.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="600" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="615.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="632" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="647.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="664" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="679.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="696" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="711.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="728" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="743.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="760" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="775.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="792" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="807.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="824" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="839.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="856" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="871.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="888" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="903.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="920" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="935.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="952" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="967.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="984" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="999.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <rect x="1016" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1031.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="1048" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1063.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="1080" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1095.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="1112" y="594" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1127.0" y="609" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <text x="120" y="636" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">LN(x)</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="230" y="636" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">THE OUTPUT ROW, AFTER BOTH STEPS</tspan></text>
+        <text x="1142.0" y="636" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end"><tspan dy="0">μ = 0.8   σ = 1.7</tspan></text>
+        <rect x="120" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="135.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−2.6</tspan></text>
+        <rect x="152" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="167.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.5</tspan></text>
+        <rect x="184" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="199.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.9</tspan></text>
+        <rect x="216" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="231.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.4</tspan></text>
+        <rect x="248" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="263.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.9</tspan></text>
+        <rect x="280" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="295.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.5</tspan></text>
+        <rect x="312" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="327.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.0</tspan></text>
+        <rect x="344" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="359.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.6</tspan></text>
+        <rect x="376" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="391.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.0</tspan></text>
+        <rect x="408" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="423.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">3.2</tspan></text>
+        <rect x="440" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="455.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.7</tspan></text>
+        <rect x="472" y="646" width="30" height="22" fill="none" stroke="#2d3142" stroke-width="1.3"/>
+        <text x="487.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">3.0</tspan></text>
+        <rect x="504" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="519.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.8</tspan></text>
+        <rect x="536" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="551.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−2.1</tspan></text>
+        <rect x="568" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="583.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="600" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="615.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−3.5</tspan></text>
+        <rect x="632" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="647.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.6</tspan></text>
+        <rect x="664" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="679.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.3</tspan></text>
+        <rect x="696" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="711.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.5</tspan></text>
+        <rect x="728" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="743.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−0.6</tspan></text>
+        <rect x="760" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="775.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.0</tspan></text>
+        <rect x="792" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="807.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">−1.6</tspan></text>
+        <rect x="824" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="839.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.3</tspan></text>
+        <rect x="856" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="871.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.7</tspan></text>
+        <rect x="888" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="903.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.2</tspan></text>
+        <rect x="920" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="935.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.9</tspan></text>
+        <rect x="952" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="967.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">2.6</tspan></text>
+        <rect x="984" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="999.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.1</tspan></text>
+        <rect x="1016" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1031.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">3.0</tspan></text>
+        <rect x="1048" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1063.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="1080" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1095.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">1.6</tspan></text>
+        <rect x="1112" y="646" width="30" height="22" fill="none" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="1127.0" y="661" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">0.5</tspan></text>
+        <rect x="471" y="645" width="32" height="24" rx="2" fill="none" stroke="#bf4520" stroke-width="1.6"/>
+        <text x="120" y="694" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">i = 12 · (x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> − μ)/σ = (</tspan><tspan dy="0">5.5</tspan><tspan dy="0"> − </tspan><tspan dy="0">2.0</tspan><tspan dy="0">)/</tspan><tspan dy="0">2.5</tspan><tspan dy="0"> = </tspan><tspan dy="0">1.4</tspan></text>
+        <text x="120" y="716" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">LN(x)</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> = γ</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3">·</tspan><tspan dy="0">1.4</tspan><tspan dy="0"> + β</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> = </tspan><tspan dy="0">2.5</tspan><tspan dy="0">·</tspan><tspan dy="0">1.4</tspan><tspan dy="0"> + </tspan><tspan dy="0">(−0.5)</tspan><tspan dy="0"> = </tspan><tspan dy="0">3.0</tspan></text>
+        <text x="120" y="738" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(</tspan><tspan dy="0">x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> − μ)/σ over its own </tspan><tspan dy="0">32</tspan><tspan dy="0"> cells: Σ = </tspan><tspan dy="0">0.0</tspan><tspan dy="0"> · Σ of squares = </tspan><tspan dy="0">32.0</tspan><tspan dy="0"> · mean of squares = </tspan><tspan dy="0">1.0</tspan></text>
+        <text x="120" y="770" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">γ and β sit after the division: the output's μ and σ are theirs — 0.8 and 1.7, not 0 and 1</tspan></text>
+        <text x="120" y="792" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"><tspan dy="0">γ and β are fitted, d values each — 2d = 64 parameters for this width, not fixed constants</tspan></text>
+      </svg>
+
+</figure>

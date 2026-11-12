@@ -1,0 +1,23 @@
+---
+title: Scoring relevance with a dot product
+description: Score every pair of rows by their dot product, turn each row of scores into shares with a softmax, and see why that is not enough.
+frame: transformation
+---
+
+The one comparison already available for two vectors is the <Ref to="dot-product">dot product</Ref>, $x_i \cdot x_j = \sum_k x_{ik}x_{jk}$. It is large when two rows point the same way and are long in that direction.
+
+<Atom name="dot-product-terms">
+
+**One dot product, term by term.** Entries pair off by position, multiply, and add to a single number. Two lists of different lengths have no dot product.
+
+</Atom>
+
+Take the raw score to be that dot product, and turn each row of scores into shares with a <Ref to="softmax">softmax</Ref>:
+
+$$
+s_{ij} = x_i \cdot x_j, \qquad a_{ij} = \frac{\exp(s_{ij})}{\sum_{j'} \exp(s_{ij'})}.
+$$
+
+The exponential makes every share positive and the division makes each row sum to one. It also preserves order, so the most similar position gets the largest share. In matrices, $S = XX^\top$, a softmax along each row, then $Y = AX$. Nothing here is trained: the shares are a function of the numbers that went in.
+
+Two problems show up at once. The score matrix is symmetric, $s_{ij} = s_{ji}$, so "$i$ finds $j$ relevant" and "$j$ finds $i$ relevant" are the same event, and direction can't be expressed. And the dot product measures alignment in a space that was built for something else. Whatever produced the rows chose their directions for its own purpose, not to mark which pairs matter here, and a fixed comparison can't be improved by training.

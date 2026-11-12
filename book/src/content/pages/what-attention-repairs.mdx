@@ -1,0 +1,11 @@
+---
+title: What attention repairs, and what it doesn't
+description: Attention gives each token a context-dependent vector and a path of length one to every other position; it adds no capacity of its own.
+frame: evidence
+---
+
+A fixed <Ref to="embedding">embedding</Ref> gives one vector per token type, the same wherever it sits. Attention removes that sameness. The output row at position $i$ depends on every row in the sequence, with weights set by content, so the same token gets different vectors in different contexts.
+
+A <Ref to="convolution">window of width $k$</Ref> gives each position access to $k$ neighbours, and bridging a longer distance takes a stack of layers proportional to it. Attention joins every pair in one step, so the path between any two positions has length one.
+
+What attention doesn't do should be said as plainly. It is a mixing operation, linear in $V$ once the weights are fixed, and it adds no capacity to transform what each position receives; that belongs to the feed-forward layer that follows it in an <Ref to="encoder-block">encoder block</Ref>. It doesn't know about position unless position is <Ref to="attention-and-order">added deliberately</Ref>. And it doesn't choose what to compare: $W_Q$, $W_K$ and $W_V$ do, and they learn only from the data they are given.

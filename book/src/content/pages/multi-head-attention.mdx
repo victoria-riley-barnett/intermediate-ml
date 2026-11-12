@@ -1,0 +1,15 @@
+---
+title: Multi-head attention
+description: Several narrower attention heads run side by side, each free to score a different relation, then are concatenated and mixed.
+frame: representation
+---
+
+One comparison per pair of positions imposes a single notion of relevance on the whole sequence. Multi-head attention runs $h$ comparisons in parallel, each with its own projections and a narrower width $d_k = d/h$:
+
+$$
+\mathrm{head}_m = \mathrm{softmax}\!\left(\frac{Q_mK_m^\top}{\sqrt{d_k}}\right)V_m, \qquad Y = \big[\mathrm{head}_1;\dots;\mathrm{head}_h\big]\,W_O.
+$$
+
+The heads are concatenated along the feature axis back to width $d$, then mixed by $W_O$ of shape $d \times d$. Heads divide the width rather than multiply the cost: $h$ heads of width $d/h$ cost the same as one head of width $d$.
+
+What several heads buy is separate subspaces. Different relations in a sequence, such as a position and its immediate neighbour or a motif and a partner far away, are different comparisons, and one bilinear form made to serve all of them lands on a compromise. Each head can put its scores on a different relation, the concatenation keeps them all, and $W_O$ decides how to recombine them.

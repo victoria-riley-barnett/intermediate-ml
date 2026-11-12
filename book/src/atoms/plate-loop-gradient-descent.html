@@ -1,0 +1,94 @@
+<figure data-atom="loop-gradient-descent" data-source="admin/diagrams/loop-gradient-descent.html" aria-label="A training loop" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="loop-gradient-descent--loop-title loop-gradient-descent--loop-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="loop-gradient-descent--loop-title">A training loop</title>
+        <desc id="loop-gradient-descent--loop-desc">A training loop. Four stages joined left to right: forward, which computes the prediction from the weight; loss, the mean squared error; backward, the gradient; and update, which subtracts the step-size times the gradient from the weight. An accented rail returns the weight from the update stage into the forward stage and carries nothing else, which closes the cycle. The pass is worked on a batch of two examples, x of (1, 2) and y of (4, 8), with loss L of 2.5 times (w minus 4) squared and step size 0.1, starting from a weight of 0.0000: the prediction is (0.000, 0.000), the loss is 40.0000, the gradient is minus 20.0000, and the rail returns a weight of 2.0000. Below the loop, the weight after each pass: 0.0000, 2.0000, 3.0000, 3.5000, 3.7500, 3.8750, 3.9375, with each arrow labelled by the amount added, 2.0000, 1.0000, 0.5000, 0.2500, 0.1250, 0.0625, each half of the one before. Every value is exact at four decimal places; the weight after six passes is 3.9375, which leaves a gap of 0.0625 to 4.</desc>
+        <defs>
+          <marker id="loop-gradient-descent--loop-arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#4f5d75"/></marker>
+          <marker id="loop-gradient-descent--loop-arrow-accent" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#bf4520"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+        <!-- the instance, stated once -->
+        <text x="120" y="34" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">INSTANCE</text>
+        <text x="205" y="34" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">x = (1, 2) &middot; y = (4, 8) &middot; L(w) = 2.5(w &minus; 4)&sup2; &middot; η = 0.1</text>
+        <text x="1160" y="34" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">white box: the model, where w lives &middot; gray capsule: keeps nothing between passes</text>
+        <line x1="120" y1="58" x2="1160" y2="58" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+
+        <!-- stage tags, above the shapes -->
+        <text x="205.0" y="88" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle" letter-spacing="0.14em">FORWARD</text>
+        <text x="495.0" y="88" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle" letter-spacing="0.14em">LOSS</text>
+        <text x="785.0" y="88" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle" letter-spacing="0.14em">BACKWARD</text>
+        <text x="1075.0" y="88" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle" letter-spacing="0.14em">UPDATE</text>
+
+        <!-- the model: the only stage that holds a number between passes -->
+        <rect x="120" y="100" width="170" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1.8"/>
+
+        <!-- steps: applied to the stream, hold nothing -->
+        <rect x="410" y="122" width="170" height="44" rx="22" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <rect x="700" y="122" width="170" height="44" rx="22" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+        <rect x="990" y="122" width="170" height="44" rx="22" fill="#d5d5db" stroke="#4f5d75" stroke-width="1.2"/>
+
+        <!-- what each stage computes -->
+        <text x="205.0" y="149" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">&#375; = w &middot; x</text>
+        <text x="495.0" y="149" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">mean((&#375; &minus; y)&sup2;)</text>
+        <text x="785.0" y="149" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2&middot;mean((&#375; &minus; y)x)</text>
+        <text x="1075.0" y="149" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">w &minus; η &middot; dL/dw</text>
+
+        <!-- the pass, left to right: one arrow per stage -->
+        <line x1="72" y1="144" x2="120" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <line x1="290" y1="144" x2="410" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <line x1="580" y1="144" x2="700" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <line x1="870" y1="144" x2="990" y2="144" stroke="#4f5d75" stroke-width="1.8" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+
+        <!-- name above each wire, value below it -->
+        <text x="96" y="130" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">w</text>
+        <text x="96" y="168" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">0.0000</text>
+        <text x="350" y="130" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">&#375;</text>
+        <text x="350" y="168" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">(0.000, 0.000)</text>
+        <text x="640" y="130" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">L</text>
+        <text x="640" y="168" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">40.0000</text>
+        <text x="930" y="130" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">dL/dw</text>
+        <text x="930" y="168" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">−20.0000</text>
+
+        <!-- the rail: w leaves the update stage and re-enters the model -->
+        <path d="M 1075.0 166 L 1075.0 228.0 Q 1075.0 236 1067.0 236 L 213.0 236 Q 205.0 236 205.0 228.0 L 205.0 191" fill="none" stroke="#bf4520" stroke-width="2" marker-end="url(#loop-gradient-descent--loop-arrow-accent)"/>
+        <text x="640" y="226" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">w</text>
+        <text x="640" y="260" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle">2.0000</text>
+
+        <line x1="120" y1="292" x2="1160" y2="292" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="322" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em">w AT EVERY PASS &middot; THE ONE NUMBER THE RAIL CARRIES</text>
+        <text x="1160" y="322" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end">one arrow = one pass through the loop</text>
+
+        <text x="120" y="392" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">0.0000</text>
+        <text x="120" y="414" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">start</text>
+        <line x1="184" y1="387" x2="266" y2="387" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <text x="225" y="366" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">+2.0000</text>
+        <text x="283" y="392" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">2.0000</text>
+        <text x="283" y="414" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">1</text>
+        <line x1="347" y1="387" x2="429" y2="387" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <text x="388" y="366" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">+1.0000</text>
+        <text x="446" y="392" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">3.0000</text>
+        <text x="446" y="414" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">2</text>
+        <line x1="510" y1="387" x2="592" y2="387" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <text x="551" y="366" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">+0.5000</text>
+        <text x="609" y="392" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">3.5000</text>
+        <text x="609" y="414" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">3</text>
+        <line x1="673" y1="387" x2="755" y2="387" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <text x="714" y="366" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">+0.2500</text>
+        <text x="772" y="392" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">3.7500</text>
+        <text x="772" y="414" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">4</text>
+        <line x1="836" y1="387" x2="918" y2="387" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <text x="877" y="366" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">+0.1250</text>
+        <text x="935" y="392" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">3.8750</text>
+        <text x="935" y="414" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">5</text>
+        <line x1="999" y1="387" x2="1081" y2="387" stroke="#4f5d75" stroke-width="1.6" marker-end="url(#loop-gradient-descent--loop-arrow)"/>
+        <text x="1040" y="366" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle">+0.0625</text>
+        <text x="1098" y="392" font-size="16" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520">3.9375</text>
+        <text x="1098" y="414" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">6</text>
+
+        <text x="120" y="452" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">each pass adds η &middot; 5 &middot; (4 &minus; w) = 0.5 · (4 &minus; w) at η = 0.1, so the gap 4 &minus; w halves</text>
+        <text x="120" y="476" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">at η = 0.4 the multiplier 1 &minus; 5η is &minus;1, so the gap keeps its size and flips sign; above 0.4 it grows</text>
+      </svg>
+
+</figure>

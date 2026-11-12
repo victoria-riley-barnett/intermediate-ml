@@ -1,0 +1,272 @@
+; ---- the state, the prompt and the drawing: what 096-primary-terms gives
+; a document, made into rows a person moves in, from the ground each time;
+; nothing here is stored that the term does not hold. The window is pm-win
+; rows from top; a cursor above row 5 or within 25 of the bottom is put 15
+; rows from the top (pm-settle).
+($define! pm-win 80)
+($define! pm-window-box (cons () pm-win))
+($define! pm-window ($lambda () (cdr pm-window-box)))
+($define! primary-window-set!
+  ($lambda (n)
+    (($lambda (size) (progn (set-cdr! pm-window-box size) size))
+     ($cond ((< n 40) 40) ((> n 160) 160) (#t n)))))
+($define! pm-page ($lambda () ($if (< (pm-window) 60) 15 30)))
+($define! pm-first
+  ($lambda (root)
+    (($lambda (ts) ($if (null? ts) () (list (car (car ts)))))
+     (pm-top root))))
+($define! pm-first-root
+  ($lambda (root)
+    (($lambda (ks) ($if (null? ks) () (list (car (car ks)))))
+     (pm-bs root))))
+($define! primary-state
+  ($lambda r (list () ($if (null? r) #f (pm-first-root (car r))) #f)))
+; a cursor or a top on no row (the source changed) is the first root row, or the first row
+($define! pm-norm
+  ($lambda (root state)
+    (($lambda (cur top)
+       (list (car state)
+         ($if (null? (pm-entry root cur)) (pm-first-root root) cur)
+         ($if (null? (pm-entry root top)) (pm-first root) top)))
+     ($if (eq? (cadr state) #f) (pm-first-root root) (cadr state))
+     ($if (eq? (caddr state) #f) (pm-first root) (caddr state)))))
+($define! cursor-path ($lambda (state) (cadr state)))
+($define! pm-scan
+  ($lambda (rows path i)
+    ($cond ((null? rows) -1)
+      ((pm-path-eq (car (car rows)) path) i)
+      (#t (pm-scan (cdr rows) path (+ i 1))))))
+($define! pm-index
+  ($lambda (root st path from)
+    (pm-scan (pm-rows-from root st from (pm-window)) path 0)))
+($define! pm-settle
+  ($lambda (root st)
+    (($lambda (i)
+       ($if ($and (> i 5) (< i (- (pm-window) 25)))
+         st
+         (list (car st) (cadr st) (pm-back root st (cadr st) 15))))
+     (pm-index root st (cadr st) (caddr st)))))
+($define! pm-put
+  ($lambda (st path)
+    ($if (null? path) st (list (car st) path (caddr st)))))
+($define! pm-go
+  ($lambda (root st path)
+    ($if (null? path)
+      st
+      (pm-settle root (list (car st) path (caddr st))))))
+($define! primary-rows
+  ($lambda (root state)
+    (map ($lambda (r) (list (car r) (cadr r) (caddr r)))
+      (pm-rows-from root (pm-norm root state) (pm-first root) 1000))))
+($define! primary-at
+  ($lambda (root state i)
+    (($lambda (st)
+       (($lambda (rows)
+          ($if ($and (>= i 0) (< i (pm-len rows)))
+            (pm-put st (car (pm-nth rows i)))
+            st))
+        (pm-rows-from root st (caddr st) (pm-window))))
+     (pm-norm root state))))
+($define! primary-scroll
+  ($lambda (root state n)
+    (($lambda (st)
+       ($if (< n 0)
+         (list (car st)
+           (cadr st)
+           (pm-back root st (caddr st) (pm-page)))
+         (($lambda (rows)
+            ($if (< (pm-len rows) (pm-window))
+              st
+              (list (car st) (cadr st) (car (pm-nth rows (pm-page))))))
+          (pm-rows-from root st (caddr st) (pm-window)))))
+     (pm-norm root state))))
+($define! primary-fold-all
+  ($lambda (root state)
+    (list (list pm-fold-all-mark) (pm-first-root root) (pm-first root))))
+($define! primary-unfold-all
+  ($lambda (root state)
+    (list () (cadr (pm-norm root state)) (caddr (pm-norm root state)))))
+($define! pm-ensure-above
+  ($lambda (st p n)
+    ($if (>= n (pm-len p))
+      st
+      (pm-ensure-above (pm-ensure st (pm-take p n)) p (+ n 1)))))
+($define! primary-find
+  ($lambda (root state name)
+    (($lambda (p)
+       ($if (null? p)
+         state
+         (pm-go root (pm-ensure-above (pm-norm root state) p 1) p)))
+     (find-def root name))))
+
+; ---- where the prompt is: the scope path of the cursor; a form's is its closure's, index off
+($define! pm-cur-row
+  ($lambda (root st)
+    (($lambda (e) ($if (null? e) () (pm-mk st (cadr st) e)))
+     (pm-entry root (cadr st)))))
+($define! cursor-kind
+  ($lambda (root state)
+    (($lambda (r) ($if (null? r) ($quote none) (cadr r)))
+     (pm-cur-row root (pm-norm root state)))))
+($define! pm-scope-path
+  ($lambda (r)
+    ($cond ((null? r) ())
+      ((eq? (cadr r) ($quote ground)) (car r))
+      ((eq? (cadr r) ($quote scope)) (car r))
+      ((eq? (cadr r) ($quote form)) (pm-init (pm-init (car r))))
+      (#t (pm-init (car r))))))
+($define! cursor-label
+  ($lambda (root state)
+    (pm-label (pm-scope-path (pm-cur-row root (pm-norm root state))))))
+($define! cursor-env
+  ($lambda (root state)
+    (($lambda (r)
+       ($cond ((null? r) root)
+         ((pm-expandable? (cadr r)) (env-at root (car r)))
+         (#t (env-at root (pm-init (car r))))))
+     (pm-cur-row root (pm-norm root state)))))
+($define! primary-eval-form
+  ($lambda (root state form) (show (eval form (cursor-env root state)))))
+
+; ---- html
+($define! pm-badge
+  ($lambda (k)
+    ($cond ((eq? k ($quote scope)) "§")
+      ((eq? k ($quote closure)) "ƒ")
+      ((eq? k ($quote string)) "&quot;")
+      ((eq? k ($quote form)) "")
+      ((eq? k ($quote ground)) "⊤")
+      (#t "·"))))
+($define! pm-source
+  ($lambda (c)
+    (($lambda (src)
+       ($if (null? src)
+         (show c)
+         (v-join (cons (oh-form (car src)) (map oh-form (cadr src)))
+           " ")))
+     (op-source c))))
+($define! pm-preview
+  ($lambda (kind v)
+    (oh-clip ($cond ((eq? kind ($quote ground))
+                     (string-append (number->string (pm-len (cdr (car v))))
+                       " names"))
+               ((eq? kind ($quote scope))
+                (string-append (number->string (pm-len (cdr (car v))))
+                  " entries"))
+               ((eq? kind ($quote closure)) (pm-source v))
+               ((eq? kind ($quote form)) (oh-form v))
+               (#t (show v)))
+      160)))
+($define! pm-path-prefix?
+  ($lambda (prefix path)
+    ($if (null? prefix)
+      #t
+      ($if (null? path)
+        #f
+        ($if (eq? (car prefix) (car path))
+          (pm-path-prefix? (cdr prefix) (cdr path))
+          #f)))))
+($define! pm-source-context?
+  ($lambda (focus container)
+    ($if (null? focus)
+      #f
+      ($if (eq? (car focus) ($quote scope))
+        (pm-path-prefix? (cdr focus) container)
+        (pm-path-eq (cdr focus) container)))))
+($define! pm-epath
+  ($lambda (path)
+    (v-join (map ($lambda (n) (esc (pm-name n))) path) "/")))
+($define! pm-dist
+  ($lambda (r cl)
+    (($lambda (d)
+       (($lambda (a) ($if (> a 9) 9 a)) ($if (< d 0) (- 0 d) d)))
+     (- (pm-f4 r) cl))))
+; a row is built by plain string-append: el and attrs escape character by character, which dear rows cannot afford; names, path, preview and the hider are escaped, classes and numbers not.
+($define! pm-html-row
+  ($lambda (r i cur dist hider focus-source)
+    (($lambda (path kind open)
+       (string-append "<div class=\"row"
+               ($if cur " cursor" "")
+               ($if open " open" "")
+               ($if (string=? hider "") "" " shadowed")
+               "\""
+               ($if cur " aria-current=\"true\"" "")
+               " data-act=\"at:"
+               (number->string i)
+               "\" data-path=\""
+               ($if (eq? kind ($quote ground)) "" (pm-epath path))
+               "\" data-depth=\""
+               (number->string (caddr r))
+               "\" data-dist=\""
+               (number->string dist)
+               "\""
+               ($if (string=? hider "")
+                 ""
+                 (string-append " title=\"hidden by "
+                   (string-append (esc hider) "\"")))
+               "><span class=\"mark\">"
+               ($if (pm-expandable? kind) ($if open "▾" "▸") "")
+               "</span> <span class=\"badge\">"
+               (pm-badge kind)
+               "</span> <span class=\"name"
+               ($if ($and (eq? kind ($quote form))
+                      (pm-source-context? focus-source (pm-init path)))
+                 " form-source"
+                 "")
+               "\">"
+               ($if (eq? kind ($quote ground))
+                 "ground"
+                 (esc ($if ($and (eq? kind ($quote form))
+                             (pm-source-context? focus-source
+                               (pm-init path)))
+                        (pm-preview kind (pm-f3 r))
+                        (pm-name (last path)))))
+               "</span> <span class=\"preview\">"
+               (esc ($if (eq? kind ($quote form))
+                      ""
+                      ($if ($or cur
+                             ($or (eq? kind ($quote ground))
+                               ($and (= dist 0)
+                                 (not (eq? kind ($quote closure))))))
+                        (pm-preview kind (pm-f3 r))
+                        "")))
+               "</span></div>"))
+     (car r)
+     (cadr r)
+     (pm-f5 r))))
+($define! pm-focus-source
+  ($lambda (root st)
+    (($lambda (r)
+       ($cond ((null? r) ())
+         ((eq? (cadr r) ($quote closure))
+          (cons ($quote closure) (car r)))
+         ((eq? (cadr r) ($quote form))
+          (cons ($quote closure) (pm-init (car r))))
+         (#t ())))
+     (pm-cur-row root st))))
+($define! pm-hider-of
+  ($lambda (chain r)
+    ($if ($or (eq? (cadr r) ($quote form))
+           (eq? (cadr r) ($quote ground)))
+      ""
+      (pm-hider (pm-before chain (pm-init (car r)) ()) (last (car r))))))
+($define! primary-html
+  ($lambda (root state)
+    (($lambda (st)
+       (($lambda (chain cl rows focus-source)
+          (el "div"
+            (list (cons "class" "primary"))
+            (join (pm-imap ($lambda (i r)
+                             (pm-html-row r
+                               i
+                               (pm-path-eq (car r) (cadr st))
+                               (pm-dist r cl)
+                               (pm-hider-of chain r)
+                               focus-source))
+                    rows
+                    0))))
+        (pm-chain root (pm-scope-path (pm-cur-row root st)))
+        (pm-level (cadr st))
+        (pm-rows-from root st (caddr st) (pm-window))
+        (pm-focus-source root st)))
+     (pm-norm root state))))

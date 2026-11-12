@@ -1,0 +1,18 @@
+---
+// An inline link to a reference page. A link to a page that does not exist yet
+// renders as plain text with a dotted rule, so a missing page is visible, not broken.
+import { getEntry } from 'astro:content';
+import { isLive, pageUrl } from '../lib/book';
+
+interface Props {
+  to: string;
+}
+const { to } = Astro.props;
+const entry = await getEntry('pages', to);
+const live = entry && (await isLive(to));
+---
+{live ? (
+  <a class="ref" href={pageUrl(to)} title={entry!.data.description}><slot /></a>
+) : (
+  <span class="ref-missing" title={`no page "${to}" yet`}><slot /></span>
+)}

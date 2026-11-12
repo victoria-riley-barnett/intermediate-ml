@@ -1,0 +1,83 @@
+; The debugger, in the language: a state is plain data (E x env k) (R v k)
+; (C f operands env k) (D v) (Y out k), `step` (cek.vau) is state -> state,
+; environments are values, operands arrive unevaluated: this layer is
+; ordinary programs over states, the kernel's own (a budget stop) too.
+;
+; UNDO. A state shares its environments: $define! and set-cdr! change the
+; frame a later state also holds, and `back`/`history` only walk a list of
+; states, so a mutation is NOT undone by going back -- only the fork undoes
+; it: (snapshot s) is a deep copy, (back-to snap) a fresh copy of it.
+
+; ---- reading a state: its continuation, and the frame beneath one
+(def (kont s)  ; D has none, R and Y carry k third
+  (if (is? ($quote E) s) (cadddr s)
+    (is? ($quote C) s) (car (cdr (cdr (cdr (cdr s)))))
+    (is? ($quote D) s) (list ($quote halt))
+    (caddr s)))
+(def (under k)
+  ; the continuation a frame sits on: mat and args keep it where seq, opev and def do not
+  (if (is? ($quote mat) k) (caddr k)
+    (is? ($quote args) k) (car (cdr (cdr (cdr (cdr (cdr k))))))
+    (cadddr k)))
+(def (summary k)
+  ; what a frame waits for: args is (f todo acc), the rest their one list or pattern
+  (if (is? ($quote args) k) (list (cadr k) (caddr k) (cadddr k)) (cadr k)))
+(def (frames-of k)
+  (if (is? ($quote halt) k) () (cons (cons (car k) (summary k)) (frames-of (under k)))))
+; (frames s): the call stack, innermost first, each (kind . summary); halt left out
+(def (frames s) (frames-of (kont s)))
+(def (depth-of k n)
+  (if (is? ($quote halt) k) n (depth-of (under k) (+ n 1))))
+(def (depth s) (depth-of (kont s) 0))
+; (where s): the form (E), the value (R, D), the call f . operands (C), what it says (Y)
+(def (where s) (if (is? ($quote C) s) (cons (cadr s) (caddr s)) (cadr s)))
+
+; ---- going forward. (step-n s n): the state after up to n steps; D and Y stay.
+(def (step-n s n)
+  (if (or (done? s) (<= n 0)) s (step-n (step s) (- n 1))))
+; (history s n): s and what follows it, oldest first, at most n, ending at D or Y
+(def (history s n)
+  (if (<= n 0) () (cons s (if (done? s) () (history (step s) (- n 1))))))
+; (run-until s pred limit): the first state from s on that pred accepts,
+; or the stop, or where limit steps ended: ask pred again
+(def (run-until s pred limit)
+  (if (pred s)
+    s
+    (if (or (done? s) (<= limit 0)) s (run-until (step s) pred (- limit 1)))))
+(def (fuel more) (if (null? more) 100000 (car more)))
+; (step-over s [limit]): on until a value or stop at a stack as shallow as
+; it began; depth alone stops early -- a body runs on the caller's stack.
+(def (settled? x) (or (is? ($quote R) x) (done? x)))
+(def (step-over s . more)
+  (if (done? s)
+    s
+    (with d (depth s)
+      (run-until (step s)
+        (fn (x) (and (settled? x) (<= (depth x) d)))
+        (fuel more)))))
+; (step-out s [limit]): on until the stack is shallower than it began
+(def (step-out s . more)
+  (if (done? s)
+    s
+    (with d (depth s)
+      (run-until (step s) (fn (x) (< (depth x) d)) (fuel more)))))
+; (break-on-name name s limit): the next E state whose form is name, or a
+; call whose head is name. s itself counts: to pass a break, step first.
+(def (names? name x)
+  (or (eq? x name) (and (pair? x) (eq? (car x) name))))
+(def (break-on-name name s limit)
+  (run-until s
+    (fn (x) (and (is? ($quote E) x) (names? name (cadr x))))
+    limit))
+
+; ---- going back: a list of states is the past (see UNDO)
+; (back hist): the state before the newest in hist, or the only one; oldest first
+(def (back hist)
+  (if (null? hist) ()
+    (null? (cdr hist)) (car hist)
+    (null? (cddr hist)) (car hist)
+    (back (cdr hist))))
+(def (snapshot s) (fork s))
+(def (back-to snap) (fork snap))
+; (watch expr env): expr in a copy of env, so a define or a mutation stays out of the run
+(def (watch expr env) (cek-eval expr (fork env)))

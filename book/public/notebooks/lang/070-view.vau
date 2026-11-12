@@ -1,0 +1,260 @@
+; view, in the language: what the machine says, as pieces a person can
+; open. Values are read with car and cdr, not from memory.
+;
+; A MESSAGE is plain data: (message head kids), head the line and kids a
+; thunk answering the list of child messages. Unfolding is lazy: nothing
+; below a message is built until its kids are asked for; a leaf's is ().
+;
+; (show v) is the printer: a value as a string, cut at a depth, so no
+; value is ever walked whole; a list cuts at 100000 elements. (view v) is
+; in 075-view-state.vau. A hole prints <hole> without its name: it is nil
+; and a pair at once, and the name would have to be read from memory.
+
+; ---- the limits: how deep, how wide, how many names, how many frames
+($define! v-deep 8)
+($define! v-wide 8)
+($define! v-names 60)
+($define! v-frames 12)
+($define! v-steps 100000)
+
+; ---- what a value is: a combiner is a pair tagged %c, an environment a
+; chain of frames; both are pairs to car and cdr.
+($define! v-inert? ($lambda (v) (eq? v #inert)))
+($define! v-hole? ($lambda (v) ($and (null? v) (pair? v))))
+($define! v-nil? ($lambda (v) ($and (null? v) (not (pair? v)))))
+($define! v-pair? ($lambda (v) ($and (pair? v) (not (v-hole? v)))))
+($define! v-sym?
+  ($lambda (v)
+    ($if (pair? v)
+      #f
+      ($if (null? v) #f ($if (number? v) #f ($if (string? v) #f (not (v-inert? v))))))))
+($define! v-tag? ($lambda (v t) ($if (v-pair? v) (eq? (car v) t) #f)))
+($define! v-closure? ($lambda (v) (v-tag? v ($quote %c))))
+($define! v-frame? ($lambda (v) (v-tag? v ($quote %f))))
+($define! v-env?
+  ($lambda (v)
+    ($if (v-pair? v) ($if (v-pair? (car v)) (v-frame? (car v)) #f) #f)))
+; (%c) alone is tagged but has no fields: a missing field is (), not a crash
+($define! v-rest ($lambda (l) ($if (v-pair? l) (cdr l) ())))
+($define! v-nth
+  ($lambda (l i)
+    ($if (v-pair? l) ($if (= i 0) (car l) (v-nth (cdr l) (- i 1))) ())))
+($define! v-kind
+  ($lambda (c) ($if (v-closure? c) (v-nth (cdr c) 0) ())))
+
+; the elements, as far as the chain of pairs goes, at most v-steps: a
+; combiner in the tail is walked into here, where v-more? stops
+($define! v-items-from
+  ($lambda (v n acc)
+    ($if ($and (v-pair? v) (< n v-steps))
+      (v-items-from (cdr v) (+ n 1) (cons (car v) acc))
+      (rev acc))))
+($define! v-items ($lambda (v) (v-items-from v 0 ())))
+($define! v-tail
+  ($lambda (v n)
+    ($if ($and (v-pair? v) (< n v-steps)) (v-tail (cdr v) (+ n 1)) v)))
+($define! v-take
+  ($lambda (l n)
+    ($if (null? l)
+      ()
+      ($if (= n 0) () (cons (car l) (v-take (cdr l) (- n 1)))))))
+($define! v-length
+  ($lambda (l) ($if (null? l) 0 (+ 1 (v-length (cdr l))))))
+($define! v-memq
+  ($lambda (x l)
+    ($if (null? l) #f ($if (eq? x (car l)) #t (v-memq x (cdr l))))))
+($define! v-append
+  ($lambda (a b) ($if (null? a) b (cons (car a) (v-append (cdr a) b)))))
+($define! v-join
+  ($lambda (strs sep)
+    ($if (null? strs)
+      ""
+      ($if (null? (cdr strs))
+        (car strs)
+        (string-append (car strs)
+          (string-append sep (v-join (cdr strs) sep)))))))
+
+; ---- the printer: a string is quoted and escaped as the machine prints
+; it, \" \\ and a newline as \n
+($define! v-escape
+  ($lambda (s i n acc)
+    ($if (= i n)
+      acc
+      (($lambda (c)
+         (v-escape s
+           (+ i 1)
+           n
+           (string-append acc
+             ($cond ((string=? c "\"") "\\\"")
+               ((string=? c "\\") "\\\\")
+               ((string=? c "\n") "\\n")
+               (#t c)))))
+       (substring s i (+ i 1))))))
+($define! v-quote
+  ($lambda (s)
+    (string-append "\""
+      (string-append (v-escape s 0 (string-length s) "") "\""))))
+
+($define! show-at
+  ($lambda (v depth)
+    ($cond ((v-inert? v) "#inert")
+      ((v-hole? v) "<hole>")
+      ((null? v) "()")
+      ((v-sym? v) (symbol->string v))
+      ((number? v) (number->string v))
+      ((string? v) (v-quote v))
+      ((v-env? v) "<environment>")
+      ((v-closure? v)
+       (string-append "<"
+         (string-append ($if (v-sym? (v-kind v))
+                          (symbol->string (v-kind v))
+                          "null")
+           ">")))
+      ((= depth 0) "…")
+      (#t (v-show-list v depth ())))))
+; the elements, then the tail: a combiner or an environment there is a
+; value, not more list.
+($define! v-show-list
+  ($lambda (rest depth parts)
+    ($cond ((v-more? rest)
+            ($if (= (v-length parts) v-wide)
+              (v-show-end (cons "…" parts) ())
+              (v-show-list (cdr rest)
+                depth
+                (cons (show-at (car rest) (- depth 1)) parts))))
+      (#t (v-show-end parts
+            ($if (v-nil? rest)
+              ""
+              (string-append " . " (show-at rest (- depth 1)))))))))
+($define! v-more?
+  ($lambda (rest)
+    ($and (v-pair? rest)
+      ($and (not (v-closure? rest)) (not (v-env? rest))))))
+($define! v-show-end
+  ($lambda (parts tail)
+    ($if (string? tail)
+      (string-append "("
+        (string-append (v-join (rev parts) " ")
+          (string-append tail ")")))
+      (string-append "(" (string-append (v-join (rev parts) " ") ")")))))
+($define! show ($lambda (v) (show-at v 4)))
+
+; ---- messages
+($define! message
+  ($lambda (head kids) (list ($quote message) head kids)))
+($define! message-head cadr)
+($define! message-kids ($lambda (m) (caddr m)))
+($define! open ($lambda (m) ((message-kids m))))
+($define! v-leaf ($lambda (head) (message head ($lambda () ()))))
+($define! v-more-leaf
+  ($lambda (n)
+    (v-leaf (string-append "… and "
+              (string-append (number->string n) " more")))))
+($define! v-label
+  ($lambda (label text)
+    ($if (string=? label "")
+      text
+      (string-append label (string-append " " text)))))
+
+; a value opens into its parts; seen is the frames already shown on the
+; way down, so a loop is said once
+($define! v-value
+  ($lambda (label v d seen)
+    (message (v-label label (show v))
+      ($lambda ()
+        ($cond ((>= d v-deep) ())
+          ((v-hole? v) ())
+          ((v-env? v) (open (v-env "names" v (+ d 1) seen)))
+          ((v-closure? v) (v-closure-kids v d seen))
+          ((v-pair? v) (v-pair-kids v d seen))
+          (#t ()))))))
+($define! v-closure-kids
+  ($lambda (v d seen)
+    (($lambda (kind f)
+       ($cond ((eq? kind ($quote ap))
+               (list (v-value "wraps" (v-nth f 0) (+ d 1) seen)))
+         ((eq? kind ($quote op))
+          (list (v-value "parameters" (v-nth f 0) (+ d 1) seen)
+            (v-value "body" (v-nth f 2) (+ d 1) seen)
+            (v-env "made in" (v-nth f 3) (+ d 1) seen)))
+         (#t ())))
+     (v-kind v)
+     (v-rest (cdr v)))))
+($define! v-elements
+  ($lambda (items i d seen)
+    ($if (null? items)
+      ()
+      (cons (v-value (string-append (number->string i) ":")
+              (car items)
+              (+ d 1)
+              seen)
+        (v-elements (cdr items) (+ i 1) d seen)))))
+($define! v-pair-kids
+  ($lambda (v d seen)
+    (($lambda (items tail)
+       (v-append (v-elements (v-take items v-wide) 0 d seen)
+         (v-append ($if (> (v-length items) v-wide)
+                     (list (v-more-leaf (- (v-length items) v-wide)))
+                     ())
+           ($if (v-nil? tail)
+             ()
+             (list (v-value "tail" tail (+ d 1) seen))))))
+     (v-items v)
+     (v-tail v 0))))
+
+; ---- an environment lists its names, newest first, frame by frame, at
+; most v-frames; a frame met twice ends the walk: (hit . frames)
+($define! v-walk
+  ($lambda (fr n path acc)
+    ($cond ((not (pair? fr)) (cons #f (rev acc)))
+      ((>= n v-frames) (cons #f (rev acc)))
+      ((v-memq fr path) (cons #t (rev acc)))
+      (#t (v-walk (cdr fr) (+ n 1) (cons fr path) (cons fr acc))))))
+($define! v-bindings
+  ($lambda (frames)
+    ($if (null? frames)
+      ()
+      (v-append (v-items (cdr (car (car frames))))
+        (v-bindings (cdr frames))))))
+($define! v-name-messages
+  ($lambda (bs path d)
+    ($if (null? bs)
+      ()
+      ($if (pair? (car bs))
+        (cons (message (show (car (car bs)))
+                ($lambda ()
+                  (list (v-value "is" (cdr (car bs)) (+ d 1) path))))
+          (v-name-messages (cdr bs) path d))
+        (v-name-messages (cdr bs) path d)))))
+($define! v-env
+  ($lambda (label e d seen)
+    (message (v-label label
+               ($if (v-env? e)
+                 (string-append "("
+                   (string-append (number->string (v-length (v-items (cdr (car e)))))
+                     (string-append " names here, "
+                       (string-append (number->string (v-length (v-items e)))
+                         " frames)"))))
+                 (show e)))
+      ($lambda ()
+        ($if ($or (>= d v-deep) (not (v-env? e)))
+          ()
+          (v-env-kids e d seen))))))
+($define! v-env-kids
+  ($lambda (e d seen)
+    (($lambda (walked)
+       (($lambda (hit frames)
+          (($lambda (names)
+             (v-append (v-take names v-names)
+               (v-append ($if hit
+                           (list (v-leaf "(a frame already shown above)"))
+                           ())
+                 ($if (> (v-length names) v-names)
+                   (list (v-more-leaf (- (v-length names) v-names)))
+                   ()))))
+           (v-name-messages (v-bindings frames)
+             (v-append frames seen)
+             d)))
+        (car walked)
+        (cdr walked)))
+     (v-walk e 0 seen ()))))

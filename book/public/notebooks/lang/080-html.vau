@@ -1,0 +1,53 @@
+; A page is a string. A Vau form evaluates to HTML and the host patches
+; it into the DOM; nothing here touches a DOM, so a kid is a string that is
+; already HTML and only text goes through `esc`.
+;
+; (esc s)            s with & < > " ' as entities
+; (join strings)     the strings appended in order; () is ""
+; (attrs alist)      ` name="value"` for each (name . value); names as given, values escaped, a number as its digits
+; (el tag alist . kids)   <tag attrs>kids</tag>; br hr img input meta link are void: no kids, no closing tag
+; (text x)           a string escaped, a number or a symbol as its name
+; (rows-of xs f)     (join (map f xs))
+
+(def (esc-char c)
+  (if (string=? c "&") "&amp;"
+    (string=? c "<") "&lt;"
+    (string=? c ">") "&gt;"
+    (string=? c "\"") "&quot;"
+    (string=? c "'") "&#39;"
+    c))
+; esc-need is what esc-from scans for: the run between escapes is copied whole, so cost is length plus one call per escape, not five string=? per character.
+($define! esc-need "&<>\"'")
+(def (esc-from s i n)
+  (if (>= i n)
+    ""
+    (with j (string-scan s esc-need i)
+      (if (< j 0)
+        (substring s i n)
+        (string-append (substring s i j)
+                       (esc-char (substring s j (+ j 1)))
+                       (esc-from s (+ j 1) n))))))
+(def (esc s) (esc-from s 0 (string-length s)))
+
+; one append per element: pairwise (log2 n) rounds measured slower here, a call costing more than the bytes it saves when each element is small.
+(def (join xs)
+  (if (null? xs) "" (string-append (car xs) (join (cdr xs)))))
+(def (name-of x) (if (string? x) x (symbol->string x)))
+(def (value-of v) (if (number? v) (number->string v) (esc v)))
+(def (attrs alist)
+  (join (map (fn (p)
+               (string-append " " (name-of (car p)) "=\"" (value-of (cdr p)) "\""))
+          alist)))
+
+($define! void-tags ($quote ("br" "hr" "img" "input" "meta" "link")))
+(def (void-tag? t xs)
+  (if (null? xs) #f (if (string=? t (car xs)) #t (void-tag? t (cdr xs)))))
+(def (el tag alist . kids)
+  (with t (name-of tag)
+    (if (void-tag? t void-tags)
+      (string-append "<" t (attrs alist) ">")
+      (string-append "<" t (attrs alist) ">" (join kids) "</" t ">"))))
+
+(def (text x)
+  (if (string? x) (esc x) (number? x) (number->string x) (symbol->string x)))
+(def (rows-of xs f) (join (map f xs)))

@@ -1,0 +1,15 @@
+---
+title: Attention as a weighted average
+description: Replace each row of a sequence by a mixture of every row, with shares that are non-negative and sum to one.
+frame: transformation
+---
+
+Take a sequence as a matrix $X$ of shape $n \times d$: $n$ positions, each a row of $d$ features. The simplest thing one position can do with the others is replace its own row by a mixture of all of them,
+
+$$
+y_i = \sum_{j=1}^{n} a_{ij}\, x_j, \qquad a_{ij} \ge 0, \quad \sum_j a_{ij} = 1.
+$$
+
+Those two constraints make $y_i$ a weighted average, so it is a vector of the same kind as the inputs: same width, same units, and no growth with $n$. For the whole sequence at once, $Y = AX$, with $A$ of shape $n \times n$ and $Y$ of shape $n \times d$. Nothing is flattened, and every position still has its own row.
+
+The open question is where $A$ comes from. It can't be handed in, because it would have to be written out for every sequence, and which pairs of positions matter is exactly what changes from one sequence to the next. So $A$ has to be computed from $X$ itself, with $a_{ij}$ large when position $j$ holds something position $i$ needs.

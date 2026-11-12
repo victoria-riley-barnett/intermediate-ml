@@ -1,0 +1,32 @@
+---
+import { render } from 'astro:content';
+import Book from '../../layouts/Book.astro';
+import { backlinks, chapterUrl, pageUrl, pages, type Page } from '../../lib/book';
+import { mdxComponents } from '../../lib/mdx-components';
+
+export async function getStaticPaths() {
+  return (await pages()).map((p) => ({ params: { page: p.id }, props: { p } }));
+}
+interface Props { p: Page }
+const { p } = Astro.props;
+const { Content } = await render(p);
+const { composedIn, linkedFrom } = await backlinks(p.id);
+---
+<Book title={p.data.title} description={p.data.description}>
+  {composedIn[0] && <p class="up">Up: <a href={`${chapterUrl(composedIn[0].id)}#${p.id}`}>{composedIn[0].data.title}</a></p>}
+  <p class="eyebrow">Reference{p.data.frame && ` · ${p.data.frame}`}</p>
+  <h1>{p.data.title}</h1>
+  <div class="prose"><Content components={mdxComponents} /></div>
+  {(composedIn.length > 0 || linkedFrom.length > 0) && (
+    <aside class="backlinks">
+      {composedIn.length > 0 && (<>
+        <strong>Read it in</strong>
+        <ul>{composedIn.map((c) => <li><a href={`${chapterUrl(c.id)}#${p.id}`}>Chapter {c.data.number}: {c.data.title}</a></li>)}</ul>
+      </>)}
+      {linkedFrom.length > 0 && (<>
+        <strong>See also</strong>
+        <ul>{linkedFrom.map((e) => <li><a href={e.collection === 'pages' ? pageUrl(e.id) : chapterUrl(e.id)}>{e.data.title}</a></li>)}</ul>
+      </>)}
+    </aside>
+  )}
+</Book>

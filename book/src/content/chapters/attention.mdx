@@ -1,0 +1,29 @@
+---
+title: Attention
+number: 11
+order: 11
+description: Let every position consult every other, with shares computed from the content itself.
+draft: true
+---
+
+A sequence of forty-eight tokens becomes a grid of forty-eight rows, one vector per position. Earlier chapters produced that grid and then collapsed it, by <Ref to="averaging-rows">averaging</Ref>, by <Ref to="flattening">flattening</Ref>, or by <Ref to="convolution">sliding a window</Ref>, and each collapse threw away a relation between two positions far apart. The grid itself was never the problem. Nothing so far has let one row consult another, and attention is that operation.
+
+<Page name="attention-as-averaging" />
+
+The rest of the chapter is about where the shares come from: first from the rows as they are, then from learned projections of them.
+
+<Page name="dot-product-scores" />
+
+<Page name="queries-keys-values" />
+
+<Page name="scaled-scores" />
+
+<Page name="one-head-worked" />
+
+<Page name="multi-head-attention" />
+
+<Page name="attention-and-order" />
+
+<Page name="attention-in-code" />
+
+<Page name="what-attention-repairs" />

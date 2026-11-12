@@ -1,0 +1,137 @@
+; An outline is a define. A heading is ($define! name ($scope body...)):
+; $scope evaluates its body forms in order in a fresh child of the caller's
+; environment and answers it. A nested heading is a nested define, a cell a
+; form, prose a string form. A child sees its parent's names and never a
+; sibling's: the outline of a scope is its environment.
+;
+; Needs core.vau and page.vau (040: child-env) only; cek.vau is not needed:
+; runs on eval, $define!, car, cdr, and a form that stops is the machine's
+; business. Carrying on, a hole in the body is collected and the next form
+; runs; waiting, the run stops at the hole and resumes with the next form.
+;
+; Frames are (%f . bindings), and bind! conses the newest binding first, so
+; outline reverses and its entries come in definition order; a name defined
+; twice is listed twice, at both places, and the newer wins on lookup.
+
+($define! $scope
+  ($vau forms
+    env
+    (($lambda (child)
+       (($lambda (#ignore) child) (scope-run forms child)))
+     (child-env env))))
+($define! scope-run
+  ($lambda (forms env)
+    ($if (null? forms)
+      ()
+      (($lambda (#ignore) (scope-run (cdr forms) env))
+       (eval (car forms) env)))))
+
+; ---- slugs. A title's slug is a symbol: ASCII letters lowercased, digits
+; kept, every other run one `-`, none at either end, `section` if empty. A
+; letter outside ASCII is dropped and counts as a boundary ("Ünï 2" -> n-2).
+($define! slug-up "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+($define! slug-low "abcdefghijklmnopqrstuvwxyz")
+($define! slug-digits "0123456789")
+($define! slug-at
+  ($lambda (c s i)
+    ($if (= i (string-length s))
+      -1
+      ($if (string=? c (substring s i (+ i 1))) i (slug-at c s (+ i 1))))))
+; c as a lowercase letter or digit, or "" if it is neither
+($define! slug-char
+  ($lambda (c)
+    (($lambda (u l d)
+       ($if (< l 0)
+         ($if (< u 0) ($if (< d 0) "" c) (substring slug-low u (+ u 1)))
+         c))
+     (slug-at c slug-up 0)
+     (slug-at c slug-low 0)
+     (slug-at c slug-digits 0))))
+; gap: whether a `-` is owed before the next kept character
+($define! slug-walk
+  ($lambda (s i acc gap)
+    ($if (= i (string-length s))
+      acc
+      (($lambda (c)
+         ($if (string=? c "")
+           (slug-walk s (+ i 1) acc #t)
+           (slug-walk s
+             (+ i 1)
+             (string-append ($if gap
+                              ($if (string=? acc "")
+                                acc
+                                (string-append acc "-"))
+                              acc)
+               c)
+             #f)))
+       (slug-char (substring s i (+ i 1)))))))
+($define! slug
+  ($lambda (title)
+    (($lambda (t)
+       ($if (string=? t "") ($quote section) (string->symbol t)))
+     (slug-walk title 0 "" #f))))
+($define! slug-taken?
+  ($lambda (x taken)
+    ($if (null? taken)
+      #f
+      ($if (eq? x (car taken)) #t (slug-taken? x (cdr taken))))))
+($define! slug-try
+  ($lambda (base n taken)
+    (($lambda (x)
+       ($if (slug-taken? x taken) (slug-try base (+ n 1) taken) x))
+     (string->symbol (string-append (symbol->string base)
+                       (string-append "-" (number->string n)))))))
+; slug, else slug-2, slug-3 ...: the first not in the list of taken symbols
+($define! unique-slug
+  ($lambda (s taken) ($if (slug-taken? s taken) (slug-try s 2 taken) s)))
+
+; ---- the outline of a scope: what its own frame binds, in definition order
+($define! scope?
+  ($lambda (v)
+    ($if (pair? v)
+      ($if (pair? (car v))
+        ($if (pair? (car (car v))) #f (eq? (car (car v)) ($quote %f)))
+        #f)
+      #f)))
+($define! tagged-c?
+  ($lambda (v)
+    ($if (pair? v) ($if (null? v) #f (eq? (car v) ($quote %c))) #f)))
+($define! kind-of
+  ($lambda (v)
+    ($if (scope? v)
+      ($quote scope)
+      ($if (tagged-c? v)
+        ($quote closure)
+        ($if (string? v) ($quote string) ($quote value))))))
+($define! outline-of-bindings
+  ($lambda (bs acc)
+    ($if (null? bs)
+      acc
+      (outline-of-bindings (cdr bs)
+        (cons (list (car (car bs)) (kind-of (cdr (car bs)))) acc)))))
+($define! outline
+  ($lambda (env)
+    ($if (scope? env) (outline-of-bindings (cdr (car env)) ()) ())))
+($define! value-in
+  ($lambda (bs name)
+    ($if (null? bs)
+      ()
+      ($if (eq? (car (car bs)) name)
+        (cdr (car bs))
+        (value-in (cdr bs) name)))))
+($define! outline-of
+  ($lambda (env name) (outline (value-in (cdr (car env)) name))))
+; a closure's source as data: (params body) from (%c op ptree eparam body
+; senv); a $lambda is (%c ap <that>), opened first. () if name is not a
+; closure of this scope, and the body is the forms as written.
+($define! op-source
+  ($lambda (c)
+    ($if (tagged-c? c)
+      ($if (eq? (car (cdr c)) ($quote ap))
+        (op-source (car (cdr (cdr c))))
+        ($if (eq? (car (cdr c)) ($quote op))
+          (list (car (cdr (cdr c))) (car (cdr (cdr (cdr (cdr c))))))
+          ()))
+      ())))
+($define! source-of
+  ($lambda (env name) (op-source (value-in (cdr (car env)) name))))

@@ -1,0 +1,19 @@
+---
+import { findAtom } from '../lib/atoms';
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+const atom = findAtom(name);
+const hasCaption = Astro.slots.has('default');
+---
+{atom ? (
+  <div class="atom" id={`atom-${name}`}>
+    <Fragment set:html={atom.html} />
+    {hasCaption && <div class="atom-caption"><slot /></div>}
+  </div>
+) : (
+  <p class="atom-missing">No atom named <code>{name}</code> in <code>src/atoms</code>.</p>
+)}

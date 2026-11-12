@@ -1,0 +1,27 @@
+---
+// Composes one reference page into a chapter. The page's own heading links back to
+// its standalone entry, so every composed section is also a node in the web.
+import { getEntry, render } from 'astro:content';
+import { pageUrl } from '../lib/book';
+import Atom from './Atom.astro';
+import Ref from './Ref.astro';
+import Side from './Side.astro';
+
+interface Props {
+  name: string;
+  /** Heading level inside the chapter. */
+  level?: 2 | 3;
+}
+const { name, level = 2 } = Astro.props;
+const entry = await getEntry('pages', name);
+const Content = entry ? (await render(entry)).Content : null;
+const H = `h${level}` as 'h2' | 'h3';
+---
+{entry && Content ? (
+  <section class="composed" id={name}>
+    <H><a class="composed-link" href={pageUrl(name)}>{entry.data.title}</a></H>
+    <Content components={{ Atom, Ref, Side }} />
+  </section>
+) : (
+  <p class="atom-missing">No page named <code>{name}</code> in <code>src/content/pages</code>.</p>
+)}

@@ -1,0 +1,23 @@
+---
+title: Queries, keys and values
+description: Three learned projections give each position a question to ask, an advertisement to be found by, and content to hand over.
+frame: representation
+---
+
+Both problems with <Ref to="dot-product-scores">raw dot-product scores</Ref> go away if the comparison happens in a learned space instead of on the raw rows. Give each position three separate projections:
+
+$$
+Q = XW_Q, \qquad K = XW_K, \qquad V = XW_V,
+$$
+
+with $W_Q, W_K$ of shape $d \times d_k$ and $W_V$ of shape $d \times d_v$. The score comes from $Q$ and $K$, and the mixture is taken over $V$:
+
+$$
+S = QK^\top, \qquad Y = \mathrm{softmax}(S)\,V.
+$$
+
+The names describe jobs. The **query** is what position $i$ is looking for. The **key** is what position $j$ advertises, so that a query can be matched against it. The **value** is what position $j$ hands over once it is matched. Score and content are now separate quantities: a position can advertise one thing and deliver another, and training adjusts both.
+
+<Ref to="one-head-worked">One head worked through</Ref> follows these exact numbers to the output.
+
+Why three matrices and not fewer? With one shared matrix, $Q = K = XW$, the score is $x_i^\top WW^\top x_j$. That is still symmetric, and the content that decides relevance is forced to be the content that gets moved. With separate $W_Q$ and $W_K$ the score is $x_i^\top W_Q W_K^\top x_j$, which is asymmetric whenever $W_QW_K^\top \ne W_KW_Q^\top$, and the projections can make "$j$ is the kind of thing $i$ needs" large along a direction the raw space never had. The third matrix isn't about comparison at all. What a position contributes to the average should be free to differ from what it uses to be found.

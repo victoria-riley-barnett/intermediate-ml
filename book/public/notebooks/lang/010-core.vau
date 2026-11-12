@@ -1,0 +1,83 @@
+; First-class environments: a thunk answering its own environment.
+;
+; $lambda is derived, not primitive: a $vau that evaluates the body in the
+; caller's environment.
+($define! get-current-environment ($vau () e e))
+
+($define! $quote ($vau (x) #ignore x))
+
+($define! list (wrap ($vau args #ignore args)))
+
+($define! $lambda
+  ($vau (ptree . body)
+    env
+    (wrap (eval (cons $vau (cons ptree (cons #ignore body))) env))))
+
+($define! car (wrap ($vau ((a . #ignore)) #ignore a)))
+($define! cdr (wrap ($vau ((#ignore . d)) #ignore d)))
+
+($define! pair? ($lambda (x) ($match? (#ignore . #ignore) x)))
+($define! null? ($lambda (x) ($match? () x)))
+
+($define! > ($lambda (a b) (< b a)))
+($define! >= ($lambda (a b) (<= b a)))
+
+($define! $if ($vau (c a b) e (eval (list c a b) e)))
+($define! not ($lambda (c) (c #f #t)))
+($define! $and ($vau (a b) e ((eval a e) (eval b e) #f)))
+($define! $or ($vau (a b) e ((eval a e) #t (eval b e))))
+
+; a dispatch literal. The reader reads #(name ...) as (%read name ...) and
+; knows nothing more (140-reader.wat); the meaning is defined here, so a
+; page adds a literal by defining one combiner and the kernel never learns
+; what it means. %read looks the name up where the form is written and
+; calls it with the region's FORMS, unevaluated, and that environment: a
+; symbol in the region is data, never a name. Dispatch happens when the
+; form RUNS, so ($quote #(hex ff)) is (%read hex ff) unread; an unbound
+; name is a hole, a name bound to something taking no region a problem.
+($define! %read
+  ($vau (name . region)
+    env
+    (($lambda (literal) (literal region env)) (eval name env))))
+
+; ---- the derived forms everything above is written in, from R-1RK 5.6.1
+; ($cond) and 5.10.1 ($let). No clause fired is #inert, as the Report
+; specifies; an empty $sequence is inert for the same reason.
+($define! $sequence
+  ($vau forms env
+    ($if (null? forms)
+      #inert
+      ($if (null? (cdr forms))
+        (eval (car forms) env)
+        (($lambda (#ignore) (eval (cons $sequence (cdr forms)) env))
+         (eval (car forms) env))))))
+
+($define! $cond
+  ($vau clauses env
+    ($if (null? clauses)
+      #inert
+      ($if (eval (car (car clauses)) env)
+        (eval (cons $sequence (cdr (car clauses))) env)
+        (eval (cons $cond (cdr clauses)) env)))))
+
+; $let binds in a frame of its own: the values are evaluated in the
+; caller's environment, in parallel, the body in the new one.
+($define! let-rev
+  ($lambda (items acc)
+    ($if (null? items) acc (let-rev (cdr items) (cons (car items) acc)))))
+($define! let-names
+  ($lambda (bindings acc)
+    ($if (null? bindings)
+      (let-rev acc ())
+      (let-names (cdr bindings) (cons (car (car bindings)) acc)))))
+($define! let-values
+  ($lambda (bindings acc)
+    ($if (null? bindings)
+      (let-rev acc ())
+      (let-values (cdr bindings) (cons (car (cdr (car bindings))) acc)))))
+($define! $let
+  ($vau (bindings . body)
+    env
+    (eval (cons (cons $lambda (cons (let-names bindings ()) body))
+            (let-values bindings ()))
+      env)))

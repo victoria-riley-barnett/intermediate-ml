@@ -1,0 +1,217 @@
+; Item identity: a stable id on every definition and every outline item,
+; minted once, and a pin naming the version of it. A quote keeps both: the
+; ID follows the item as it is edited (live), the PIN names the content
+; quoted (fixed), and the two disagree when the item has changed since.
+;
+;   (item-id root path)      the id, minted on first ask: a number for a
+;                            definition, (n . i) for its i-th body form; () if
+;                            the path leads nowhere
+;   (item-pin root path)     the content as "a.b.len"; a scope's is each
+;                            entry's name and content, in order (item-text, 098)
+;   (item-at-id root id)     the path of that id now, or () if none has it
+;
+; WHERE THE ID LIVES. Not in anything that prints: an id in the value made
+; two identical runs print differently. An id is a row (id . cell) keyed by
+; the BINDING CELL and found through the OUTERMOST frame of the root's
+; chain, never the caller; a closure holds it, so it shows as <ap>. Fork,
+; set-cdr!, steer's adoption and an image keep the cells, so the id survives
+; them; rebuilding the document from text loses it. A body form has no cell,
+; so its id is its place (n . i) and shifts on insert.
+;
+; THE PIN is computed on ask, from the text, so it is equal for equal text.
+; Two hashes mod primes below 2^23: 46 bits and the length, not sha256. It
+; does not see what item-text does not show, and a cyclic value never
+; finishes. About 15 us a byte.
+; Needs core, cek, page, scope (090), primary-terms (096), item (098).
+
+; ---- the table: (%ids next . rows), rows (id . cell)
+($define! id-new-table
+  ($lambda () (($lambda (t) ($lambda () t)) (cons ($quote %ids) (cons 1 ())))))
+($define! %item-ids (id-new-table))
+($define! id-world
+  ($lambda (env) ($if (null? (cdr env)) env (id-world (cdr env)))))
+($define! id-table
+  ($lambda (root)
+    (($lambda (w)
+       (($lambda (b)
+          ($if ($and (pair? b) (tagged-c? (cdr b)))
+            ((cdr b))
+            (($lambda (t)
+               ($sequence (set-cdr! (car w)
+                            (cons (cons ($quote %item-ids) t) (cdr (car w))))
+                 (t)))
+             (id-new-table))))
+        (it-binding (cdr (car w)) ($quote %item-ids))))
+     (id-world root))))
+($define! id-row-of
+  ($lambda (rows cell)
+    ($cond ((null? rows) ())
+      ((eq? (cdr (car rows)) cell) (car rows))
+      (#t (id-row-of (cdr rows) cell)))))
+($define! id-row-at
+  ($lambda (rows id)
+    ($cond ((null? rows) ())
+      ((eq? (car (car rows)) id) (car rows))
+      (#t (id-row-at (cdr rows) id)))))
+($define! id-mint!
+  ($lambda (t cell)
+    (($lambda (n)
+       ($sequence (set-cdr! t
+                    (cons (+ n 1) (cons (cons n cell) (cdr (cdr t)))))
+         n))
+     (car (cdr t)))))
+; an older row of the same name in the same frame that has an id: the
+; item it continues
+($define! id-older
+  ($lambda (rows bs name)
+    ($cond ((null? bs) ())
+      (($and (eq? (car (car bs)) name)
+         (pair? (id-row-of rows (car bs))))
+       (id-row-of rows (car bs)))
+      (#t (id-older rows (cdr bs) name)))))
+($define! id-of-cell
+  ($lambda (t bs cell)
+    (($lambda (row)
+       ($if (pair? row)
+         (car row)
+         (($lambda (old)
+            ($if (pair? old)
+              ($sequence (set-cdr! old cell) (car old))
+              (id-mint! t cell)))
+          (id-older (cdr (cdr t)) (cdr bs) (car cell)))))
+     (id-row-of (cdr (cdr t)) cell))))
+
+; ---- the item at a path: the newest binding, its frame's bindings
+($define! id-frame
+  ($lambda (root path)
+    (($lambda (s) ($if (scope? s) (cdr (car s)) #f))
+     (pm-resolve root (pm-init path)))))
+($define! id-found?
+  ($lambda (root path)
+    ($if (null? path) #f (car (it-lookup root path)))))
+($define! item-id
+  ($lambda (root path)
+    ($cond ((not (id-found? root path)) ())
+      ((number? (last path))
+       (cons (item-id root (pm-init path)) (last path)))
+      (#t (($lambda (bs)
+             (id-of-cell (id-table root) bs (it-binding bs (last path))))
+           (id-frame root path))))))
+
+; ---- a path from an id: the cell, looked for among the root's entries
+; and then the ground's, (^ ...). A scope is gone into only from the
+; frame it is a child of, so an environment bound by name is not a loop.
+($define! id-search
+  ($lambda (env bs cell prefix skip)
+    ($cond ((null? bs) ())
+      ((eq? (car bs) cell) (rev (cons (car (car bs)) prefix)))
+      (#t (($lambda (v)
+             (($lambda (in)
+                ($if (null? in)
+                  (id-search env (cdr bs) cell prefix skip)
+                  in))
+              ($if ($and (scope? v)
+                     ($and (eq? (cdr v) env) (not (eq? v skip))))
+                (id-search v
+                  (cdr (car v))
+                  cell
+                  (cons (car (car bs)) prefix)
+                  skip)
+                ())))
+           (cdr (car bs)))))))
+($define! id-path-of
+  ($lambda (root cell)
+    (($lambda (p)
+       ($if (pair? p)
+         p
+         ($if (scope? (cdr root))
+           (id-search (cdr root)
+             (cdr (car (cdr root)))
+             cell
+             (list pm-mark)
+             root)
+           ())))
+     (id-search root (cdr (car root)) cell () ()))))
+; the path, if the item there now is the one with this id (a shadowed
+; row's id has moved, or will on this ask, to the newest)
+($define! id-confirm
+  ($lambda (root p id)
+    ($if ($and (pair? p) (eq? (item-id root p) id)) p ())))
+($define! item-at-id
+  ($lambda (root id)
+    ($cond ((pair? id)
+            (($lambda (p)
+               ($if ($and (pair? p)
+                      (id-found? root (pm-snoc p (cdr id))))
+                 (pm-snoc p (cdr id))
+                 ()))
+             (item-at-id root (car id))))
+      (#t (($lambda (row)
+             ($if (pair? row)
+               (id-confirm root (id-path-of root (cdr row)) id)
+               ()))
+           (id-row-at (cdr (cdr (id-table root))) id))))))
+
+; ---- the pin
+($define! id-p1 8388593)
+($define! id-p2 7254571)
+($define! id-byte
+  (($lambda (fr)
+     (($lambda (fill)
+        ($sequence (fill fill 0)
+          ($lambda (s i)
+            (eval (string->symbol (substring s i (+ i 1))) fr))))
+      ($lambda (self i)
+        ($if (< i 256)
+          ($sequence (set-cdr! (car fr)
+                       (cons (cons (string->symbol (integer->char i)) i)
+                         (cdr (car fr))))
+            (self self (+ i 1)))
+          ()))))
+   (cons (cons ($quote %f) ()) ())))
+; st is (a b len): the two hashes and the bytes so far
+($define! id-hash
+  ($lambda (s i n st)
+    ($if (= i n)
+      st
+      (($lambda (c)
+         (id-hash s
+           (+ i 1)
+           n
+           (list (remainder (+ (* (car st) 31) c) id-p1)
+             (remainder (+ (* (cadr st) 37) c) id-p2)
+             (+ (caddr st) 1))))
+       (+ (id-byte s i) 1)))))
+($define! id-add ($lambda (s st) (id-hash s 0 (string-length s) st)))
+; what a pin hashes: an item's text; a scope's entries, each its name
+; and what it holds; a scope bound under a name that is not its child
+; (an environment kept by name, an ancestor) only "<environment>", so a
+; pin never goes round a loop
+($define! id-content
+  ($lambda (root path st)
+    ($cond ((not (eq? (cadr (it-lookup root path)) ($quote scope)))
+            (id-add (item-text root path) st))
+      ((eq? (cdr (pm-resolve root path))
+         (pm-resolve root (pm-init path)))
+       (id-entries root path (entries-at root path) st))
+      (#t (id-add "<environment>" st)))))
+($define! id-entries
+  ($lambda (root path es st)
+    ($if (null? es)
+      st
+      (id-entries root
+        path
+        (cdr es)
+        (id-content root
+          (pm-snoc path (car (car es)))
+          (id-add "\n" (id-add (pm-name (car (car es))) st)))))))
+($define! item-pin
+  ($lambda (root path)
+    ($if (id-found? root path)
+      (($lambda (st)
+         (string-append (number->string (car st))
+           (string-append "."
+             (string-append (number->string (cadr st))
+               (string-append "." (number->string (caddr st)))))))
+       (id-content root path (list 0 0 0)))
+      ())))
