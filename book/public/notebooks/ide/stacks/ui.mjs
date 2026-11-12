@@ -318,7 +318,7 @@ function drawProbe() {
     : r.done ? r.names().filter((n) => !/^%/.test(n))
         .filter((n) => !/^id-/.test(n))
         .map((n) => [n, r.eval(n).text ?? ''])
-        .filter(([n, v]) => v && !/^<function|^#<|^id-|^0x|^\$/.test(v) && !v.startsWith(n))   // definitions and handles are not data
+        .filter(([n, v]) => v && !/^<|^#<|^id-|^0x|^\$/.test(v) && !v.startsWith(n))   // definitions and handles are not data
         .slice(0, 8) : [];
   names.innerHTML = pairs.length
     ? `<b>${esc(frame?.label ?? 'in scope')}</b>${pairs.slice(0, 8).map(([k, v]) => `<div><span>${esc(k)}</span><code>${esc(pretty(String(v)).slice(0, 34))}</code></div>`).join('')}`
