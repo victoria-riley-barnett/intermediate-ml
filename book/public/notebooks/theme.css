@@ -145,3 +145,6 @@ body.student .probe-out .v{font:.8rem var(--mono);color:var(--ink);word-break:br
 @media (max-width:1099px){
   body.student .probe{position:sticky;bottom:0;top:auto;right:auto;width:auto;height:auto;max-height:45vh;border-left:0;border-top:1px solid var(--rule);display:block;margin-top:2rem}
 }
+
+/* a figure number that repeats its own box is noise: the box already says it */
+body.student .dgm .dg-t.v + .dg-t.v{display:none}
