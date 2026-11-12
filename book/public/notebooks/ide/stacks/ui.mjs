@@ -289,11 +289,6 @@ function build() {
   let h = `<h1 class="doc-title">${esc(d.keywords.title ?? S.file)}</h1>`;
   if (!STUDENT) h = `<div class="kw">${kw}</div>${h}`;
   h += d.intro.map((b) => blockShell(b, d.cards[0] ?? null)).join('');
-  if (STUDENT) {
-    // a long page needs a contents list, the way any wiki page has one
-    const items = d.cards.flatMap((c) => c.sections.filter((s) => s.level <= 2).map((s) => [s.id, s.title]));
-    if (items.length > 3) h += `<nav class="toc" aria-label="Contents"><b>Contents</b>${items.map(([id, t]) => `<a href="#sec-${id}">${esc(t)}</a>`).join('')}</nav>`;
-  }
   for (const c of d.cards) {
     h += `<section class="card" data-card="${c.id}"><div class="h1card"><span class="stars">*</span><span class="ttl">${esc(c.title)}</span><span class="env-chip">card · an environment ↑ stack ↑ ground${c.tags.length ? ` · :${esc(c.tags.join(':'))}:` : ''}</span></div>`;
     h += `<div class="body">${shells(c.intro, c)}`;
@@ -585,7 +580,7 @@ function drawDiagramBlock(b, card) {
   const ctl = r ? `<div class="row dg-ctl">${['back', 'step', 'score', 'row', 'end'].filter((k) => k !== 'score' || st.d.boxes.size).map((k) => `<button class="btn${k === 'step' ? ' pri' : ''}" data-act="${k}" data-run="${r.id}" title="${esc(ACTIONS[k].title)}">${ACTIONS[k].label}</button>`).join('')}<span class="lab">${r.done ? 'finished' : `step ${r.idx.toLocaleString('en-US')}`} · ${esc(blockOfRun(r)?.name ?? r.label)}</span></div>` : '';
   S.headCount = new Set(st.events.filter((e) => e.kind === 'weights').map((e) => e.info[0])).size;
   el.innerHTML = `${STUDENT
-    ? `<div class="blk-h"><b>${esc(b.args.title ?? 'diagram')}</b><span>· click a box to see its numbers</span></div>`
+    ? `<div class="blk-h"><b>${esc(b.args.title ?? 'diagram')}</b></div>`
     : `<div class="blk-h"><b>${esc(b.args.title ?? 'diagram')}</b> <span>· click a box to see its numbers; the lit box is the step you are on</span><span class="r"><button class="btn" data-dedit="${b.id}">${S.open.has(`${b.id}:text`) ? 'hide the text' : 'the text'}</button></span></div>`}
     ${ctl}<div class="dg-wrap">${drawDiagram(st.d, { ...st, selected: sel })}</div>${sel ? diagramDetail(b, card, st, sel) : ''}
     ${!STUDENT && S.open.has(`${b.id}:text`) ? `<textarea class="code dg-text" data-dtext="${b.id}" spellcheck="false" wrap="off" rows="${b.text.split('\n').length + 1}">${esc(b.text)}</textarea>` : ''}`;

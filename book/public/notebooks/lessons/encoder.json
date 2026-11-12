@@ -4,7 +4,7 @@
  "blocks": [
   {
    "kind": "prose",
-   "html": "<p>Every number in this block has a name, so each one is something you can say out loud. Step the run and watch each part fill in, or click a box in the diagram to see its numbers at the step you are on.</p>"
+   "html": "<p>Every number in this block has a name, so each one is something you can say out loud.</p>"
   },
   {
    "kind": "heading",

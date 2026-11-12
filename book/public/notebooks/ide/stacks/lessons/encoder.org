@@ -1,7 +1,7 @@
 #+title: One encoder block, small enough to read
 #+course: CSC 411 · machine learning architectures · slide XI
 
-Every number in this block has a name, so each one is something you can say out loud. Step the run and watch each part fill in, or click a box in the diagram to see its numbers at the step you are on.
+Every number in this block has a name, so each one is something you can say out loud.
 
 * One encoder block (pre-norm) :card:
 

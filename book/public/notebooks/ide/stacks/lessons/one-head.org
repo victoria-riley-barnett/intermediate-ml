@@ -2,7 +2,7 @@
 #+course: CSC 411 · machine learning architectures · slide X
 #+machine: the vau kernel (cek.wasm)
 
-These are the numbers from slide X. Step the run and watch S, then A, then Y fill in, one entry at a time; click any weight to see the four products that made its score.
+These are the numbers from slide X.
 
 * One attention head :card:
 
@@ -153,7 +153,7 @@ Divide every score by √d_h = 2, then softmax along each row, so each row's wei
 A: each row is position i's weights over j, and adds up to 1
 #+end_view
 
-The first row is =1 0 -1 3=. Halve it, exponentiate, and divide by the sum, and you get =0.21 0.13 0.08 0.58=. Run this cell to check, then step it line by line.
+The first row is =1 0 -1 3=. Halve it, exponentiate, and divide by the sum, and you get =0.21 0.13 0.08 0.58=.
 
 #+begin_src python :live
 import math
