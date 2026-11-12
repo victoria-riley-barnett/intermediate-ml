@@ -179,7 +179,13 @@ function rebindTable(b) {
   if (r.error) { toast(r.error); return; }
   for (const x of runsOfCard(card)) x.truncate();
   readData(card);
-  toast(`${b.name} changed: what is computed from here reads the new value`);
+  // a reader should not have to press Run after changing a number
+  for (const rb of blocksOf(card)) {
+    if (rb.type !== 'src' || !rb.args.run || !isVau(rb)) continue;
+    const r = newRun(rb, { select: !S.sel || S.sel.blockId === rb.id });
+    r?.toEnd();
+  }
+  if (STUDENT) S.cell = null;
   refresh();
 }
 function setUi(b, name, value) {
@@ -760,10 +766,16 @@ function wire() {
   doc.addEventListener('click', (e) => {
     const g = e.target.closest('[data-dbox], [data-dskip]');
     if (g) {
-      const blk = g.closest('[data-b]').dataset.b, b = S.blocks.get(blk), card = S.cardOf.get(blk);
+      const blk = g.closest('[data-b]').dataset.b;
       const id = g.dataset.dbox ?? `skip:${g.dataset.dskip}`;
       S.dsel.set(blk, S.dsel.get(blk) === id ? null : id);
       refresh();
+      // the box is where the block lives: open what it holds, and go there
+      if (STUDENT && g.dataset.dbox) {
+        const card = S.cardOf.get(blk);
+        const box = readDiagram(S.blocks.get(blk).text).boxes.get(g.dataset.dbox);
+        if (box?.block) { openBlockNamed(card, box.block); }
+      }
       return;
     }
     const t = e.target.closest('button, td[data-view], .res-run');
