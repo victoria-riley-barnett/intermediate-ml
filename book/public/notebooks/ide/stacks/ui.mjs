@@ -318,7 +318,7 @@ function drawProbe() {
   const pairs = frame?.names?.length
     ? frame.names.map((x) => [x.name, x.value])
     : r.done ? r.names().filter((n) => !/^%/.test(n))
-        .filter((n) => !/^id-/.test(n))
+        .filter((n) => !/^(id-|pm-|%|\$)/.test(n))
         .map((n) => [n, r.eval(n).text ?? ''])
         .filter(([n, v]) => v && !/^<|^#<|^id-|^0x|^\$/.test(v) && !v.startsWith(n))   // definitions and handles are not data
         .slice(0, 8) : [];
