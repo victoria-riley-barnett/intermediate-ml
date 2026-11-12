@@ -1,0 +1,37 @@
+---
+title: One attention head, worked through
+description: Four positions and a head of width 4, from queries and keys to the output, with every number shown.
+frame: transformation
+---
+
+These are the <Ref to="queries-keys-values">queries, keys and values</Ref> of four positions, each row a projection of one position.
+
+<Atom name="attention-qkv" />
+
+Every query is compared with every key. Row $i$ of $Q$ against column $j$ of $K^\top$ gives the score $s_{ij}$, so four positions give sixteen scores.
+
+<Atom name="attention-scores">
+
+**`S = QKᵀ`.** The tinted row and column make the outlined score; the line below writes that one out.
+
+</Atom>
+
+The scores are <Ref to="scaled-scores">divided by the square root of the width</Ref>, here $\sqrt 4 = 2$.
+
+<Atom name="attention-scale" />
+
+A <Ref to="softmax">softmax</Ref> along each row turns the scores into shares.
+
+<Atom name="attention-weights">
+
+**`A = softmax(S/√d)`.** Every row sums to 1, and each of the four queries puts its largest share on a different key.
+
+</Atom>
+
+Each output row is its row of shares applied to the values: a weighted average, so no output entry can leave the range of the values it mixes.
+
+<Atom name="attention-output">
+
+**`Y = AV`.** Row 1 of `Y` is the tinted row of `A` applied to the four rows of `V`.
+
+</Atom>

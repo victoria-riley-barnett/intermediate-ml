@@ -1,0 +1,393 @@
+; §15 ports, minus the host: source and destination are a STRING the machine
+; already holds, so open-input-string and open-output-string carry the R7RS
+; spelling nothing else here uses. port?, input-port?, output-port?, read,
+; write, load, get-module and the two current ports keep the Report's names;
+; nothing takes a filename, and nothing closes a port -- a closed one would be
+; admitted by neither input-port? nor output-port? (§15.1.2).
+;
+; THE TYPE IS ENCAPSULATED: a port is a make-encapsulation-type value, so no
+; pair passes for one, and port? is that type's own predicate, variadic as
+; §15.1.1 writes it. Content is (kind . state), state (holds . pos), moved by
+; set-car! and set-cdr!; the kind never changes. The seal's one gap is the
+; machine's: %port-wrap and %port-unwrap are bindings in the one flat
+; environment every layer and page loads into, so code that writes %port-wrap
+; wraps a pair of its own.
+;
+; A wrong operand or unreadable text is a PROBLEM VALUE, not a trap: (problem
+; kind detail ()) answers as 030-repl shows it in a problem turn.
+;
+; Needs 010-core, 020-cek (bind!, problem, eval), 025-library (symbol?, ignore?,
+; inert?, combiner?, environment?, cell-of), and make-encapsulation-type.
+
+; ---- the type: §15's encapsulation.
+($define! %port-type (make-encapsulation-type))
+($define! %port-wrap (car %port-type))
+($define! %port-test (cadr %port-type))
+($define! %port-unwrap (caddr %port-type))
+; §15.1.1 (port? . objects): every operand a port, and no operand true
+($define! port? %port-test)
+
+; the end-of-input answer: §15.1.7 names an end-of-file object and gives it no
+; type, so it is an encapsulation (§8) -- unforgeable, asked only by eof-object?
+($define! %eof-type (make-encapsulation-type))
+($define! end-of-file ((car %eof-type) ()))
+($define! eof-object? (cadr %eof-type))
+
+; ---- a port's halves. On a port these are total; port? in front keeps them
+; total on anything. Output holds what was written and a write replaces it;
+; input holds its text and reading moves the cursor after it.
+($define! %port-kind ($lambda (p) (car (%port-unwrap p))))
+($define! %port-state ($lambda (p) (cdr (%port-unwrap p))))
+($define! %port-holds ($lambda (p) (car (%port-state p))))
+($define! %port-at ($lambda (p) (cdr (%port-state p))))
+($define! %port-set! ($lambda (p v) (set-car! (%port-state p) v)))
+($define! %port-advance! ($lambda (p i) (set-cdr! (%port-state p) i)))
+($define! %input?
+  ($lambda (p) ($if (port? p) (eq? (%port-kind p) ($quote in)) #f)))
+($define! %output?
+  ($lambda (p) ($if (port? p) (eq? (%port-kind p) ($quote out)) #f)))
+($define! %all?
+  ($lambda (p? l)
+    ($if (null? l) #t ($if (p? (car l)) (%all? p? (cdr l)) #f))))
+; §15.1.2: true unless one operand is not one, and no operand true; a port is
+; one or the other and never both, so at least one of these admits it
+($define! input-port? ($lambda objects (%all? %input? objects)))
+($define! output-port? ($lambda objects (%all? %output? objects)))
+
+; a wrong operand is the machine's problem, not a guess
+($define! %wrong-type ($lambda (x) (problem ($quote type) (list x) ())))
+
+; ---- §15.1.5 over a string instead of a file: the only source and destination.
+($define! open-input-string
+  ($lambda (s)
+    ($if (string? s)
+      (%port-wrap (cons ($quote in) (cons s 0)))
+      (%wrong-type s))))
+($define! open-output-string
+  ($lambda () (%port-wrap (cons ($quote out) (cons () ())))))
+
+; there is no console, so this is the only way to read what write wrote
+; Text is built by rewriting a list, not by appending to a string: (string-append acc x) copies everything
+; already built, so a printer written that way is quadratic in what it prints. Chunks are pushed onto a list
+; (one tail cell rewritten) and joined by halving, which copies about n log n bytes instead of n^2.
+($define! %push ($lambda (acc s) (cons s acc)))
+($define! %glue
+  ($lambda (l)
+    ($if (null? l)
+      ()
+      ($if (null? (cdr l))
+        (list (car l))
+        (cons (string-append (car l) (car (cdr l))) (%glue (cdr (cdr l))))))))
+($define! %join-halves
+  ($lambda (l) ($if (null? (cdr l)) l (%join-halves (%glue l)))))
+($define! %join ($lambda (l) ($if (null? l) "" (car (%join-halves l)))))
+($define! %output-text
+  ($lambda (p) (%join (rev (%port-holds p)))))
+($define! get-output-string
+  ($lambda (p) ($if (%output? p) (%output-text p) (%wrong-type p))))
+
+; ---- the printer: what write writes, exactly the read syntax the reader below
+; accepts and nothing else: a combiner, an environment, the eof object and any
+; other opaque value print as a name in angle brackets the reader refuses. A
+; name holding a space or a paren prints bare and does not read back -- the
+; kernel's printer has the same hole, and no escape for it either.
+($define! %escape-char
+  ($lambda (c)
+    ($cond ((string=? c "\"") "\\\"")
+      ((string=? c "\\") "\\\\")
+      ((string=? c "\n") "\\n")
+      (#t c))))
+($define! %escape
+  ($lambda (s i n acc)
+    ($if (= i n)
+      (%join (rev acc))
+      (%escape s (+ i 1) n (%push acc (%escape-char (substring s i (+ i 1))))))))
+($define! %quoted
+  ($lambda (s) (%join (list "\"" (%escape s 0 (string-length s) ()) "\""))))
+
+; a combiner or an environment ends the walk and prints after a dot, not spliced. src is the source mode:
+; there a tagged pair is the list it is, so a form the reader made survives
+; (read (open-input-string (%source-string v))).
+; the open paren is the last chunk, so the first element needs no space before it
+($define! %tight? ($lambda (acc) ($if (pair? acc) (string=? (car acc) "(") #t)))
+($define! %show-chunks            ; reversed: each chunk was emitted after the ones below it
+  ($lambda (v src acc)
+    ($cond ((inert? v) (%push acc "#inert"))
+      ((eq? v #t) (%push acc "#t"))
+      ((eq? v #f) (%push acc "#f"))
+      ((ignore? v) (%push acc "#ignore"))
+      ((null? v) (%push acc "()"))
+      ((symbol? v) (%push acc (symbol->string v)))
+      ((number? v) (%push acc (number->string v)))
+      ((string? v) (%push acc (%quoted v)))
+      ((eof-object? v) (%push acc "<end-of-file>"))
+      ((port? v) (%push acc "<port>"))
+      ((combiner? v) ($if src (%show-pair v src acc) (%push acc "<combiner>")))
+      ((environment? v) (%push acc "<environment>"))
+      ((pair? v) (%show-pair v src acc))
+      (#t (%push acc "<opaque>")))))
+($define! %show-pair ($lambda (v src acc) (%show-rest v src (%push acc "("))))
+; a combiner ends the list in value mode, and the rest prints after a dot
+($define! %ends-list? ($lambda (v src) ($and (pair? v) ($if src #f (combiner? v)))))
+($define! %show-rest
+  ($lambda (v src acc)
+    ($cond ((null? v) (%push acc ")"))
+      (($if (pair? v) ($if (%ends-list? v src) #f #t) #f)
+       (%show-rest (cdr v) src
+         (%show-chunks (car v) src ($if (%tight? acc) acc (%push acc " ")))))
+      (#t (%push (%show-chunks v src (%push acc " . ")) ")")))))
+
+; a boolean prints as the Report spells it: this machine's are derived combiners
+; and its own printer shows them <op>, which does not read back; #t and #f do.
+($define! %show* ($lambda (v src) (%join (rev (%show-chunks v src ())))))
+($define! %show ($lambda (v) (%show* v #f)))
+; the source printer: same syntax, but every tagged pair is a list, so a form
+; containing %c (the combiner tag) still reads back
+($define! %source-string ($lambda (v) (%show* v #t)))
+
+; ---- §15.1.8 write: (write datum) is the current output port, (write datum p)
+; is p. The Report leaves the answer unspecified; it is #inert here.
+($define! %put
+  ($lambda (p s)
+    ($sequence (%port-set! p (cons s (%port-holds p))) #inert)))
+; the port an operation works on: the one named, else the current one
+($define! %given-port
+  ($lambda (objects current)
+    ($if (null? objects) (current) (car objects))))
+($define! write
+  ($lambda (datum . rest)
+    ($let ((p (%given-port rest get-current-output-port)))
+      ($if (%output? p) (%put p (%show datum)) (%wrong-type p)))))
+
+; ---- the reader. The kernel's reader is not callable from the language (%read
+; is only the dispatch hook, 010-core), so read has one of its own. It accepts
+; what write writes for data, plus comments:
+;   ( ... )  (a . b)   a list, and an improper one
+;   "..."              \" \\ \n escape; any other \x reads as the char after it
+;   #inert #t #f       the values themselves, so write's output reads back
+;   #( ... )           a list headed by %read, as the kernel's reader answers
+;   -12, x             digits with an optional - are a number, else the name
+;   ; ...              to end of line; space, tab, cr and nl separate
+; A string that does not close, a list that does not close and a ) with nothing
+; open are problems: a port's text is input, and wrong input is the machine's
+; problem, not a guess.
+($define! %bad ($lambda (p) (cons ($quote %bad) p)))
+($define! %read-ok? ($lambda (d) ($and (pair? d) (number? (cdr d)))))
+($define! %syntax
+  ($lambda (s i) (%bad (problem ($quote syntax) (list i s) ()))))
+; scanner answers are told apart by shape: (datum . index), a pair whose cdr is
+; not a number is (%bad . problem), and the end-of-input object is neither
+($define! %at?
+  ($lambda (s i c)
+    ($if (< i (string-length s))
+      (string=? (substring s i (+ i 1)) c)
+      #f)))
+; the kernel reader knows three escapes (\" \\ \n), so a tab and a carriage
+; return cannot be written as literals here: \t in the source reads as the letter t
+($define! %tab (integer->char 9))
+($define! %cr (integer->char 13))
+($define! %space?
+  ($lambda (s i)
+    ($or (%at? s i " ")
+      ($or (%at? s i "\n") ($or (%at? s i %tab) (%at? s i %cr))))))
+($define! %delim?
+  ($lambda (s i)
+    ($or (%space? s i) ($or (%at? s i "(") (%at? s i ")")))))
+($define! %skip-line
+  ($lambda (s i)
+    ($if (< i (string-length s))
+      ($if (%at? s i "\n") (%skip s (+ i 1)) (%skip-line s (+ i 1)))
+      i)))
+($define! %skip
+  ($lambda (s i)
+    ($cond ((%space? s i) (%skip s (+ i 1)))
+      ((%at? s i ";") (%skip-line s (+ i 1)))
+      (#t i))))
+
+($define! %string-escape
+  ($lambda (s i acc)
+    ($if (= (+ i 1) (string-length s))
+      (%syntax s i)
+      (%string s
+        (+ i 2)
+        (string-append acc
+          ($if (%at? s (+ i 1) "n")
+            "\n"
+            (substring s (+ i 1) (+ i 2))))))))
+($define! %string
+  ($lambda (s i acc)
+    ($cond ((= i (string-length s)) (%syntax s i))
+      ((%at? s i "\"") (cons acc (+ i 1)))
+      ((%at? s i "\\") (%string-escape s i acc))
+      (#t (%string s
+            (+ i 1)
+            (string-append acc (substring s i (+ i 1))))))))
+
+($define! %token-end
+  ($lambda (s i)
+    ($if (= i (string-length s))
+      i
+      ($if (%delim? s i) i (%token-end s (+ i 1))))))
+($define! %atom
+  ($lambda (t)
+    ($cond ((string=? t "#inert") #inert)
+      ((string=? t "#t") #t)
+      ((string=? t "#f") #f)
+      (#t ($let ((n (string->number t)))
+            ($if (number? n) n (string->symbol t)))))))
+($define! %token
+  ($lambda (s i)
+    ($let ((j (%token-end s i))) (cons (%atom (substring s i j)) j))))
+
+($define! %dispatch
+  ($lambda (s i)
+    ($let ((d (%list s i ())))
+      ($if (%read-ok? d)
+        (cons (cons ($quote %read) (car d)) (cdr d))
+        d))))
+($define! %dot?
+  ($lambda (s i)
+    ($if (%at? s i ".")
+      ($if (= (+ i 1) (string-length s)) #t (%delim? s (+ i 1)))
+      #f)))
+($define! %tail
+  ($lambda (s i acc)
+    ($let ((d (%datum s i)))
+      ($if (%read-ok? d)
+        ($let ((k (%skip s (cdr d))))
+          ($if (%at? s k ")")
+            (cons (append acc (car d)) (+ k 1))
+            (%syntax s k)))
+        d))))
+($define! %list
+  ($lambda (s i acc)
+    ($let ((j (%skip s i)))
+      ($cond ((= j (string-length s)) (%syntax s j))
+        ((%at? s j ")") (cons (rev acc) (+ j 1)))
+        ((%dot? s j) (%tail s (+ j 1) (rev acc)))
+        (#t ($let ((d (%datum s j)))
+              ($if (%read-ok? d)
+                (%list s (cdr d) (cons (car d) acc))
+                d)))))))
+($define! %datum
+  ($lambda (s i)
+    ($let ((j (%skip s i)))
+      ($cond ((= j (string-length s)) end-of-file)
+        ((%at? s j "(") (%list s (+ j 1) ()))
+        ((%at? s j ")") (%syntax s j))
+        ((%at? s j "\"") (%string s (+ j 1) ""))
+        ((%at? s j "#")
+         ($if (%at? s (+ j 1) "(") (%dispatch s (+ j 2)) (%token s j)))
+        (#t (%token s j))))))
+
+; ---- §15.1.7 read: (read) is the current input port, (read p) is p. End of
+; input answers the end-of-file object, not a problem -- what is asked for is the
+; next object and there is none. Reading advances the cursor, the only change an
+; input operation makes. Bad text answers (problem syntax index text) and does
+; not advance, so the text is where it was for whoever asks why.
+($define! %scan
+  ($lambda (p) (%datum (%port-holds p) (%port-at p))))
+($define! %read-port
+  ($lambda (p)
+    ($let ((d (%scan p)))
+      ($cond ((eof-object? d) d)
+        ((%read-ok? d)
+         ($sequence (%port-advance! p (cdr d)) (car d)))
+        (#t (cdr d))))))
+($define! read
+  ($lambda objects
+    ($let ((p (%given-port objects get-current-input-port)))
+      ($if (%input? p) (%read-port p) (%wrong-type p)))))
+
+; ---- §15.2.2 load over a PORT where the Report takes a filename: the forms must
+; come from somewhere the machine reaches, and a port is the only such place. It
+; answers #inert; a form the reader cannot read answers the reader's problem and
+; stops the load, leaving the rest of the port unread.
+;
+; The default environment is the CALLER's, not this call's frame: a lambda's body
+; runs in a frame whose parent is the caller's, so that frame is (cdr
+; (get-current-environment)) here. It has to be the caller's -- a load defines,
+; and a definition in this call's frame is gone when the call answers.
+($define! %load-forms
+  ($lambda (p env)
+    ($let ((d (%scan p)))
+      ($cond ((eof-object? d) #inert)
+        ((%read-ok? d)
+         ($sequence
+           (%port-advance! p (cdr d))
+           (eval (car d) env)
+           (%load-forms p env)))
+        (#t (cdr d))))))
+($define! load
+  ($lambda (p . rest)
+    (($lambda (env)
+       ($if (%input? p) (%load-forms p env) (%wrong-type p)))
+      ($if (null? rest) (cdr (get-current-environment)) (car rest)))))
+
+; ---- §15.1.4 the current ports. No keyboard, no console: standard input is over
+; the empty string -- (read) at top level answers end of input -- and standard
+; output collects text only get-output-string reads back.
+($define! %standard-input (open-input-string ""))
+($define! %standard-output (open-output-string))
+($define! get-current-input-port ($lambda () %standard-input))
+($define! get-current-output-port ($lambda () %standard-output))
+
+; ---- §15.2.3 get-module. The Report's derivation turns on the one thing this
+; machine lacks, a filename; what it has is an environment, and an environment
+; holds bindings, so a module's source is a STRING in a registry: the binding
+; %modules, an alist of (name . source) that register-module extends. The rest is
+; the derivation as written: a fresh standard environment, module-parameters
+; bound to the optional argument, the forms loaded into it -- that is the answer.
+; A name nothing registered is a problem, not an invented module.
+($define! %registry ($quote %modules))
+($define! %module-source
+  ($lambda (name env)
+    ($if (environment? env)
+      ($let ((cell (cell-of %registry env)))
+        ($if (null? cell)
+          ()
+          ($let ((entry (assoc name (cdr cell))))
+            ($if (pair? entry) (cdr entry) ()))))   ; assoc answers the ENTRY, so the source is its cdr
+      (%wrong-type env))))
+($define! %register
+  ($lambda (name source env)
+    ($if (environment? env)
+      ($if (string? name)
+        ($if (string? source)
+          ($let ((cell (cell-of %registry env)))
+            ($if (null? cell)
+              ($sequence
+                (bind! env %registry (list (cons name source)))
+                #inert)
+              ($sequence
+                (set-cdr! cell (cons (cons name source) (cdr cell)))
+                #inert)))
+          (%wrong-type source))
+        (%wrong-type name))
+      (%wrong-type env))))
+; the registry's environment is the optional third argument, and the
+; caller's own when it is not given, as load's environment is
+($define! register-module
+  ($lambda (name source . rest)
+    ($if (null? rest)
+      (%register name source (cdr (get-current-environment)))
+      (%register name source (car rest)))))
+; the standard environment is this layer's; a module runs in a fresh child, so it
+; sees the standard names and none of the caller's (the §15.2.3 point)
+($define! %standard-environment (get-current-environment))
+($define! %fresh-environment
+  ($lambda ()
+    (eval ($quote ($let () (get-current-environment)))
+      %standard-environment)))
+($define! get-module
+  ($lambda (name . rest)
+    ($let ((source (%module-source name (get-current-environment))))
+      ($if (null? source)
+        (problem ($quote module) (list name) ())
+        ($let ((env (%fresh-environment)))
+          ($sequence
+            ($if (null? rest)
+              #inert
+              (bind! env ($quote module-parameters) (car rest)))
+            (load (open-input-string source) env)
+            env))))))

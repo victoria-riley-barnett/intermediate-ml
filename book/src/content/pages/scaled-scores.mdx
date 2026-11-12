@@ -1,0 +1,23 @@
+---
+title: Why scores are divided by √d
+description: A dot product of width d grows like √d; dividing by it keeps the softmax out of saturation at any width.
+frame: transformation
+---
+
+A score $s_{ij} = \sum_{t=1}^{d_k} q_{it}k_{jt}$ is a sum of $d_k$ terms. If each product has mean zero and variance $\sigma^2$, and the terms are roughly independent, the sum has variance $d_k\sigma^2$. Its typical size grows as $\sqrt{d_k}$, so at width 512 the spread of the scores is about twenty-two times the spread at width 1.
+
+A <Ref to="softmax">softmax</Ref> behaves very differently for small and large spreads. In a row of two, a lead of $c$ gives the leader $e^c/(e^c+1)$, which is about 73% at $c=1$ and 99% at $c=5$. With more entries the concentration is sharper still, and the row approaches a one-hot vector. That is saturation, and it costs the gradient. The derivative of a softmax row is $p_j(\delta_{jk} - p_k)$, which for a one-hot row is close to zero everywhere. A saturated row passes almost nothing back to $W_Q$ and $W_K$, so the comparison that produced it can't be corrected.
+
+Dividing by $\sqrt{d_k}$ puts the variance back to $\sigma^2$ whatever the width:
+
+$$
+a_{ij} = \mathrm{softmax}_j\!\left(\frac{q_i \cdot k_j}{\sqrt{d_k}}\right).
+$$
+
+<Atom name="attention-scale-flatter">
+
+**Same ranking, flatter row.** One query against three keys of width 4. Dividing by `√4` cannot reorder the keys, but it moves weight off the leader.
+
+</Atom>
+
+The scale of the scores is now set by the initialization and the data, not by the layer's width, so the same learning rate and the same softmax behaviour hold as a model gets wider.

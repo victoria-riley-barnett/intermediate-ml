@@ -1,0 +1,168 @@
+; An outline of an environment, as html. The source is a tree of scopes
+; (090-scope), so reading it is walking environments: (outline-html env
+; depth) draws the entries of env's own frame, oldest first, as nested
+; <details>: for a scope, of its entries, or a <div class="scope capped"> at
+; `depth`; for a closure, with badge ƒ, its source in <pre> once opened; a
+; string as its text; any other value as (show v), cut at 200 characters.
+;
+; Every entry carries data-path="a/b/c", the slugs from env down to it, so a
+; host or an on-act can name the one meant. The top is not folded, and a
+; scope that holds itself draws only as deep as `depth`. (find-def env name)
+; is the path of names to the first entry called `name`, in env's own frame
+; then its scopes, depth first; () if none.
+; Needs core, cek (map, rev), page, scope, view (show, v-*) and html.
+
+($define! oh-clip
+  ($lambda (s n)
+    ($if (> (string-length s) n)
+      (string-append (substring s 0 n) "…")
+      s)))
+
+; ---- a form as written, whole: show cuts, right for a value, wrong for source
+($define! oh-form
+  ($lambda (v)
+    ($cond ((v-hole? v) "<hole>")
+      ((null? v) "()")
+      ((v-sym? v) (symbol->string v))
+      ((number? v) (number->string v))
+      ((string? v) (v-quote v))
+      ((v-pair? v)
+       ($if (v-env? v)
+         "<environment>"
+         ($if (v-closure? v) "<combiner>" (oh-list v))))
+      (#t "?"))))
+($define! oh-list
+  ($lambda (v)
+    (string-append "("
+      (string-append (v-join (map oh-form (v-items v)) " ")
+        (string-append ($if (v-nil? (v-tail v 0))
+                         ""
+                         (string-append " . " (oh-form (v-tail v 0))))
+          ")")))))
+($define! oh-source
+  ($lambda (src)
+    (string-append (oh-form (car src))
+      (join (map ($lambda (f) (string-append "\n  " (oh-form f)))
+              (cadr src))))))
+
+; ---- which closures are open, in one cell so it outlasts an edit of the
+; surface; a page that never toggles draws heads only. A summary carries
+; data-act="a/b/c": the host calls (on-act "a/b/c"), answering (outline-toggle! path).
+($define! outline-open (cons () ()))
+($define! oh-open?
+  ($lambda (path) (v-memq-string path (cdr outline-open))))
+($define! v-memq-string
+  ($lambda (s l)
+    ($if (null? l)
+      #f
+      ($if (string=? s (car l)) #t (v-memq-string s (cdr l))))))
+($define! oh-without
+  ($lambda (s l)
+    ($if (null? l)
+      ()
+      ($if (string=? s (car l))
+        (oh-without s (cdr l))
+        (cons (car l) (oh-without s (cdr l)))))))
+($define! outline-toggle!
+  ($lambda (path)
+    ($if (oh-open? path)
+      (($lambda (#ignore) (string-append "shut " path))
+       (set-cdr! outline-open (oh-without path (cdr outline-open))))
+      (($lambda (#ignore) (string-append "opened " path))
+       (set-cdr! outline-open (cons path (cdr outline-open)))))))
+
+; ---- one entry: `path` already escaped for an attribute, `en` its escaped name
+($define! oh-head
+  ($lambda (en badge) (join (list "<b>" en "</b> <i>" badge "</i>"))))
+($define! oh-open-tag
+  ($lambda (tag path cls)
+    (join (list "<" tag " data-path=\"" path "\" class=\"" cls "\">"))))
+($define! oh-scope
+  ($lambda (en path v depth)
+    ($if (> depth 0)
+      (join (list (oh-open-tag "details" path "scope")
+              "<summary>"
+              (oh-head en "§")
+              "</summary>"
+              (oh-entries v path (- depth 1))
+              "</details>"))
+      (join (list (oh-open-tag "div" path "scope capped")
+              (oh-head en "§")
+              "</div>")))))
+($define! oh-closure
+  ($lambda (en path v)
+    (join (list "<details data-path=\""
+            path
+            "\" data-act=\""
+            path
+            "\" class=\"closure\""
+            ($if (oh-open? path) " open" "")
+            ">"
+            "<summary>"
+            (oh-head en "ƒ")
+            "</summary>"
+            ($if (oh-open? path)
+              (el "pre"
+                ()
+                (text ($if (null? (op-source v))
+                        (show v)
+                        (oh-source (op-source v)))))
+              "")
+            "</details>"))))
+($define! oh-entry
+  ($lambda (name v prefix depth)
+    (($lambda (en)
+       (($lambda (path)
+          ($cond ((scope? v) (oh-scope en path v depth))
+            ((tagged-c? v) (oh-closure en path v))
+            ((string? v)
+             (join (list (oh-open-tag "div" path "string")
+                     (oh-head en "\"")
+                     " <q>"
+                     (esc v)
+                     "</q></div>")))
+            (#t (join (list (oh-open-tag "div" path "value")
+                        (oh-head en "=")
+                        " <code>"
+                        (esc (oh-clip (show v) 200))
+                        "</code></div>")))))
+        ($if (string=? prefix "") en (join (list prefix "/" en)))))
+     (esc (symbol->string name)))))
+($define! oh-entries
+  ($lambda (env prefix depth)
+    (rows-of (rev (cdr (car env)))
+      ($lambda (b) (oh-entry (car b) (cdr b) prefix depth)))))
+($define! outline-html
+  ($lambda (env depth)
+    ($if (scope? env)
+      (el "div"
+        (list (cons "class" "outline"))
+        (oh-entries env "" depth))
+      "")))
+
+($define! oh-has
+  ($lambda (bs name)
+    ($if (null? bs)
+      #f
+      ($if (eq? (car (car bs)) name) #t (oh-has (cdr bs) name)))))
+; the oldest scope in bs that holds name, as the path through it
+($define! oh-in-kids
+  ($lambda (bs name seen)
+    ($if (null? bs)
+      ()
+      (($lambda (r)
+         ($if (null? r)
+           (oh-in-kids (cdr bs) name seen)
+           (cons (car (car bs)) r)))
+       ($if (scope? (cdr (car bs)))
+         (oh-find (cdr (car bs)) name seen)
+         ())))))
+($define! oh-find
+  ($lambda (env name seen)
+    ($if (v-memq (car env) seen)
+      ()
+      ($if (oh-has (cdr (car env)) name)
+        (list name)
+        (oh-in-kids (rev (cdr (car env))) name (cons (car env) seen))))))
+($define! find-def
+  ($lambda (env name) ($if (scope? env) (oh-find env name ()) ())))

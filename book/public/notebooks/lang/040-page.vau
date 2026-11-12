@@ -1,0 +1,11 @@
+; A page's environments, in the language. A heading's environment is a
+; child of the heading above it: a new frame whose parent is that
+; environment, so a name defined in a section is seen by the sections
+; inside it and by nobody beside it. An environment is a list of frames,
+; a frame is (%f . bindings) (see new-frame in cek.vau), and a child is
+; a frame in front: nothing the host needs to know. It needs only
+; core.vau, so a page can run on a ground that never loaded the
+; machine-in-the-language.
+
+($define! child-env
+  ($lambda (parent) (cons (cons ($quote %f) ()) parent)))

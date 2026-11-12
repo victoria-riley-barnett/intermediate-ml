@@ -1,0 +1,40 @@
+; §11.1 make-keyed-static-variable: a binding whose key is not a name, so
+; access is regulated by holding the accessor. Each call makes a fresh pair
+; (b a): the accessor is its own key, a combiner nothing $quote writes or
+; cons builds is eq? to, so reading the value or making a child that binds
+; it takes b and a. A symbol cannot: reaching an environment shadows one.
+;
+;   (b value env)  a child of the environment its caller NAMES, not its own,
+;                  holding one binding: a value there and under it, nowhere else
+;   (a)            the value, from the dynamic environment of its call and its
+;                  ancestors, innermost binding winning; unbound with none
+;
+; The binding names a fixed object: binding-mutation is not built in, so this
+; layer mutates nothing and has no setter. Mutation goes to the referent.
+; Needs 010-core ($let, $letrec, $if, $sequence, $quote), 020-cek
+; (new-frame, bind!, problem), 025-library (cell-of).
+
+; one frame of its own: the environment it was made from is left as it was
+($define! keyed-child
+  ($lambda (key value env)
+    ($let ((fr (new-frame env)))
+      ($sequence (bind! fr key value) fr))))
+
+; the cell, not the value: a value of `none` would otherwise answer as if
+; nothing were bound, and none is a pair any caller can pass to b
+($define! keyed-value
+  ($lambda (key env)
+    ($let ((cell (cell-of key env)))
+      ($if (null? cell)
+        (problem ($quote unbound) (list key) ())
+        (cdr cell)))))
+
+($define! make-keyed-static-variable
+  ($lambda ()
+    ($letrec ((a (wrap ($vau () env (keyed-value a env))))
+              (b
+                (wrap
+                  ($vau (value env)
+                    #ignore
+                    (keyed-child a value env)))))
+      (list b a))))

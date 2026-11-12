@@ -1,0 +1,695 @@
+; The machine, in the language: a CEK. State is data (control, environment,
+; continuation); step is state -> state, drive and run loop it. Environments
+; are frames (cell . parent), and $define! (and recursion) works because a
+; cell is mutated by set-cdr!. Combiners are tagged lists (%c kind . fields).
+($define! fail ($lambda () ((wrap ($vau (x) #ignore x)))))
+($define! cadr ($lambda (x) (car (cdr x))))
+($define! cddr ($lambda (x) (cdr (cdr x))))
+($define! caddr ($lambda (x) (car (cddr x))))
+($define! cadddr ($lambda (x) (car (cdr (cddr x)))))
+($define! map
+  ($lambda (f l) ($if (null? l) () (cons (f (car l)) (map f (cdr l))))))
+($define! rev-onto
+  ($lambda (l acc)
+    ($if (null? l) acc (rev-onto (cdr l) (cons (car l) acc)))))
+($define! rev ($lambda (l) (rev-onto l ())))
+($define! is? ($lambda (k x) (eq? (car x) k)))
+
+($define! t-c ($quote %c))
+($define! tagged? ($lambda (x) ($and (pair? x) (eq? (car x) t-c))))
+($define! combiner
+  ($lambda (kind . fields) (cons t-c (cons kind fields))))
+
+; ---- environments
+($define! new-frame
+  ($lambda (parent) (cons (cons ($quote %f) ()) parent)))
+($define! bind!
+  ($lambda (fr name v)
+    (set-cdr! (car fr) (cons (cons name v) (cdr (car fr))))))
+
+; none is a cell nothing else can make, so find may answer it where nothing binds; lookup is find that insists
+($define! none (cons () ()))
+
+; the trace hook: (cdr tap) is () or a function (kind what env) told of every read,
+; define, native call and match (050-ask.vau installs one per run); off, a note is one test.
+($define! tap (cons () ()))
+($define! note!
+  ($lambda (kind what env)
+    ($if (null? (cdr tap)) () ((cdr tap) kind what env))))
+($define! scan
+  ($lambda (sym bindings frame)
+    ($if (null? bindings)
+      (find sym (cdr frame))
+      ($if (eq? (car (car bindings)) sym)
+        (cdr (car bindings))
+        (scan sym (cdr bindings) frame)))))
+($define! find
+  ($lambda (sym frame)
+    ($if (null? frame) none (scan sym (cdr (car frame)) frame))))
+($define! lookup
+  ($lambda (sym frame)
+    ($let ((v (find sym frame))) ($if (eq? v none) (fail) v))))
+($define! match!
+  ($lambda (pattern value frame)
+    ($cond ((eq? pattern #ignore) #t)
+      ((null? pattern) (null? value))
+      ((pair? pattern) ($if (pair? value)
+                         ($and (progn (note! ($quote match) value frame) #t)
+                           ($and (match! (car pattern) (car value) frame)
+                             (match! (cdr pattern) (cdr value) frame)))
+                         #f))
+      (($or (number? pattern) (string? pattern))
+       (eq? pattern value))  ; a literal matches by equality
+      (#t (($lambda (#ignore) #t) (bind! frame pattern value))))))
+
+; a user's mistake is a state, not a crash: (Y (problem kind . detail) k),
+; waiting like an unbound name ($problem, kernel/problems.wat)
+($define! new-site
+  (($lambda (c) ($lambda () (set-cdr! c (+ (cdr c) 1)) (cdr c)))
+   (cons 0 0)))  ; a hole is a place: the counter lives in this pair
+; a guard in the extent of the mistake whose clause is selected by
+; error-continuation is passed it instead, as 125-cont does.
+($define! problem
+  ($lambda (kind detail k)
+    (($lambda (out)
+       (($lambda (r)
+          ($if (null? r) (list ($quote Y) out k (new-site)) r))
+        (raise out k)))
+     (cons ($quote problem) (cons kind detail)))))
+($define! hole
+  ($lambda (x k)
+    (($lambda (out)
+       (($lambda (r)
+          ($if (null? r) (list ($quote Y) (cdr out) k (new-site)) r))
+        (raise out k)))
+     (cons ($quote problem) (list ($quote unbound) x)))))
+
+; the natives are the outer machine's and a bad call stops the whole outer run, so shapes are checked here
+($define! len
+  ($lambda (l) ($if (pair? l) (+ 1 (len (cdr l))) ($if (null? l) 0 -1))))
+($define! all-numbers?
+  ($lambda (l)
+    ($if (null? l) #t ($if (number? (car l)) (all-numbers? (cdr l)) #f))))
+($define! all-rational?
+  ($lambda (l)
+    ($if (null? l) #t ($if (rational? (car l)) (all-rational? (cdr l)) #f))))
+($define! all-integers?
+  ($lambda (l)
+    ($if (null? l) #t ($if (integer? (car l)) (all-integers? (cdr l)) #f))))
+($define! env?
+  ($lambda (x)
+    ($if (pair? x)
+      ($if (pair? (car x)) (eq? (car (car x)) ($quote %f)) #f)
+      #f)))
+($define! named?
+  ($lambda (name names)
+    ($if (null? names)
+      #f
+      ($if (eq? name (car names)) #t (named? name (cdr names))))))
+($define! fits?
+  ; may the native (fn name) take these operands? n with no name is left to the outer machine
+  ($lambda (fields operands n)
+    ($if (null? (cdr fields)) #t (fits-named? (cadr fields) operands n))))
+($define! fits-named?
+  ($lambda (name operands n)
+    ($cond ((named? name ($quote (cons eq?))) (= n 2))
+      ((named? name ($quote (set-cdr! set-car!))) ($if (= n 2) (pair? (car operands)) #f))
+      ((named? name ($quote (number? integer? rational?))) (= n 1))
+      ((named? name ($quote (+ *))) (all-rational? operands))
+      ((eq? name ($quote -)) ($if (= n 0) #f (all-rational? operands)))
+      ((eq? name ($quote /)) ($if (= n 0) #f (all-rational? operands)))
+      ((named? name ($quote (quotient remainder)))
+       ($if (= n 2) (all-integers? operands) #f))
+      ((named? name ($quote (< <= =)))
+       ($if (= n 2) (all-numbers? operands) #f))
+      ((named? name ($quote (numerator denominator exact?)))
+       ($if (= n 1) (all-rational? operands) #f))
+      (#t #t))))
+
+; the least operands each kind reads before it could fail
+($define! want
+  ($lambda (kind)
+    ($if (named? kind ($quote (vau guardcont)))
+      3
+      ($if (named? kind
+             ($quote (eval define match kdvb applycont extendcont)))
+        2
+        ($if (named? kind
+               ($quote (wrap callcc yield unwrap contp cont2app)))
+          1
+          0)))))
+; the machine's own booleans are those bound to #t and #f in its environment, not the native machine's
+($define! machine-boolean
+  ($lambda (b env)
+    ($if b (lookup ($quote #t) env) (lookup ($quote #f) env))))
+($define! last
+  ($lambda (l) ($if (null? (cdr l)) (car l) (last (cdr l)))))
+($define! progn ($lambda args (last args)))
+; A continuation is (%c cont . chain), NOT a combiner (R-1RK 7.2.1);
+; (%c ap (%c k . chain)) is the applicative that jumps, which is what
+; continuation->applicative hands out. apply-val strips the wraps.
+($define! cont?
+  ($lambda (x) ($and (tagged? x) (eq? (cadr x) ($quote cont)))))
+($define! cont-of
+  ($lambda (chain) (cons t-c (cons ($quote cont) chain))))
+($define! shape
+  ($lambda (kind operands k)
+    (problem ($quote shape) (list kind operands) k)))
+($define! apply-val
+  ($lambda (f)
+    ($if ($and (tagged? f) (eq? (cadr f) ($quote ap)))
+      (apply-val (car (cddr f)))
+      f)))
+($define! outer
+  ($lambda (name . args)
+    (eval (cons name (map ($lambda (a) (list $quote a)) args))
+      (get-current-environment))))
+($define! bind-dynamic
+  ; (binder v comb): the key is (x . payload), so set-cdr! is all it needs
+  ($lambda (fields operands k)
+    (($lambda (key)
+       ($lambda (old)
+         (set-cdr! key (list (car operands)))
+         (list ($quote C)
+           (cadr operands)
+           ()
+           (new-frame ())
+           (list ($quote unbind) key old k))))
+     (car fields)
+     (cdr (car fields)))))
+($define! read-dynamic
+  ($lambda (f fields k)
+    ($if (null? (cdr (car fields)))
+      (hole f k)
+      ; (accessor): unbound is a hole, as an unbound name is
+      (list ($quote R) (car (cdr (car fields))) k))))
+($define! encap-op
+  ; a tag-7 value cannot be made from pairs: the native machine makes it
+  ($lambda (kind fields operands k)
+    ($if (eq? kind ($quote encapp))
+      (list ($quote R)
+        (outer ($quote %encap) 1 (car fields) (car operands))
+        k)
+      ($if (eq? kind ($quote encap))
+        (list ($quote R)
+          (outer ($quote %encap) 0 (car fields) (car operands))
+          k)
+        ($if (outer ($quote %encap) 1 (car fields) (car operands))
+          (list ($quote R)
+            (outer ($quote %encap) 2 (car fields) (car operands))
+            k)
+          (shape kind operands k))))))
+
+; ---- states: (E x env k) (R v k) (C f operands env k) (D v) (Y out k site)
+; ---- continuations: (kind . fields), each taken apart where step-ret reaches it
+($define! sequence
+  ($lambda (body env k)
+    (list ($quote E)
+      (car body)
+      env
+      ($if (null? (cdr body)) k (list ($quote seq) (cdr body) env k)))))
+
+($define! step-eval
+  ($lambda (x env k)
+    ($if (tagged? x)
+      (list ($quote R) x k)
+      ($if (pair? x)
+        (list ($quote E) (car x) env (list ($quote opev) (cdr x) env k))
+        ($if ($or (null? x) ($or (number? x) (string? x)))
+          (list ($quote R) x k)
+          ; a name nothing binds is a hole: the machine waits, naming it, resumable with a value
+          (($lambda (v)
+             ($if (eq? v none)
+               (hole x k)
+               (list ($quote R) v k)))
+           (progn (note! ($quote read) x env) (find x env))))))))
+
+
+; ---- guarded continuations (R-1RK 7.2.4), as 125-cont does them. A frame's
+; parent is its last element, so the chain is the tree. A pass from s to d runs
+; the exit clauses of the (kg entry exit k') frames between s and the nearest
+; common ancestor, innermost first, then their entry clauses down to d,
+; outermost first; a clause is selected by a selector that is an ancestor-or-
+; self of d (exit) or of s (entry), halt being a parent of every chain.
+($define! kparent
+  ($lambda (f) ($if (is? ($quote halt) f) () (last f))))
+($define! klen
+  ($lambda (f) ($if (null? f) 0 (+ 1 (klen (kparent f))))))
+($define! kdrop
+  ($lambda (f n) ($if (< 0 n) (kdrop (kparent f) (- n 1)) f)))
+($define! kanc
+  ($lambda (a d)
+    ($if (is? ($quote halt) a)
+      #t
+      ($if (null? d) #f ($if (eq? a d) #t (kanc a (kparent d)))))))
+($define! kcommon-walk
+  ($lambda (s d)
+    ($if (eq? s d)
+      s
+      ($if (null? (kparent s))
+        ()
+        (kcommon-walk (kparent s) (kparent d))))))
+($define! kcommon
+  ($lambda (s d)
+    (($lambda (ls ld)
+       (kcommon-walk (kdrop s (- ls ld)) (kdrop d (- ld ls))))
+     (klen s)
+     (klen d))))
+; the kg frames from f up to ca (exclusive), innermost first
+($define! kguards
+  ($lambda (f ca)
+    ($if ($or (null? f) (eq? f ca))
+      ()
+      ($if (is? ($quote kg) f)
+        (cons f (kguards (kparent f) ca))
+        (kguards (kparent f) ca)))))
+($define! kcat
+  ($lambda (a b) ($if (null? a) b (cons (car a) (kcat (cdr a) b)))))
+; ((g . #f) ...) the exits, then ((g . #t) ...) the entries
+($define! kstages
+  ($lambda (s d)
+    (($lambda (ca)
+       (kcat (map ($lambda (g) (cons g #f)) (kguards s ca))
+         (map ($lambda (g) (cons g #t)) (rev (kguards d ca)))))
+     (kcommon s d))))
+($define! kselect
+  ($lambda (clauses test)
+    ($if (null? clauses)
+      ()
+      ($if (kanc (cddr (car (car clauses))) test)
+        (car clauses)
+        (kselect (cdr clauses) test)))))
+($define! kpass
+  ($lambda (w stages s d)
+    ($if (null? stages)
+      (list ($quote R) w d)
+      (kstage w (car stages) (cdr stages) s d))))
+($define! kstage
+  ($lambda (w st rest s d)
+    (($lambda (g)
+       (($lambda (cl)
+          ($if (null? cl)
+            (kpass w rest s d)
+            (list ($quote C)
+              (apply-val (cadr cl))
+              (list w
+                (app (cons t-c (cons ($quote k) (cadddr g)))))
+              ()
+              (list ($quote kp) rest s d (cadddr g)))))
+        (kselect ($if (cdr st) (cadr g) (caddr g)) ($if (cdr st) s d))))
+     (car st))))
+($define! pass
+  ($lambda (v s d)
+    (($lambda (st)
+       ($if (null? st) (list ($quote R) v d) (kpass v st s d)))
+     (kstages s d))))
+; is any stage's selected clause one whose selector is error-continuation itself?
+($define! catching?
+  ($lambda (stages s d)
+    ($if (null? stages)
+      #f
+      (($lambda (g)
+         (($lambda (cl)
+            ($if ($and (pair? cl) (eq? (cddr (car cl)) d))
+              #t
+              (catching? (cdr stages) s d)))
+          (kselect ($if (cdr (car stages)) (cadr g) (caddr g))
+            ($if (cdr (car stages)) s d))))
+       (car (car stages))))))
+($define! raise
+  ($lambda (out k)
+    (($lambda (stages)
+       ($if (catching? stages k cek-errk)
+         (kpass out stages k cek-errk)
+         ()))
+     (kstages k cek-errk))))
+($define! clauses-ok?
+  ($lambda (l)
+    ($if (< (len l) 0)
+      #f
+      ($if (null? l)
+        #t
+        ($if ($and (= (len (car l)) 2)
+               ($and (cont? (car (car l)))
+                 ($and (tagged? (cadr (car l)))
+                   (eq? (cadr (cadr (car l))) ($quote ap)))))
+          (clauses-ok? (cdr l))
+          #f)))))
+($define! clauses-copy
+  ($lambda (l)
+    ($if (null? l)
+      ()
+      (cons (list (car (car l)) (cadr (car l)))
+        (clauses-copy (cdr l))))))
+
+($define! step-ret
+  ($lambda (v k)
+    ($if (is? ($quote halt) k)
+      (list ($quote D) v)
+      ($if (is? ($quote opev) k)
+        (list ($quote C) v (cadr k) (caddr k) (cadddr k))
+        ($if (is? ($quote args) k)  ; (args f todo acc env k')
+          (($lambda (f todo acc env k2)
+             ($if (null? todo)
+               (list ($quote C) f (rev (cons v acc)) env k2)
+               (list ($quote E)
+                 (car todo)
+                 env
+                 (list ($quote args) f (cdr todo) (cons v acc) env k2))))
+           (cadr k)
+           (caddr k)
+           (cadddr k)
+           (car (cdr (cdr (cdr (cdr k)))))
+           (car (cdr (cdr (cdr (cdr (cdr k)))))))
+          ($if (is? ($quote seq) k)
+            (sequence (cadr k) (caddr k) (cadddr k))
+            ($if (is? ($quote def) k)  ; (def p env k'): $define! is inert (R-1RK 4.9.1)
+              ($if (progn (note! ($quote write) (cadr k) (caddr k))
+                     (match! (cadr k) v (caddr k)))
+                (list ($quote R) #inert (cadddr k))
+                (problem ($quote no-fit) (list (cadr k) v) (cadddr k)))
+              ($if (is? ($quote mat) k)  ; (mat p k')
+                (list ($quote R)
+                  (machine-boolean (match! (cadr k) v (new-frame ()))
+                    (caddr k))
+                  (cadddr k))
+                ; (kf f env k'): an interceptor, the combiner applied to the value
+                ($if (is? ($quote kf) k)
+                  (list ($quote C)
+                    (apply-val (cadr k))
+                    (list v)
+                    (caddr k)
+                    (cadddr k))
+                  ; (unbind key payload k'): put the old binding back, then answer the value
+                  ($if (is? ($quote unbind) k)
+                    (progn (set-cdr! (cadr k) (caddr k))
+                      (list ($quote R) v (cadddr k)))
+                    ; (kp stages s d k'): an interceptor returned, the pass goes on
+                    ($if (is? ($quote kp) k)
+                      (kpass v (cadr k) (caddr k) (cadddr k))
+                      ; (kg entry exit k'): a normal return is not a pass
+                      ($if (is? ($quote kg) k)
+                        (list ($quote R) v (cadddr k))
+                        (fail)))))))))))))
+
+($define! step-kind
+  ($lambda (f operands env k)
+    (($lambda (kind fields)
+       ($if (eq? kind ($quote op))  ; (ptree eparam body senv)
+         (($lambda (local)
+            ($if (match! (car fields) operands local)
+              ($if (match! (cadr fields) env local)
+                (sequence (caddr fields) local k)
+                (problem ($quote no-fit) (list (cadr fields) env) k))
+              (problem ($quote no-fit) (list (car fields) operands) k)))
+          (new-frame (cadddr fields)))
+         ($if (eq? kind ($quote ap))
+           ($if (null? operands)
+             (list ($quote C) (car fields) () env k)
+             (list ($quote E)
+               (car operands)
+               env
+               (list ($quote args) (car fields) (cdr operands) () env k)))
+           ($if (eq? kind ($quote vau))
+             (list ($quote R)
+               (combiner ($quote op)
+                 (car operands)
+                 (cadr operands)
+                 (cddr operands)
+                 env)
+               k)
+             ($if (eq? kind ($quote wrap))
+               (list ($quote R) (combiner ($quote ap) (car operands)) k)
+               ($if (eq? kind ($quote eval))
+                 ($if (env? (cadr operands))
+                   (list ($quote E) (car operands) (cadr operands) k)
+                   (problem ($quote shape) (list kind operands) k))
+                 ($if (eq? kind ($quote define))
+                   (list ($quote E)
+                     (cadr operands)
+                     env
+                     (list ($quote def) (car operands) env k))
+                   ($if (eq? kind ($quote match))
+                     (list ($quote E)
+                       (cadr operands)
+                       env
+                       (list ($quote mat) (car operands) env k))
+                     ; (k . captured): the value goes to the captured continuation (fields = captured)
+                     ($if (eq? kind ($quote k))
+                       (pass ($if (null? operands) () (car operands)) k fields)
+                       ($if (eq? kind ($quote yield))
+                         (list ($quote Y) (car operands) k (new-site))
+                         ($if (eq? kind ($quote hole))
+                           (list ($quote R) f k)  ; a hole applied is a hole
+                           ; nat: a native applicative, given its arguments as quoted data
+                           ($if (eq? kind ($quote nat))
+                             ($if (fits? fields operands (len operands))
+                               (progn (note! ($quote native)
+                                        (cons ($if (null? (cdr fields))
+                                                ()
+                                                (cadr fields))
+                                          operands)
+                                        env)
+                                 (list ($quote R)
+                                   (eval (cons (car fields)
+                                           (map ($lambda (a)
+                                                  (list $quote a))
+                                             operands))
+                                     (get-current-environment))
+                                   k))
+                               (problem ($quote shape)
+                                 (list ($if (null? (cdr fields))
+                                         (car fields)
+                                         (cadr fields))
+                                   operands)
+                                 k))
+                             ($if (eq? kind ($quote callcc))
+                               (list ($quote C)
+                                 (car operands)
+                                 (list (cont-of k))
+                                 env
+                                 k)  ; ours, not the Report's, tried last: (7.2.2) k as a CONTINUATION
+                               ($if (eq? kind ($quote contp))
+                                 (list ($quote R)
+                                   (machine-boolean (cont? (car operands))
+                                     env)
+                                   k)  ; continuation? (7.2.1)
+                                 ($if (eq? kind ($quote applycont))
+                                   ($if (cont? (car operands))
+                                     (pass (cadr operands) k (cddr (car operands)))
+                                     (shape kind operands k))  ; apply-continuation (7.3.1)
+                                   ($if (eq? kind ($quote cont2app))
+                                     ($if (cont? (car operands))
+                                       (list ($quote R)
+                                         (app (cons t-c
+                                                (cons ($quote k)
+                                                  (cddr (car operands)))))
+                                         k)
+                                       (shape kind operands k))  ; continuation->applicative (7.2.5)
+                                     ($if (eq? kind ($quote guardcont))
+                                       ($if ($and (= (len operands) 3)
+                                              ($and (cont? (cadr operands))
+                                                ($and (clauses-ok? (car operands))
+                                                  (clauses-ok? (caddr operands)))))
+                                         (list ($quote R)
+                                           (cont-of (list ($quote kg)
+                                                      (clauses-copy (car operands))
+                                                      (clauses-copy (caddr operands))
+                                                      (cddr (cadr operands))))
+                                           k)
+                                         (shape kind operands k))  ; guard-continuation (7.2.4)
+                                     ($if (eq? kind ($quote extendcont))
+                                       ($if (cont? (car operands))
+                                         (list ($quote R)
+                                           (cont-of (list ($quote kf)
+                                                      (cadr operands)
+                                                      ($if (null? (cddr operands))
+                                                        ()
+                                                        (caddr operands))
+                                                      (cddr (car operands))))
+                                           k)
+                                         (shape kind operands k))  ; extend-continuation (7.2.3)
+                                       ($if (eq? kind ($quote unwrap))
+                                         ($if ($and (tagged? (car operands))
+                                                (eq? (cadr (car operands))
+                                                  ($quote ap)))
+                                           (list ($quote R)
+                                             (car (cddr (car operands)))
+                                             k)
+                                           (shape kind operands k))  ; the combiner a wrap put away
+                                         ($if (eq? kind ($quote kdvb))
+                                           ($if (= (len operands) 2)
+                                             (bind-dynamic fields
+                                               operands
+                                               k)
+                                             (shape kind operands k))
+                                           ($if (eq? kind ($quote kdva))
+                                             ($if (= (len operands) 0)
+                                               (read-dynamic f fields k)
+                                               (shape kind operands k))
+                                             ($if (named? kind
+                                                    ($quote (encap encapp
+                                                              encapd)))
+                                               (encap-op kind
+                                                 fields
+                                                 operands
+                                                 k)
+                                               (problem ($quote not-combiner)
+                                                 (list f)
+                                                 k)))))))))))))))))))))))
+     (cadr f)
+     (cddr f))))
+
+($define! step-comb
+  ($lambda (f operands env k)
+    ($if (tagged? f)
+      (($lambda (n)
+         ; improper operands, or too few for the kind
+         ($if ($if (< n 0) #t (< n (want (cadr f))))
+           (problem ($quote shape) (list (cadr f) operands) k)
+           (step-kind f operands env k)))
+       (len operands))
+      (problem ($quote not-combiner) (list f) k))))
+
+($define! step
+  ($lambda (state)
+    ($cond ((is? ($quote E) state) (step-eval (cadr state) (caddr state) (cadddr state)))
+      ((is? ($quote R) state) (step-ret (cadr state) (caddr state)))
+      (#t (step-comb (cadr state)
+            (caddr state)
+            (cadddr state)
+            (car (cdr (cdr (cdr (cdr state))))))))))
+
+($define! done?
+  ($lambda (state)
+    ($or (is? ($quote D) state) (is? ($quote Y) state))))
+($define! drive
+  ($lambda (state) ($if (done? state) state (drive (step state)))))
+
+; resume runs on a fork of the continuation (the outer machine's native deep
+; copy, sharing and cycles kept): each resume gets environments of its own, so
+; a define in one branch is not seen by another or by the state that waited.
+($define! resume
+  ($lambda (y input) (list ($quote R) input (fork (caddr y)))))
+($define! start
+  ($lambda (x env) (drive (list ($quote E) x env (list ($quote halt))))))
+($define! run
+  ($lambda (state)
+    ($if (done? state) (cadr state) (run (step state)))))
+($define! cek-eval
+  ($lambda (x env) (run (list ($quote E) x env (list ($quote halt))))))
+
+; ---- the ground of the machine's language
+($define! app ($lambda (c) (combiner ($quote ap) c)))
+; error-continuation, the one of every cek ground, as the kernel makes it: (kf yield env (halt))
+($define! cek-errk (list ($quote kf) (app (combiner ($quote yield))) () (list ($quote halt))))
+
+; a native is (%c nat fn name): the outer applicative, named for complaint and shape check
+($define! native!
+  ($lambda (fr name fn)
+    (bind! fr name (app (combiner ($quote nat) fn name)))))
+($define! ground-frame
+  ($lambda ()
+    (($lambda (fr)
+       (progn (bind! fr ($quote $vau) (combiner ($quote vau)))
+         (bind! fr ($quote $define!) (combiner ($quote define)))
+         (bind! fr ($quote $match?) (combiner ($quote match)))
+         (bind! fr ($quote yield) (app (combiner ($quote yield))))
+         (bind! fr ($quote call/cc) (app (combiner ($quote callcc))))
+         (bind! fr ($quote unwrap) (app (combiner ($quote unwrap))))
+         (bind! fr
+           ($quote continuation?)
+           (app (combiner ($quote contp))))
+         (bind! fr
+           ($quote apply-continuation)
+           (app (combiner ($quote applycont))))
+         (bind! fr
+           ($quote continuation->applicative)
+           (app (combiner ($quote cont2app))))
+         (bind! fr
+           ($quote extend-continuation)
+           (app (combiner ($quote extendcont))))
+         (bind! fr
+           ($quote guard-continuation)
+           (app (combiner ($quote guardcont))))
+         (bind! fr
+           ($quote root-continuation)
+           (cont-of (list ($quote halt))))
+         (bind! fr ($quote error-continuation) (cont-of cek-errk))
+         ; these two the language machine cannot make: an encapsulation is a
+         ; tag-7 cell, and a keyed dynamic variable's key is made beside its binder
+         (native! fr
+           ($quote make-encapsulation-type)
+           make-encapsulation-type)
+         (native! fr
+           ($quote make-keyed-dynamic-variable)
+           make-keyed-dynamic-variable)
+         (bind! fr ($quote wrap) (app (combiner ($quote wrap))))
+         (bind! fr ($quote eval) (app (combiner ($quote eval))))
+         (native! fr ($quote cons) cons)
+         (native! fr ($quote set-cdr!) set-cdr!)
+         (native! fr ($quote set-car!) set-car!)
+         ; numbers are the outer machine's natives; the comparisons answer this machine's booleans
+         (native! fr ($quote +) +)
+         (native! fr ($quote -) -)
+         (native! fr ($quote *) *)
+         (native! fr ($quote quotient) quotient)
+         (native! fr ($quote remainder) remainder)
+         (native! fr
+           ($quote <)
+           ($lambda (a b) (machine-boolean (< a b) fr)))
+         (native! fr
+           ($quote <=)
+           ($lambda (a b) (machine-boolean (<= a b) fr)))
+         (native! fr
+           ($quote =)
+           ($lambda (a b) (machine-boolean (= a b) fr)))
+         (native! fr
+           ($quote number?)
+           ($lambda (a) (machine-boolean (number? a) fr)))
+         ; the rest of the tower is the outer machine's too (kernel/105)
+         (native! fr ($quote /) /)
+         (native! fr ($quote numerator) numerator)
+         (native! fr ($quote denominator) denominator)
+         (native! fr
+           ($quote integer?)
+           ($lambda (a) (machine-boolean (integer? a) fr)))
+         (native! fr
+           ($quote rational?)
+           ($lambda (a) (machine-boolean (rational? a) fr)))
+         (native! fr
+           ($quote exact?)
+           ($lambda (a) (machine-boolean (exact? a) fr)))
+         ; strings are the outer machine's too; predicates and string->number answer this machine's booleans
+         (native! fr
+           ($quote string?)
+           ($lambda (a) (machine-boolean (string? a) fr)))
+         (native! fr ($quote string-length) string-length)
+         (native! fr ($quote string-append) string-append)
+         (native! fr
+           ($quote string=?)
+           ($lambda (a b) (machine-boolean (string=? a b) fr)))
+         (native! fr ($quote substring) substring)
+         (native! fr ($quote symbol->string) symbol->string)
+         (native! fr ($quote string->symbol) string->symbol)
+         (native! fr ($quote number->string) number->string)
+         (native! fr
+           ($quote string->number)
+           ($lambda (a)
+             (($lambda (n) ($if (number? n) n (machine-boolean #f fr)))
+              (string->number a))))
+         (native! fr ($quote integer->char) integer->char)
+         (native! fr ($quote string-scan) string-scan)
+         (bind! fr ($quote #ignore) #ignore)
+         ; booleans are derived here, from $vau and eval: nothing about them is the native machine's
+         (bind! fr
+           ($quote #t)
+           (cek-eval ($quote ($vau (a b) e (eval a e))) fr))
+         (bind! fr
+           ($quote #f)
+           (cek-eval ($quote ($vau (a b) e (eval b e))) fr))
+         (native! fr
+           ($quote eq?)
+           ($lambda (a b) (machine-boolean (eq? a b) fr)))
+         fr))
+     (new-frame ()))))

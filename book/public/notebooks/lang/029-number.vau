@@ -1,0 +1,345 @@
+; §12 numbers. The machine's numeric tower (kernel/100, 105, 140, 150): exact
+; integers of any size (a 29-bit fixnum, or a bignum when the result does not
+; fit: overflow promotes, it never fails), exact ratios in lowest terms, and
+; the exact infinities #e+infinity and #e-infinity. There is no inexact real
+; -- §12.1 lets an implementation omit them -- so real->inexact and
+; make-inexact answer the 'inexact problem, a decimal token without #e is not
+; a number, and the transcendentals are absent. No complex number has an
+; imaginary part, so complex? and real? hold of every number. The natives do
+; the arithmetic (+ - * /, quotient remainder, < <= =, numerator denominator,
+; integer? rational? exact?); this layer builds the Report's names on them.
+; Errors are (problem kind detail ()) of kind type, exact, inexact, complex,
+; divide-by-zero or range.
+; Needs 010-core ($if, $cond, $let, $quote), 020-cek (problem), 025-library.
+
+; ---- the shapes every name below is written with
+($define! %non-numbers
+  ($lambda (xs)
+    ($if (null? xs) ()
+      ($if (number? (car xs)) (%non-numbers (cdr xs)) (cons (car xs) (%non-numbers (cdr xs)))))))
+; infinities count as non-rationals, so a guarded body never sees one
+($define! %non-rationals
+  ($lambda (xs)
+    ($if (null? xs) ()
+      ($if (rational? (car xs)) (%non-rationals (cdr xs)) (cons (car xs) (%non-rationals (cdr xs)))))))
+($define! %non-integers
+  ($lambda (xs)
+    ($if (null? xs) ()
+      ($if (integer? (car xs)) (%non-integers (cdr xs)) (cons (car xs) (%non-integers (cdr xs)))))))
+($define! %complain-type
+  ($lambda (xs) (problem ($quote type) (%non-numbers xs) ())))
+($define! %over-numbers
+  ($lambda (xs body)
+    ($if (null? (%non-numbers xs)) (body xs) (%complain-type xs))))
+($define! %over-rationals
+  ($lambda (xs body)
+    ($if (null? (%non-rationals xs)) (body xs) (problem ($quote type) (%non-rationals xs) ()))))
+($define! %over-integers
+  ($lambda (xs body)
+    ($if (null? (%non-integers xs)) (body xs) (problem ($quote type) (%non-integers xs) ()))))
+($define! %every
+  ($lambda (p xs) ($if (null? xs) #t ($if (p (car xs)) (%every p (cdr xs)) #f))))
+($define! %chain
+  ($lambda (p xs)
+    ($if (null? xs) #t
+      ($if (null? (cdr xs)) #t
+        ($if (p (car xs) (cadr xs)) (%chain p (cdr xs)) #f)))))
+($define! %all
+  ($lambda (p) ($lambda xs (%over-numbers xs ($lambda (ys) (%every p ys))))))
+($define! %chain-of
+  ($lambda (p) ($lambda xs (%over-numbers xs ($lambda (ys) (%chain p ys))))))
+; §12.2: a type predicate answers #f for a non-number, where %all complains
+($define! %type-predicate
+  ($lambda (p) ($lambda xs (%every p xs))))
+($define! %has-zero?
+  ($lambda (xs) ($if (null? xs) #f ($if (= (car xs) 0) #t (%has-zero? (cdr xs))))))
+($define! %integer-id
+  ($lambda (real) ($if (number? real) real (problem ($quote type) (list real) ()))))
+; a two-argument division is guarded: type error, then a zero divisor
+($define! %quotient-of
+  ($lambda (real1 real2 body)
+    ($if (null? (%non-rationals (list real1 real2)))
+      ($if (= real2 0)
+        (problem ($quote divide-by-zero) (list real2) ())
+        (body real1 real2))
+      (problem ($quote type) (%non-rationals (list real1 real2)) ()))))
+
+; ---- §12.5.1 number?, finite?, integer?. integer? and rational? are the kernel
+; natives made variadic type predicates; finite? is rational? with a type error.
+($define! %native-integer? integer?)
+($define! %native-rational? rational?)
+($define! %native-exact? exact?)
+($define! %native-divide /)
+($define! %native-numerator numerator)
+($define! %native-denominator denominator)
+($define! integer? (%type-predicate %native-integer?))
+($define! rational? (%type-predicate %native-rational?))
+($define! finite? (%all %native-rational?))
+
+; ---- §12.5.2 =?, §12.5.3 <?, <=?, >=?, >?
+($define! =? (%chain-of =))
+($define! <? (%chain-of <))
+($define! <=? (%chain-of <=))
+($define! >=? (%chain-of >=))
+($define! >? (%chain-of >))
+
+; ---- §12.5.7 zero?, §12.5.10 positive? negative?, §12.5.11 odd? even?
+($define! zero? (%all ($lambda (x) (= x 0))))
+($define! positive? (%all ($lambda (x) (> x 0))))
+($define! negative? (%all ($lambda (x) (< x 0))))
+($define! odd?
+  ($lambda xs (%over-integers xs ($lambda (ys) (%every ($lambda (x) (not (= (remainder x 2) 0))) ys)))))
+($define! even?
+  ($lambda xs (%over-integers xs ($lambda (ys) (%every ($lambda (x) (= (remainder x 2) 0)) ys)))))
+
+($define! %negate
+  ($lambda (x) ($if (%native-rational? x) (- x) ($if (< x 0) #e+infinity #e-infinity))))
+($define! abs
+  ($lambda (real)
+    ($if (number? real)
+      ($if (< real 0) (%negate real) real)
+      (problem ($quote type) (list real) ()))))
+
+; ---- §12.5.13 max, min. No arguments: the identity, an exact infinity.
+($define! %largest
+  ($lambda (xs acc)
+    ($if (null? xs) acc (%largest (cdr xs) ($if (< acc (car xs)) (car xs) acc)))))
+($define! %smallest
+  ($lambda (xs acc)
+    ($if (null? xs) acc (%smallest (cdr xs) ($if (< (car xs) acc) (car xs) acc)))))
+($define! max
+  ($lambda reals
+    ($if (null? reals) #e-infinity
+      (%over-numbers reals ($lambda (ys) (%largest ys (car ys)))))))
+($define! min
+  ($lambda reals
+    ($if (null? reals) #e+infinity
+      (%over-numbers reals ($lambda (ys) (%smallest ys (car ys)))))))
+
+; ---- §12.5.14 gcd, lcm: Euclid on magnitudes, so no factoring.
+($define! %gcd2
+  ($lambda (a b) ($if (= b 0) a (%gcd2 b (remainder a b)))))
+($define! %gcd-of
+  ($lambda (xs acc)
+    ($if (null? xs) acc
+      (%gcd-of (cdr xs) ($if (= (car xs) 0) acc (%gcd2 acc (abs (car xs))))))))
+; no arguments: +infinity; all zero: no primary value, an 'infinity problem
+($define! gcd
+  ($lambda imps
+    ($if (null? imps) #e+infinity
+      (%over-integers imps
+        ($lambda (xs)
+          ($let ((g (%gcd-of xs 0)))
+            ($if (= g 0) (problem ($quote infinity) xs ()) g)))))))
+($define! %lcm-of
+  ($lambda (xs acc)
+    ($if (null? xs) acc
+      ($if (= (car xs) 0) acc
+        ($let ((x (abs (car xs))))
+          (%lcm-of (cdr xs) (* (quotient acc (%gcd2 acc x)) x)))))))
+($define! lcm
+  ($lambda imps
+    ($if (null? imps) 1
+      (%over-integers imps
+        ($lambda (xs)
+          ($if (%has-zero? xs) (problem ($quote infinity) xs ()) (%lcm-of xs 1)))))))
+
+; ---- §12.8.4 floor, ceiling, truncate, round. A ratio is never an integer,
+; so a negative n/d (d >= 2) truncates above its floor.
+($define! %floor
+  ($lambda (q)
+    ($if (%native-integer? q) q
+      ($let ((n (%native-numerator q)) (d (%native-denominator q)))
+        ($if (< n 0) (- (quotient n d) 1) (quotient n d))))))
+($define! %ceiling
+  ($lambda (q) ($if (%native-integer? q) q (+ (%floor q) 1))))
+($define! %truncate
+  ($lambda (q) ($if (< q 0) (%ceiling q) (%floor q))))
+; nearest integer, a tie to the even one
+($define! %round
+  ($lambda (q)
+    ($let* ((fl (%floor q)) (diff (- q fl)))
+      ($cond ((< diff 1/2) fl)
+        ((> diff 1/2) (+ fl 1))
+        (#t ($if (= (remainder fl 2) 0) fl (+ fl 1)))))))
+($define! %rounder
+  ($lambda (f)
+    ($lambda (real)
+      ($if (%native-rational? real) (f real)
+        ($if (number? real) real (problem ($quote type) (list real) ()))))))
+($define! floor (%rounder %floor))
+($define! ceiling (%rounder %ceiling))
+($define! truncate (%rounder %truncate))
+($define! round (%rounder %round))
+
+; ---- §12.5.8 div, mod, div-and-mod; §12.5.9 div0, mod0, div0-and-mod0. div
+; floors a positive divisor and ceils a negative one, so mod lies in [0, |b|).
+($define! %div-of
+  ($lambda (a b) ($if (> b 0) (%floor (/ a b)) (%ceiling (/ a b)))))
+($define! %mod-of ($lambda (a b) (- a (* b (%div-of a b)))))
+($define! %div0-of
+  ($lambda (a b)
+    ($if (> b 0) (%floor (+ (/ a b) 1/2)) (%ceiling (- (/ a b) 1/2)))))
+($define! %mod0-of ($lambda (a b) (- a (* b (%div0-of a b)))))
+($define! div ($lambda (real1 real2) (%quotient-of real1 real2 %div-of)))
+($define! mod ($lambda (real1 real2) (%quotient-of real1 real2 %mod-of)))
+($define! div-and-mod
+  ($lambda (real1 real2)
+    (%quotient-of real1 real2 ($lambda (a b) (list (%div-of a b) (%mod-of a b))))))
+($define! div0 ($lambda (real1 real2) (%quotient-of real1 real2 %div0-of)))
+($define! mod0 ($lambda (real1 real2) (%quotient-of real1 real2 %mod0-of)))
+($define! div0-and-mod0
+  ($lambda (real1 real2)
+    (%quotient-of real1 real2 ($lambda (a b) (list (%div0-of a b) (%mod0-of a b))))))
+
+; ---- §12.6.1 exact?, inexact?, robust?, undefined?. Every number is exact, and
+; §12.2 makes every exact real robust, so robust? is constantly #t.
+($define! exact? (%all %native-exact?))
+($define! inexact? (%all ($lambda (x) #f)))
+($define! robust? (%all ($lambda (x) #t)))
+($define! undefined? (%all ($lambda (x) #f)))
+
+; ---- §12.6.2-3 bounds and primary, §12.6.5 real->exact
+($define! %bounds
+  ($lambda (real)
+    ($if (number? real) (list real real) (problem ($quote type) (list real) ()))))
+($define! get-real-internal-bounds %bounds)
+($define! get-real-exact-bounds %bounds)
+($define! get-real-internal-primary %integer-id)
+($define! get-real-exact-primary %integer-id)
+($define! real->exact %integer-id)
+
+; ---- §12.6.4 make-inexact, §12.6.5 real->inexact: no inexact type to promise one from
+($define! make-inexact
+  ($lambda (real1 real2 real3)
+    ($if (null? (%non-numbers (list real1 real2 real3)))
+      (problem ($quote inexact) (list real2) ())
+      (%complain-type (list real1 real2 real3)))))
+($define! real->inexact
+  ($lambda (real)
+    ($if (number? real)
+      (problem ($quote inexact) (list real) ())
+      (problem ($quote type) (list real) ()))))
+
+; ---- §12.8.2 /. Exact division: a ratio when the divisor does not divide. A
+; zero divisor is an error the natives answer with a hole, so checked here.
+($define! %divide-all
+  ($lambda (acc xs)
+    ($if (null? xs) acc (%divide-all (%native-divide acc (car xs)) (cdr xs)))))
+($define! /
+  ($lambda (number . numbers)
+    ($if (null? (%non-rationals (cons number numbers)))
+      ($if (null? numbers)
+        ($if (= number 0)
+          (problem ($quote divide-by-zero) (list number) ())
+          (%native-divide number))
+        ($if (%has-zero? numbers)
+          (problem ($quote divide-by-zero) numbers ())
+          (%divide-all number numbers)))
+      (problem ($quote type) (%non-rationals (cons number numbers)) ()))))
+
+; ---- §12.8.3 numerator, denominator (an infinity is itself over one)
+($define! numerator
+  ($lambda (rational)
+    ($if (%native-rational? rational) (%native-numerator rational) (%integer-id rational))))
+($define! denominator
+  ($lambda (rational)
+    ($if (%native-rational? rational) (%native-denominator rational)
+      ($if (number? rational) 1 (problem ($quote type) (list rational) ())))))
+
+; ---- §12.8.5 simplest-rational, rationalize: the simplest rational in
+; [low, high] -- least denominator, then numerator -- by continued fractions.
+($define! %simplest-positive
+  ($lambda (lo hi)
+    ($let ((fl (%floor lo)))
+      ($cond ((= fl lo) fl)
+        ((< fl (%floor hi)) (+ fl 1))
+        (#t (+ fl (/ 1 (%simplest-positive (/ 1 (- hi fl)) (/ 1 (- lo fl))))))))))
+($define! %simplest
+  ($lambda (low high)
+    ($cond ((> low 0) (%simplest-positive low high))
+      ((< high 0) (- (%simplest-positive (- high) (- low))))
+      (#t 0))))
+($define! simplest-rational
+  ($lambda (real1 real2)
+    (%over-rationals (list real1 real2)
+      ($lambda (xs)
+        ($if (<= real1 real2)
+          (%simplest real1 real2)
+          (problem ($quote range) (list real1 real2) ()))))))
+($define! rationalize
+  ($lambda (real1 real2)
+    (%over-rationals (list real1 real2)
+      ($lambda (xs)
+        ($if (< real2 0)
+          (problem ($quote range) (list real1 real2) ())
+          (%simplest (- real1 real2) (+ real1 real2)))))))
+
+($define! real? (%type-predicate number?))
+
+; ---- §12.9.5 sqrt. Newton on integers gives the floor of the root, exact only
+; for a perfect square (a ratio of two); anything else is the exactness complaint.
+($define! %isqrt-from
+  ($lambda (x n)
+    ($let ((y (quotient (+ x (quotient n x)) 2)))
+      ($if (< y x) (%isqrt-from y n) x))))
+; -1 for a non-square: sqrt turns that into the exactness complaint
+($define! %exact-root
+  ($lambda (n)
+    ($if (= n 0) 0
+      ($let ((r (%isqrt-from (+ (quotient n 2) 1) n)))
+        ($if (= (* r r) n) r -1)))))
+($define! sqrt
+  ($lambda (number)
+    ($cond ((not (number? number)) (problem ($quote type) (list number) ()))
+      ((not (%native-rational? number)) ($if (< number 0) (problem ($quote type) (list number) ()) number))
+      ((< number 0) (problem ($quote type) (list number) ()))
+      (#t ($let ((n (%exact-root (%native-numerator number))) (d (%exact-root (%native-denominator number))))
+            ($if (< n 0) (problem ($quote exact) (list number) ())
+              ($if (< d 0) (problem ($quote exact) (list number) ()) (/ n d))))))))
+
+; ---- §12.9.6 expt. Squaring, so the exponent costs its bit length. An integer
+; power of an exact rational is exact; any other exponent would need an inexact.
+($define! %expt-positive
+  ($lambda (b n acc)
+    ($cond ((= n 0) acc)
+      ((= (remainder n 2) 0) (%expt-positive (* b b) (quotient n 2) acc))
+      (#t (%expt-positive (* b b) (quotient n 2) (* acc b))))))
+($define! expt
+  ($lambda (number1 number2)
+    ($if (null? (%non-numbers (list number1 number2)))
+      ($cond ((not (%native-rational? number1)) (problem ($quote exact) (list number1 number2) ()))
+        ((not (%native-integer? number2)) (problem ($quote exact) (list number1 number2) ()))
+        ((< number2 0)
+         ($if (= number1 0)
+           (problem ($quote divide-by-zero) (list number1) ())
+           (/ 1 (%expt-positive number1 (- number2) 1))))
+        (#t (%expt-positive number1 number2 1)))
+      (%complain-type (list number1 number2)))))
+
+($define! complex? (%type-predicate number?))
+
+; ---- §12.10.2 make-rectangular, real-part, imag-part
+($define! make-rectangular
+  ($lambda (real1 real2)
+    ($if (null? (%non-numbers (list real1 real2)))
+      ($if (= real2 0) real1 (problem ($quote complex) (list real1 real2) ()))
+      (%complain-type (list real1 real2)))))
+($define! real-part %integer-id)
+($define! imag-part
+  ($lambda (complex)
+    ($if (number? complex) 0 (problem ($quote type) (list complex) ()))))
+
+; ---- §12.10.3 make-polar, magnitude, angle
+($define! magnitude abs)
+($define! angle
+  ($lambda (complex)
+    ($if (number? complex)
+      ($if (< complex 0) (problem ($quote exact) (list complex) ()) 0)
+      (problem ($quote type) (list complex) ()))))
+($define! make-polar
+  ($lambda (real1 real2)
+    ($if (null? (%non-numbers (list real1 real2)))
+      ($if (= real1 0) 0
+        ($if (= real2 0) real1 (problem ($quote complex) (list real1 real2) ())))
+      (%complain-type (list real1 real2)))))

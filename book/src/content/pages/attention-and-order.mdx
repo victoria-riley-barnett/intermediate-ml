@@ -1,0 +1,17 @@
+---
+title: Attention is blind to order
+description: Permuting the input rows only permutes the output rows, so position has to be added before the scores are formed.
+frame: representation
+---
+
+Attention as written can't see order. Let $P$ be a permutation matrix that shuffles the rows of $X$. Then $Q' = PQ$ and $K' = PK$, and
+
+$$
+S' = PSP^\top, \qquad Y' = \mathrm{softmax}(PSP^\top)\,PV = P\,\mathrm{softmax}(S)\,V = PY.
+$$
+
+The output is shuffled exactly as the input was. Two sequences made of the same rows in different orders produce the same set of output rows, so if the answer depends on where things sit relative to each other, that information has to come in from outside.
+
+The fix is to add a position-dependent matrix before the projections, $X \leftarrow X + E$, with one row $e_i$ per index. Now the queries and keys carry the index, and the score $s_{ij}$ depends on $i$ and $j$ as well as on content. Two identical rows at different offsets give different queries and keys, so a position can learn to prefer a particular offset.
+
+Adding $E$ *after* attention doesn't work. By then the mixture is finished: each output row is a weighted average whose weights were computed with no knowledge of position. Adding $e_i$ labels that summary with an index, but the routing has already happened, and routing is what a task about distances needs. Position has to be present when the scores are formed.

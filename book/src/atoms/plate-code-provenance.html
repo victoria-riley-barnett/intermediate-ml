@@ -1,0 +1,73 @@
+<figure data-atom="code-provenance" data-source="admin/diagrams/code-provenance.html" aria-label="Four things a rerun needs printed" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 578" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="code-provenance-title code-provenance-desc" style="display:block;width:100%;height:auto;max-width:100%">
+  <title id="code-provenance-title">Four things a rerun needs printed</title>
+  <desc id="code-provenance-desc">15 lines of Python on the left and the 5 lines they print, verbatim, on the right. The listing reads the course's human_data.txt, 4,380 gene sequences in 7 families, turns each sequence into 64 3-mer frequencies, deals 0.25 of the rows into a held-out set with numpy's default random generator at seed 0, classifies by majority vote of the 5 nearest training rows in Euclidean distance, and prints python 3.10.2, numpy 2.2.6, seed 0, 3270 train and 1110 test rows, k 5 neighbours, and accuracy 807 of 1110 = 0.727. The four lines above the score are tagged in the panel gutter: versions, seed, split, parameter; an accent rule brackets exactly those four and the score sits outside it. A column to the right of the panel says what each of the four pins. The same listing at k = 1, same seed, same split, printed 0.884: the score moves with a number the output now carries. The four items are what a CSC 411 project is graded on, not a claim that they make a run reproducible in general.</desc>
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+  <text x="120" y="44" font-size="10" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">LISTING &middot; pipeline.py</text>
+  <rect x="120" y="56" width="592" height="323" rx="8" fill="#eaeaee"/>
+  <text x="152" y="86" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 1</text>
+  <text x="152" y="105" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 2</text>
+  <text x="152" y="124" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 3</text>
+  <text x="152" y="143" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 4</text>
+  <text x="152" y="162" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 5</text>
+  <text x="152" y="181" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 6</text>
+  <text x="152" y="200" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 7</text>
+  <text x="152" y="219" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 8</text>
+  <text x="152" y="238" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace"> 9</text>
+  <text x="152" y="257" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">10</text>
+  <text x="152" y="276" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">11</text>
+  <text x="152" y="295" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">12</text>
+  <text x="152" y="314" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">13</text>
+  <text x="152" y="333" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">14</text>
+  <text x="152" y="352" xml:space="preserve" text-anchor="end" fill="#5a6580" font-size="11" font-family="'Geist Mono', ui-monospace, monospace">15</text>
+  <text x="168" y="86" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">import</tspan> sys, numpy <tspan fill="#1f232f" font-weight="500">as</tspan> np; <tspan fill="#1f232f" font-weight="500">from</tspan> itertools <tspan fill="#1f232f" font-weight="500">import</tspan> product</text>
+  <text x="168" y="105" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">SEED, K = <tspan fill="#4f5d75">0</tspan>, <tspan fill="#4f5d75">5</tspan>                    <tspan fill="#5a6580" font-style="italic"># the seed, and the parameter</tspan></text>
+  <text x="168" y="124" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">MER = [<tspan fill="#4f5d75">""</tspan>.join(p) <tspan fill="#1f232f" font-weight="500">for</tspan> p <tspan fill="#1f232f" font-weight="500">in</tspan> product(<tspan fill="#4f5d75">"ACGT"</tspan>, repeat=<tspan fill="#4f5d75">3</tspan>)]</text>
+  <text x="168" y="143" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">S = [l.split() <tspan fill="#1f232f" font-weight="500">for</tspan> l <tspan fill="#1f232f" font-weight="500">in</tspan> <tspan fill="#1f232f" font-weight="500">open</tspan>(<tspan fill="#4f5d75">"human_data.txt"</tspan>).readlines()[<tspan fill="#4f5d75">1</tspan>:]]</text>
+  <text x="168" y="162" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">y = np.array([<tspan fill="#1f232f" font-weight="500">int</tspan>(c) <tspan fill="#1f232f" font-weight="500">for</tspan> _, c <tspan fill="#1f232f" font-weight="500">in</tspan> S])</text>
+  <text x="168" y="181" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">X = np.array([[s.count(m) / <tspan fill="#1f232f" font-weight="500">len</tspan>(s) <tspan fill="#1f232f" font-weight="500">for</tspan> m <tspan fill="#1f232f" font-weight="500">in</tspan> MER] <tspan fill="#1f232f" font-weight="500">for</tspan> s, _ <tspan fill="#1f232f" font-weight="500">in</tspan> S], <tspan fill="#4f5d75">"f4"</tspan>)</text>
+  <text x="168" y="200" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">hold = np.random.default_rng(SEED).random(<tspan fill="#1f232f" font-weight="500">len</tspan>(y)) &lt; <tspan fill="#4f5d75">0.25</tspan></text>
+  <text x="168" y="219" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">A, B, ya = X[~hold], X[hold], y[~hold]</text>
+  <text x="168" y="238" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">d = (B * B).sum(<tspan fill="#4f5d75">1</tspan>)[:, <tspan fill="#1f232f" font-weight="500">None</tspan>] + (A * A).sum(<tspan fill="#4f5d75">1</tspan>) - <tspan fill="#4f5d75">2</tspan> * B @ A.T</text>
+  <text x="168" y="257" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace">pred = [np.bincount(ya[r[:K]]).argmax() <tspan fill="#1f232f" font-weight="500">for</tspan> r <tspan fill="#1f232f" font-weight="500">in</tspan> np.argsort(d, <tspan fill="#4f5d75">1</tspan>)]</text>
+  <text x="168" y="276" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">print</tspan>(<tspan fill="#4f5d75">f"python {</tspan>sys.version.split()[<tspan fill="#4f5d75">0</tspan>]<tspan fill="#4f5d75">} numpy {</tspan>np.__version__<tspan fill="#4f5d75">}"</tspan>)</text>
+  <text x="168" y="295" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">print</tspan>(<tspan fill="#4f5d75">f"seed {</tspan>SEED<tspan fill="#4f5d75">}"</tspan>)</text>
+  <text x="168" y="314" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">print</tspan>(<tspan fill="#4f5d75">f"split {</tspan>(~hold).sum()<tspan fill="#4f5d75">} train, {</tspan>hold.sum()<tspan fill="#4f5d75">} test"</tspan>)</text>
+  <text x="168" y="333" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">print</tspan>(<tspan fill="#4f5d75">f"k {</tspan>K<tspan fill="#4f5d75">} neighbours, {</tspan><tspan fill="#1f232f" font-weight="500">len</tspan>(MER)<tspan fill="#4f5d75">} 3-mer features"</tspan>)</text>
+  <text x="168" y="352" xml:space="preserve" fill="#2d3142" font-size="12" font-family="'Geist Mono', ui-monospace, monospace"><tspan fill="#1f232f" font-weight="500">print</tspan>(<tspan fill="#4f5d75">f"accuracy {</tspan>(np.array(pred) == y[hold]).mean()<tspan fill="#4f5d75">:.3f}"</tspan>)</text>
+  <text x="740" y="44" font-size="10" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">STDOUT &middot; unedited</text>
+  <rect x="740" y="56" width="450" height="158" rx="8" fill="#eaeaee"/>
+  <rect x="748" y="71" width="3" height="100" fill="#bf4520"/>
+  <text x="832" y="86" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">VERSIONS</text>
+  <text x="846" y="86" xml:space="preserve" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">python 3.10.2 numpy 2.2.6</text>
+  <text x="832" y="112" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">SEED</text>
+  <text x="846" y="112" xml:space="preserve" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">seed 0</text>
+  <text x="832" y="138" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">SPLIT</text>
+  <text x="846" y="138" xml:space="preserve" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">split 3270 train, 1110 test</text>
+  <text x="832" y="164" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">PARAMETER</text>
+  <text x="846" y="164" xml:space="preserve" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">k 5 neighbours, 64 3-mer features</text>
+  <text x="832" y="190" text-anchor="end" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">RESULT</text>
+  <text x="846" y="190" xml:space="preserve" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">accuracy 0.727</text>
+  <line x1="740" y1="240" x2="1190" y2="240" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+  <text x="740" y="262" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">WHAT EACH PRINTED LINE PINS</text>
+  <text x="740" y="288" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">VERSIONS</text>
+  <text x="836" y="288" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">what the arithmetic ran on; other versions, another run</text>
+  <text x="740" y="314" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">SEED</text>
+  <text x="836" y="314" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the split is dealt from this number</text>
+  <text x="740" y="340" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">SPLIT</text>
+  <text x="836" y="340" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">which rows went where; the counts alone do not say</text>
+  <text x="740" y="366" font-size="11" font-weight="500" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">PARAMETER</text>
+  <text x="836" y="366" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">k sets the vote; the same listing at k = 1 printed 0.884</text>
+  <text x="120" y="412" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the listing is the file that wrote this stdout, run on the course's human_data.txt: 4,380 sequences, 7 families</text>
+  <text x="120" y="430" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the panel is copied, not retyped &middot; 1110 test rows is 0.253 of the corpus, the 0.25 the listing asks for</text>
+  <text x="120" y="448" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">the four are what a 411 project is graded on, not a claim of sufficiency &middot; not drawn: the model's own choice, the data's provenance, the hardware</text>
+  <line x1="120" y1="472" x2="1190" y2="472" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+  <text x="120" y="496" font-size="8" letter-spacing="0.14em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">MARKS</text>
+  <rect x="120" y="508" width="3" height="15" fill="#bf4520"/>
+  <text x="176" y="520" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the four printed lines a rerun needs, and the score outside them</text>
+  <text x="120" y="544" font-size="10" letter-spacing="0.10em" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">SPLIT</text>
+  <text x="176" y="544" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the figure's name for the printed line beside it; the line is the program's own</text>
+</svg>
+<figcaption style="margin:0;padding:10px 16px 12px;border-top:1px solid #cfcfd6;font:400 12px/1.6 'Geist',system-ui,sans-serif;color:#4f5d75"><b style="display:block;font:500 10px/1.6 'Geist',system-ui,sans-serif;letter-spacing:.11em;text-transform:uppercase;color:#5a6580">Sources</b>
+<p style="margin:0 0 4px">Gene-family corpus: <code>sequence\tclass</code>, 4,380 human / 1,682 chimp / 820 dog sequences in seven RefSeq gene families, mirrored from <code>raahuldatta/DNA-Sequencing-using-Machine-Learning-and-Deep-Learning-Algorithms</code> and fetched 2026-09-29. The mirror's licence is unverified: see SOURCES.md.</p></figcaption>
+</figure>

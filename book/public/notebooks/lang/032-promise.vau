@@ -1,0 +1,68 @@
+; §9.1 promises: promise?, memoize, $lazy and force, one encapsulation
+; type, so no pair a program builds is ever taken for a promise.
+;
+; The Report mutates (object . env) with set-car! and set-cdr!. This
+; machine has only set-cdr! -- a cell is mutated by assigning its cdr,
+; which is how $set! (025-library) assigns -- so the state sits one pair
+; further along the cdr:
+;
+;   content = (%promise . slot)  cdr assigned only to share another
+;                                promise's slot (the iterative case)
+;   slot    = (%slot . payload)  cdr assigned only to memoize
+;   payload = (object . env)     object the operand; env () once a value
+;                                is determined, else the env $lazy saw
+;
+; "Determined" is still (null? (cdr payload)), the Report's own test.
+; handle-promise-result's first clause is the re-entrancy check: a
+; promise forced during its own evaluation has determined a value, and
+; that value wins. Its third shares y's slot so y is not forced twice,
+; then tail-calls, so a series of promises is forced in constant space.
+;
+; Bound openly, as 025-library binds its helpers, not under $provide!
+; (§6.8.2): this layer needs nothing above 025, and the encapsulation
+; stays opaque -- only the binding here opens one.
+;
+; Needs 010-core, 020-cek (eval), 025-library (not?).
+
+($define! promise-tools (make-encapsulation-type))
+($define! encapsulate (car promise-tools))
+($define! promise? (cadr promise-tools))
+($define! decapsulate (caddr promise-tools))
+
+($define! promise-of
+  ($lambda (payload)
+    (encapsulate
+      (cons ($quote %promise) (cons ($quote %slot) payload)))))
+
+; the payload (object . env) through the slot: the part a share
+; substitutes, so two promises watch one state
+($define! promise-payload ($lambda (content) (cdr (cdr content))))
+
+($define! memoize
+  ($lambda (value) (promise-of (cons value ()))))
+
+($define! $lazy
+  ($vau (exp) env (promise-of (cons exp env))))
+
+($define! force
+  ($lambda (x)
+    ($if (not (promise? x)) x (force-promise (decapsulate x)))))
+
+($define! force-promise
+  ($lambda (content)
+    ($let ((payload (promise-payload content)))
+      ($if (null? (cdr payload))
+        (car payload)
+        (handle-promise-result content
+          (eval (car payload) (cdr payload)))))))
+
+($define! handle-promise-result
+  ($lambda (content y)
+    ($let ((payload (promise-payload content)))
+      ($cond ((null? (cdr payload)) (car payload))
+        ((not (promise? y))
+          ($sequence (set-cdr! (cdr content) (cons y ())) y))
+        (#t
+          ($sequence
+            (set-cdr! content (cdr (decapsulate y)))
+            (force-promise content)))))))

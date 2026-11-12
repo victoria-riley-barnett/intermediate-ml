@@ -1,0 +1,59 @@
+; The keys of the primary view. A key is a NAME looked up in `keymap`, a
+; scope like any other: it shows in the outline, and a binding redefined
+; there is a new key the next time one is pressed. The host sends the
+; key's text and nothing else; no key is known to the page.
+;
+; An ACTION is (root state): a state answering a state, acting on the
+; cursor row alone and moving one row at a time as the document is walked
+; (097); none looks at the rest of the source. Down is unfold, up is fold;
+; the rest only move.
+;   unfold   open the row: its entries show right under it, the cursor stays (a scope, a closure or the ground; else nothing)
+;   fold     shut the row; a row with nothing to fold shuts the row it came out of, and lands there
+;   toggle   one or the other, by what the row is
+;   hover    what the pointer resting on a row does: unfold, never fold, and not the ground
+;
+;   (primary-key root state key)    the action bound to the key's name in keymap, applied; a key with no binding: the state unchanged
+
+(def (pm-cur-kind root st)
+  (with r (pm-cur-row root st) (if (null? r) ($quote none) (cadr r))))
+(def (unfold root st)
+  (if (pm-expandable? (pm-cur-kind root st)) (pm-ensure st (cadr st)) st))
+(def (toggle root st)
+  (if (pm-expandable? (pm-cur-kind root st)) (pm-flip st (cadr st)) st))
+(def (fold root st)
+  (with r (pm-cur-row root st)
+    (if (null? r) st
+      (pm-f5 r) (pm-flip st (cadr st))
+      (null? (cdr (car r))) st
+      (pm-go root (pm-flip st (pm-init (car r))) (pm-init (car r))))))
+(def (hover root st)
+  (if (eq? (pm-cur-kind root st) ($quote ground)) st (unfold root st)))
+(def (down root st) (pm-go root st (pm-next root st (cadr st))))
+(def (up root st) (pm-go root st (pm-prev root st (cadr st))))
+(def (top root st) (pm-go root st (pm-first root)))
+(def (bottom root st)
+  (with ts (pm-top root)
+    (if (null? ts) st (pm-go root st (pm-deepest root st (list (car (last ts))))))))
+
+($define! keymap
+  ($scope (def j down)
+    (def ArrowDown down)
+    (def k up)
+    (def ArrowUp up)
+    (def g top)
+    (def G bottom)
+    (def hh primary-fold-all)
+    (def ll primary-unfold-all)
+    (def l unfold)
+    (def Enter unfold)
+    (def ArrowRight unfold)
+    (def h fold)
+    (def ArrowLeft fold)
+    (def Backspace fold)
+    (def Tab toggle)
+    (def hover hover)))
+
+(def (primary-key root state key)
+  (with st (pm-norm root state)
+    (with act (value-in (cdr (car keymap)) (string->symbol key))
+      (if (null? act) st (act root st)))))

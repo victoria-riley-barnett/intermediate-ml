@@ -1,0 +1,141 @@
+; §7 control, derived. The kernel binds call/cc, continuation?,
+; apply-continuation, continuation->applicative, extend-continuation,
+; guard-continuation and root-continuation (125-cont, 090-combiners):
+; the guards live in the machine because a pass between continuations
+; is the stepper's business. Everything below is written with those,
+; 010-core and 025-library.
+;
+;   ($let/cc k body...)           the rest of the extent, as k (7.3.2)
+;   (guard-dynamic-extent i f o)  call f under those clauses (7.3.3)
+;   (dynamic-wind before f after) before/after from entry/exit guards
+;   (signal-error v)              leave through error-continuation (7.2.7)
+;   error-continuation            a continuation outside it all (7.2.7)
+;   (exit)                        leave through root-continuation (7.3.4)
+;
+; Errors are catchable: a mistake (a wrong operand, an unbound name, an
+; operand count) is a PROBLEM and reaches a guard clause selecting
+; error-continuation, as (problem kind . detail); with no such clause the
+; run stops in the resumable problem state the REPL and the editor fill
+; in. A root-continuation clause does not take an error by itself; a
+; spent step budget is not an error and cannot be caught.
+;
+; Needs 010-core, 020-cek (cadr) and 025-library (apply).
+
+; ---- 7.3.2 $let/cc. ($lambda (k)) with no body is a shape problem in
+; this machine: an empty body gets #inert, which is what 7.3.2 answers.
+($define! body-or-inert
+  ($lambda (body) ($if (null? body) (list #inert) body)))
+($define! $let/cc
+  ($vau (symbol . body)
+    env
+    (eval (list call/cc
+            (cons $lambda (cons (list symbol) (body-or-inert body))))
+      env)))
+
+; ---- 7.2.7 error-continuation: a child of the root, so its extent is
+; disjoint from the computation's; the kernel makes it (it must know it
+; to deliver language errors, 125-cont) and binds it in the ground. A
+; pass to it exits every guard on the way, and its interceptor is yield,
+; a value handed out of the run (030-repl waits at one).
+($define! signal-error
+  ($lambda (v) (apply-continuation error-continuation v)))
+
+; ---- 7.3.3 guard-dynamic-extent. Guards fire on abnormal passes only,
+; so the combiner's value LEAVES by a normal return and no exit clause
+; runs for it. The first entry is a pass too, and is made to skip the
+; entry clauses by one placed ahead of them whose selector contains only
+; that one source; only the first selected clause of a guard runs. That
+; selector is captured in non-tail position: root-like frames (the top
+; of a run) are ancestors of every chain (125-cont), so the extent's own
+; outer continuation would not do; an exit clause selects when D is in
+; its selector's extent, an entry one when S is.
+($define! guard-dynamic-extent
+  (wrap ($vau (entry-guards combiner exit-guards)
+    env
+    ($let/cc outer
+      (car (list
+        ($let/cc first-entry
+          (apply-continuation
+            (extend-continuation
+              (guard-continuation
+                (cons (list first-entry ($lambda (v #ignore) v)) entry-guards)
+                outer
+                exit-guards)
+              ($lambda (#ignore) (apply combiner () env)))
+            #inert))))))))
+
+; ---- dynamic-wind, derived: before runs on every entry into thunk's
+; extent, after on every exit, however it is left; the caller's own
+; normal entry and exit are no pass and run neither.
+($define! dynamic-wind
+  ($lambda (before thunk after)
+    ($sequence (before)
+      ($let ((r (guard-dynamic-extent
+                  (list (list root-continuation
+                          ($lambda (v #ignore) ($sequence (before) v))))
+                  thunk
+                  (list (list root-continuation
+                          ($lambda (v #ignore) ($sequence (after) v)))))))
+        ($sequence (after) r)))))
+
+; ---- 7.3.4 exit: #inert to root-continuation, where the computation
+; ends. The exit guards of every extent it leaves run on the way.
+($define! exit
+  ($lambda () (apply-continuation root-continuation #inert)))
+
+; ---- catching. An error object is a problem: (problem kind . detail),
+; kind unbound, not-combiner, shape or no-fit. signal-error passes any
+; value, so a handler asks error-object? first.
+($define! error-object?
+  ($lambda (v)
+    ($and (pair? v) ($and (eq? (car v) ($quote problem))
+            ($and (pair? (cdr v)) (symbol? (cadr v)))))))
+($define! error-kind ($lambda (e) (cadr e)))
+($define! error-detail ($lambda (e) (cddr e)))
+; the operands the failing form had, as a list: shape the list given,
+; no-fit the value, not-combiner the thing called, unbound the name
+($define! error-operands
+  ($lambda (e)
+    ($if (eq? (error-kind e) ($quote shape))
+      (car (cdr (error-detail e)))
+      ($if (eq? (error-kind e) ($quote no-fit))
+        (cdr (error-detail e))
+        (error-detail e)))))
+($define! %err-name
+  ($lambda (v)
+    ($cond ((symbol? v) (symbol->string v))
+      ((number? v) (number->string v))
+      (#t "something"))))
+; a sentence a person can read, for any value: an error object or not
+($define! error-message
+  ($lambda (e)
+    ($cond ((not? (error-object? e)) "something was signalled")
+      ((eq? (error-kind e) ($quote unbound))
+       (string-append "there is no name " (%err-name (car (error-detail e)))))
+      ((eq? (error-kind e) ($quote not-combiner))
+       "something that is not a function was called")
+      ((eq? (error-kind e) ($quote shape))
+       (string-append (%err-name (car (error-detail e)))
+         " was given operands it cannot take"))
+      ((eq? (error-kind e) ($quote no-fit))
+       "a value did not fit the shape asked of it")
+      (#t "something went wrong"))))
+
+; (with-error-handler thunk handler): if thunk errors -- a language error
+; or signal-error -- the answer is (handler error), and the work after
+; the call goes on. ($catch expr (e) handler...) is the same, inline.
+($define! with-error-handler
+  ($lambda (thunk handler)
+    (guard-dynamic-extent ()
+      thunk
+      (list (list error-continuation
+              ($lambda (e divert) (divert (handler e))))))))
+($define! $catch
+  ($vau (expr (var) . handler)
+    env
+    (with-error-handler
+      ($lambda () (eval expr env))
+      ($lambda (e)
+        (eval (list $let (list (list var (list $quote e)))
+                (cons $sequence (body-or-inert handler)))
+          env)))))

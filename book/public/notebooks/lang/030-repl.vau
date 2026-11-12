@@ -1,0 +1,396 @@
+; The REPL as a program on the machine, not a host: the loop waits at a
+; hole, (yield (line n last pending)), and the host answers. Loaded after
+; cek.vau because a turn's stops must be data the loop holds -- the
+; native machine's would stop the loop itself.
+;
+; (line . forms) is the next turn; (fill . forms) evaluates them and
+; resumes the stopped turn with the value, as a resume answers for a hole;
+; any other message is waited past. n counts the chain plus one, last is
+; the newest turn or (), pending the stopped run a fill would resume.
+;
+; A TURN is (turn n source outcome); an OUTCOME is tagged so a problem
+; cannot pass for a value: (value v) | (open why, the run waits on a hole)
+; | (problem what, a call that did not fit). A chain is newest first, and
+; a bad line is a problem turn, not an end.
+;
+; EACH TURN RUNS IN A FORK (deep copy, so the line's defines are its own):
+; a value makes the fork the session; a stop leaves the session as it was,
+; the fork waits in `pending`, and a fill resumes a copy, keeping its
+; defines only if it ends in a value.
+
+($define! chain-length
+  ($lambda (c) ($if (null? c) 0 (+ 1 (chain-length (cdr c))))))
+($define! repl-turn
+  ($lambda (n source outcome) (list ($quote turn) n source outcome)))
+($define! turn-n cadr)
+($define! turn-source caddr)
+($define! turn-outcome cadddr)
+($define! outcome-kind car)
+($define! outcome-payload cadr)
+($define! last-turn ($lambda (c) ($if (null? c) () (car c))))
+($define! turn-at
+  ($lambda (c n)
+    ($if (null? c)
+      ()
+      ($if (= (turn-n (car c)) n) (car c) (turn-at (cdr c) n)))))
+
+; ---- running forms: (done v env) | (stopped out state env rest), rest left unrun
+($define! after
+  ($lambda (st env rest)
+    ($if (is? ($quote D) st)
+      ($if (null? rest)
+        (list ($quote done) (cadr st) env)
+        (after (start (car rest) env) env (cdr rest)))
+      (list ($quote stopped) (cadr st) st env rest))))
+($define! run-forms
+  ($lambda (forms env) (after (list ($quote D) ()) env forms)))
+
+; a stop is a problem if the machine says so ((problem kind . detail),
+; kernel/problems.wat), and otherwise open: the run waits on it
+($define! outcome-of
+  ($lambda (res)
+    ($if (is? ($quote done) res)
+      (list ($quote value) (cadr res))
+      (($lambda (out)
+         ($if ($if (pair? out) (eq? (car out) ($quote problem)) #f)
+           (list ($quote problem) (cdr out))
+           (list ($quote open) out)))
+       (cadr res)))))
+
+; ---- the loop
+($define! repl ($lambda (env chain) (repl-wait env chain ())))
+($define! repl-wait
+  ($lambda (env chain pending)
+    (repl-act (yield (list ($quote line)
+                       (+ 1 (chain-length chain))
+                       (last-turn chain)
+                       pending))
+      env
+      chain
+      pending)))
+($define! repl-act
+  ($lambda (cmd env chain pending)
+    (($lambda (kind)
+       ($if (eq? kind ($quote line))
+         (repl-line (cdr cmd) env chain)
+         ($if (eq? kind ($quote fill))
+           (repl-fill (cdr cmd) env chain pending)
+           (repl-wait env chain pending))))
+     ($if (pair? cmd) (car cmd) ()))))
+
+($define! note
+  ($lambda (source outcome env chain pending)
+    (repl-wait env
+      (cons (repl-turn (+ 1 (chain-length chain)) source outcome) chain)
+      pending)))
+($define! repl-record
+  ($lambda (source res env chain)
+    ($if (is? ($quote done) res)
+      (note source (outcome-of res) (caddr res) chain ())
+      ; a stop: the session as it was, the run waiting to be filled
+      (note source (outcome-of res) env chain res))))
+($define! repl-line
+  ($lambda (forms env chain)
+    (repl-record forms (run-forms forms (fork env)) env chain)))
+
+($define! repl-fill
+  ($lambda (forms env chain pending)
+    (($lambda (source)
+       ($if (null? pending)
+         (note source
+           (list ($quote problem) ($quote (nothing-to-fill)))
+           env
+           chain
+           ())
+         (fill-value (run-forms forms (fork env))
+           source
+           env
+           chain
+           pending)))
+     (list (cons ($quote fill) forms)))))
+($define! fill-value
+  ($lambda (got source env chain pending)
+    ($if (is? ($quote done) got)
+      (repl-record source
+        (resume-with (cadr got) (fork (cdr pending)))
+        env
+        chain)
+      ; the value itself did not come: the stopped run still waits
+      (note source (outcome-of got) env chain pending))))
+; resume a copy of (stopped out state env rest) with v, then its unrun forms
+($define! resume-with
+  ($lambda (v copy)
+    (after (drive (list ($quote R) v (caddr (cadr copy))))
+      (caddr copy)
+      (cadddr copy))))
+
+; ---- a session: a ground of the machine, the prelude loaded, docs bound
+($define! load-forms
+  ($lambda (forms env)
+    ($if (null? forms)
+      ()
+      (progn (cek-eval (car forms) env) (load-forms (cdr forms) env)))))
+($define! make-session
+  ($lambda (prelude)
+    (($lambda (env)
+       (progn (load-forms prelude env)
+         (native! env ($quote docs) docs)
+         (native! env ($quote doc) doc)
+         env))
+     (ground-frame))))
+
+; a surface is a child of the base: its names shadow the base only for the
+; person's forms, not for the base's own closures. The Bel layer loads here.
+($define! make-session-in
+  ($lambda (parent prelude)
+    (($lambda (env) (progn (load-forms prelude env) env)) (new-frame parent))))
+
+; ---- docs are data: rows (name signature description), the description a
+; list of words; a test holds every name to being bound. `append` is 026's
+; (variadic): a two-argument one here would shadow R-1RK 6.3.3 above.
+($define! docs-ground
+  ($quote (($vau ($vau ptree env-name body...)
+             (a combiner
+               that
+               gets
+               its
+               operands
+               unevaluated
+               and
+               the
+               caller
+               environment))
+           ($define! ($define! pattern form)
+             (evaluate form
+               and
+               bind
+               the
+               names
+               in
+               pattern
+               to
+               it
+               in
+               this
+               environment))
+           ($match? ($match? pattern form)
+             (evaluate form: #t if it fits pattern else #f))
+           (yield (yield out)
+             (stop the
+               machine
+               and
+               say
+               out:
+               it
+               resumes
+               with
+               the
+               value
+               it
+               is
+               given))
+           (call/cc (call/cc f)
+             (call f
+               with
+               the
+               rest
+               of
+               the
+               computation
+               as
+               a
+               function:
+               calling
+               it
+               returns
+               there))
+           (wrap (wrap operative)
+             (the applicative
+               that
+               evaluates
+               its
+               operands
+               and
+               gives
+               them
+               to
+               operative))
+           (eval (eval form env) (evaluate form in env))
+           (cons (cons a d) (a new pair))
+           (set-cdr! (set-cdr! pair d) (change the second half of pair))
+           (+ (+ a b) (the sum of two numbers))
+           (- (- a b)
+             (the difference, or with one operand its negation))
+           (* (* a b) (the product))
+           (quotient (quotient a b) (division truncating toward zero))
+           (remainder (remainder a b)
+             (what is left, with the sign of a))
+           (< (< a b) (#t if a is less than b))
+           (<= (<= a b) (#t if a is at most b))
+           (= (= a b) (#t if the numbers are equal))
+           (number? (number? x) (#t if x is a number))
+           (eq? (eq? a b)
+             (#t if a and b are the same symbol, number, or pair))
+           ($quote ($quote x) (x unevaluated))
+           (list (list xs...) (the list of the values of xs))
+           ($lambda ($lambda ptree body...)
+             (a function of the names in ptree))
+           ($if ($if c a b) (a if c is #t else b))
+           (not (not c) (the opposite of c))
+           ($and ($and a b) (#t if both are))
+           ($or ($or a b) (#t if either is))
+           (car (car pair) (the first half))
+           (cdr (cdr pair) (the second half))
+           (pair? (pair? x) (#t if x is a pair))
+           (null? (null? x) (#t if x is the empty list))
+           (docs (docs) (every row of these docs))
+           (doc (doc name)
+             (the row for the symbol name or the empty list)))))
+($define! docs-repl
+  ($quote ((repl (repl env chain)
+             (the loop:
+               wait
+               on
+               a
+               line,
+               evaluate
+               it
+               in
+               a
+               fork
+               of
+               env,
+               record
+               the
+               turn,
+               wait
+               again))
+           (repl-turn (repl-turn n source outcome) (the turn as data))
+           (chain-length (chain-length chain)
+             (how many turns: the next turn is one more))
+           (last-turn (last-turn chain)
+             (the newest turn or the empty list))
+           (turn-at (turn-at chain n)
+             (the turn numbered n or the empty list))
+           (turn-n (turn-n turn) (its number))
+           (turn-source (turn-source turn) (the forms that were typed))
+           (turn-outcome (turn-outcome turn)
+             (value or open or problem and its payload))
+           (outcome-kind (outcome-kind outcome)
+             (value or open or problem))
+           (outcome-payload (outcome-payload outcome)
+             (the value or why it is open or what did not fit))
+           (make-session (make-session prelude-forms)
+             (a fresh ground with the prelude loaded and docs bound))
+           (step-n (step-n s n)
+             (the state after up to n steps: D and Y stay put))
+           (history (history s n)
+             (the states
+               visited
+               from
+               s
+               oldest
+               first
+               up
+               to
+               n
+               ending
+               at
+               D
+               or
+               Y))
+           (run-until (run-until s pred limit)
+             (the first
+               state
+               pred
+               accepts
+               or
+               the
+               stop
+               within
+               limit
+               steps))
+           (depth (depth s)
+             (how many continuation frames the state has))
+           (step-over (step-over s)
+             (one step
+               then
+               on
+               until
+               the
+               stack
+               is
+               as
+               shallow
+               as
+               it
+               began))
+           (step-out (step-out s)
+             (on until the stack is shallower than it began))
+           (break-on-name (break-on-name name s limit)
+             (run to
+               an
+               E
+               state
+               whose
+               form
+               is
+               name
+               or
+               a
+               call
+               headed
+               by
+               name))
+           (back (back hist)
+             (the state
+               before
+               the
+               newest
+               in
+               a
+               history:
+               mutations
+               are
+               not
+               undone))
+           (snapshot (snapshot s) (a deep copy of the state))
+           (back-to (back-to snap)
+             (a fresh copy of a snapshot to go on from))
+           (watch (watch expr env)
+             (the value
+               of
+               expr
+               in
+               a
+               copy
+               of
+               env
+               so
+               the
+               run
+               is
+               undisturbed))
+           (frames (frames s)
+             (the call stack as kind and summary pairs innermost first))
+           (where (where s)
+             (the form or value or call the state is about)))))
+($define! all-docs (append docs-ground docs-repl))
+($define! docs ($lambda #ignore all-docs))
+($define! doc-row
+  ($lambda (name rows)
+    ($if (null? rows)
+      ()
+      ($if (eq? (car (car rows)) name)
+        (car rows)
+        (doc-row name (cdr rows))))))
+($define! doc
+  ($lambda args ($if (null? args) () (doc-row (car args) all-docs))))
+; documented names env does not bind: () unless the docs have drifted from the language
+($define! unbound-docs
+  ($lambda (rows env)
+    ($if (null? rows)
+      ()
+      ($if (eq? (find (car (car rows)) env) none)
+        (cons (car (car rows)) (unbound-docs (cdr rows) env))
+        (unbound-docs (cdr rows) env)))))

@@ -1,0 +1,76 @@
+/* The book's page: one reading column, a right margin for notes, and figures that
+   may span both. Atoms carry their own styling; nothing here reaches inside them. */
+:root {
+  --paper: #fbfbf9;
+  --ink: #2d3142;
+  --muted: #4f5d75;
+  --rule: #d9d9df;
+  --accent: #bf4520;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --sans: 'Geist', system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, monospace;
+  --display: 'Instrument Serif', Georgia, serif;
+  --column: 36rem;
+  --margin: 15rem;
+  --gutter: 2.5rem;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--paper); color: var(--ink); }
+body { margin: 0; font: 1.075rem/1.62 var(--serif); }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+code, pre { font-family: var(--mono); font-size: 0.86em; }
+pre { background: #f0f0ec; padding: 0.9rem 1rem; overflow-x: auto; border-radius: 3px; line-height: 1.5; }
+
+.masthead { padding: 1.25rem 1.5rem; font: 500 0.8rem var(--sans); letter-spacing: 0.08em; text-transform: uppercase; }
+.masthead a { color: var(--muted); text-decoration: none; }
+
+.page { padding: 1rem 1.5rem 6rem; max-width: calc(var(--column) + var(--gutter) + var(--margin) + 3rem); margin: 0 auto; }
+.page > *, .prose > *, .composed > * { max-width: var(--column); }
+.prose > .composed, .page > .prose { max-width: none; }
+
+h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.15; letter-spacing: -0.01em; }
+h1 { font-size: 2.6rem; margin: 1.5rem 0 0.5rem; }
+h2 { font-size: 1.75rem; margin: 2.75rem 0 0.5rem; }
+h3 { font-size: 1.35rem; margin: 2rem 0 0.25rem; }
+.eyebrow, .meta { font: 500 0.72rem var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.2rem; color: var(--muted); }
+
+/* Composed pages keep their identity: the heading links to the standalone entry. */
+.composed-link { color: inherit; text-decoration: none; }
+.composed-link:hover { color: var(--accent); }
+.composed-link::after { content: ' ↗'; font: 0.8rem var(--sans); color: var(--muted); vertical-align: super; }
+
+/* Links into the web of pages: quiet underline, never a button. */
+a.ref { color: inherit; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 1.5px; }
+.ref-missing { text-decoration: underline dotted var(--muted); }
+
+/* Margin notes. */
+.side { display: block; font: 0.85rem/1.5 var(--sans); color: var(--muted); margin: 0.5rem 0 0.75rem; padding-left: 0.75rem; border-left: 2px solid var(--rule); }
+@media (min-width: 64rem) {
+  .side { float: right; clear: right; width: var(--margin); margin: 0.2rem calc(-1 * (var(--margin) + var(--gutter))) 1rem 0; padding: 0; border: 0; }
+}
+
+/* Atoms span the reading column and the margin: the plates are drawn wide. */
+.atom { margin: 2rem 0; max-width: var(--column); }
+.atom:has(figure[data-source]) { max-width: calc(var(--column) + var(--gutter) + var(--margin)) !important; }
+.atom-caption { margin-top: 0.6rem; font: 0.9rem/1.55 var(--sans); color: var(--muted); max-width: var(--column); }
+.atom-caption p { margin: 0; }
+.atom-caption strong { color: var(--ink); }
+.atom-missing { font: 0.9rem var(--sans); color: var(--accent); border: 1px dashed var(--accent); padding: 0.5rem 0.75rem; }
+
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0; }
+
+/* Contents and indexes. */
+.toc { list-style: none; padding: 0; }
+.toc li { margin: 0.9rem 0; }
+.toc .num { display: inline-block; width: 2.5rem; font: 500 0.85rem var(--mono); color: var(--muted); }
+.toc .desc { display: block; margin-left: 2.5rem; font-size: 0.95rem; color: var(--muted); }
+.backlinks { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--rule); font: 0.9rem/1.6 var(--sans); }
+.backlinks ul { padding-left: 1.1rem; }
+
+/* Draft sheet. */
+.atom-sheet { list-style: none; padding: 0; display: grid; gap: 2.5rem; max-width: none !important; }
+.atom-card .atom { margin: 0 0 0.5rem; }
+.atom-meta { font: 0.8rem var(--mono); color: var(--muted); margin: 0.15rem 0; }
+.up { font: 0.85rem var(--sans); color: var(--muted); margin: 0; }
+.backlinks p { margin: 0.2rem 0; }

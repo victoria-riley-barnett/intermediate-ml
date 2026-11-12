@@ -1,0 +1,40 @@
+<figure data-atom="eq-chain-rule" data-source="admin/diagrams/eq-chain-rule.html" aria-label="The chain rule" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 612" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-chain-rule-title eq-chain-rule-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="eq-chain-rule-title">The chain rule</title>
+        <desc id="eq-chain-rule-desc">The chain rule, written dL/dw = dL/dy times dy/dz times dz/dw, on the same small model as the one-weight gradient figure: one layer with weights (1, 5, 2), inputs (2, 0, 3), target 5, output z = w·x = 8. The composition is z = w·x, then y = z, then L = (y − t)²/2. Each factor is the derivative of one operation, taken at the values that operation received. The loss's own slope is dL/dy = y − t = 8 − 5 = 3. The pass-through's own slope is dy/dz = 1. The multiply's own slope is dz/dw, which is the input x = (2, 0, 3). Multiplying the three gives 3 · 1 · (2, 0, 3) = (6, 0, 9), the gradient of the whole composition with respect to the three weights. No factor refers to anything outside its own operation: the loss's slope needs only y and t, the pass-through's needs nothing, the multiply's needs only x. A factor of zero zeroes the product, whichever factor it is. The middle factor is 1 here because that operation is a pass-through, not because the chain rule drops terms.</desc>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520" dy="0">∂L/∂w</tspan><tspan dy="0"> = ∂L/∂y · ∂y/∂z · ∂z/∂w</tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">each factor is one operation's slope, not the net's</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">SYMBOL</tspan></text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">NAME</tspan></text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WHAT IT IS</tspan></text>
+        <text x="940" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">IN THE EXAMPLE</tspan></text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">∂L/∂w</tspan></text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">gradient of the loss</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">vector, 3 numbers — how fast L rises per unit of one weight, the rest held fixed</text>
+        <text x="940" y="246" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(6, 0, 9)</tspan></text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">∂L/∂y</tspan></text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">slope of the loss</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — the loss's own derivative at the y it was handed; here y − t</text>
+        <text x="940" y="272" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">3</tspan></text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">∂y/∂z</tspan></text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">slope of y = z</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — 1, because this operation hands z on unchanged</text>
+        <text x="940" y="298" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">1</tspan></text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">∂z/∂w</tspan></text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">slope of z = w·x</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">vector, 3 numbers — the input x itself, one entry per weight</text>
+        <text x="940" y="324" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(2, 0, 3)</tspan></text>
+        <line x1="120" y1="346" x2="1160" y2="346" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="380" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WORKED · L = (y − t)²/2, y = z, z = w·x — ONE EXAMPLE · w = (1, 5, 2), x = (2, 0, 3), t = 5</tspan></text>
+        <text x="120" y="405" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">L = (y − t)²/2  →  ∂L/∂y = y − t = </tspan><tspan dy="0">8 − 5 = 3</tspan></text>
+        <text x="120" y="437" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">y = z  →  ∂y/∂z = </tspan><tspan dy="0">1</tspan></text>
+        <text x="120" y="469" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">z = w·x  →  ∂z/∂w = x = </tspan><tspan dy="0">(2, 0, 3)</tspan></text>
+        <text x="120" y="501" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">∂L/∂w = </tspan><tspan dy="0">3 · 1 · </tspan><tspan dy="0">(2, 0, 3)</tspan><tspan dy="0"> = </tspan><tspan fill="#bf4520" dy="0">(6, 0, 9)</tspan></text>
+        <rect x="108" y="478" width="345" height="32" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="120" y="566" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"><tspan dy="0">∂L/∂y = 0 → ∂L/∂w = 0 whatever ∂y/∂z and ∂z/∂w are — </tspan><tspan dy="0">one zero factor zeroes the product</tspan></text>
+      </svg>
+
+</figure>

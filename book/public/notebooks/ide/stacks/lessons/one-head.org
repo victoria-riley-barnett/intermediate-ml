@@ -1,0 +1,209 @@
+#+title: One attention head, by hand
+#+course: CSC 411 · machine learning architectures · slide X
+#+machine: the vau kernel (cek.wasm)
+
+These are the numbers from slide X.
+
+* One attention head :card:
+
+** The block
+
+#+begin_diagram :title one attention head
+box qkv | Q, K, V | io | Q | |
+box s | S = Q Kᵀ | g | scores | score
+box a | A = softmax(S / √d_h) | g+ | weights | weights
+box y | Y = A V | g | output | y
+box out | Y | io | output | y
+flow qkv s a y out
+#+end_diagram
+
+MODEL  T = 4 positions · d_h = 4 · one head · B = 1. Q, K and V are given, as on the slide; in a full layer they would be X W_Q, X W_K and X W_V.
+
+#+attr: :beside
+| term    | equation                    | shape     |
+|---------+-----------------------------+-----------|
+| scores  | S = Q Kᵀ                    | i × j     |
+| weights | A = softmax over j (S / √d_h) | i × j, each row sums to 1 |
+| output  | Y = A V                     | i × d_h   |
+
+#+begin_src python :caption the same head in PyTorch
+import torch
+import torch.nn.functional as F
+
+Q = torch.tensor([[1,-1,1,-1],[1,1,-2,2],[0,-2,1,0],[-2,2,1,-1]], dtype=torch.float)
+K = torch.tensor([[0,-1,0,0],[1,1,-2,-2],[-1,1,-1,-2],[2,0,0,-1]], dtype=torch.float)
+V = torch.tensor([[1,1,1,2],[0,3,2,3],[3,0,2,1],[2,1,3,1]], dtype=torch.float)
+
+S = Q @ K.T                      # scores, i x j
+A = torch.softmax(S / 4**0.5, dim=-1)   # weights, rows sum to 1
+Y = A @ V                        # output, i x d_h
+# or in one call:
+Y = F.scaled_dot_product_attention(Q, K, V, scale=1/2)
+#+end_src
+
+| symbol | in plain words |
+|--------+----------------|
+| i      | the query position: the row, the place that is asking |
+| j      | the key position: the column, the place being asked |
+| Q      | query; x W_Q; what i looks for |
+| K      | key; x W_K; what j offers |
+| V      | value; x W_V; what j passes on |
+| S      | scores; how well i's query matches j's key |
+| A      | weights; S scaled by √d_h, then softmax over j, so each row sums to 1 |
+| Y      | output; for each i, the blend of the values, weighted by A |
+| d_h    | the head width: 4 here, so √d_h = 2 |
+| T      | the number of positions: 4 |
+
+** Q, K, V :data:
+
+Edit any number: the next score computed reads it.
+
+#+name: Q
+| i | q1 | q2 | q3 | q4 |
+|---+----+----+----+----|
+| 1 | 1  | -1 | 1  | -1 |
+| 2 | 1  | 1  | -2 | 2  |
+| 3 | 0  | -2 | 1  | 0  |
+| 4 | -2 | 2  | 1  | -1 |
+
+#+name: K
+| j | k1 | k2 | k3 | k4 |
+|---+----+----+----+----|
+| 1 | 0  | -1 | 0  | 0  |
+| 2 | 1  | 1  | -2 | -2 |
+| 3 | -1 | 1  | -1 | -2 |
+| 4 | 2  | 0  | 0  | -1 |
+
+#+name: V
+| j | v1 | v2 | v3 | v4 |
+|---+----+----+----+----|
+| 1 | 1  | 1  | 1  | 2  |
+| 2 | 0  | 3  | 2  | 3  |
+| 3 | 3  | 0  | 2  | 1  |
+| 4 | 2  | 1  | 3  | 1  |
+
+#+begin_src vau
+(def tokens ($quote (1 2 3 4)))
+(def T 4)
+(def d-h 4)
+#+end_src
+
+** Arithmetic :step-over:
+
+Rows by position, a sum, and softmax. The numbers are exact, so =exp= is a series, rounded to six places. The step keys pass over this part.
+
+#+begin_src vau :step over :folded
+(def (fx x) (/ (round (* x 1000)) 1000))
+(def (fx6 x) (/ (round (* x 1000000)) 1000000))
+(def (at xs i) (if (= i 0) (car xs) (at (cdr xs) (- i 1))))
+(def (range n) (range-from 0 n))
+(def (range-from i n) (if (< i n) (cons i (range-from (+ i 1) n)) ()))
+(def (sum xs) (if (null? xs) 0 (+ (car xs) (sum (cdr xs)))))
+; row i of a table, without its label
+(def (row M i) (cdr (at M i)))
+(def (exp x) (if (< x -20) 0 (exp-halved (fx6 x) 0)))
+(def (exp-halved y n) (if (> (abs y) 1/2) (exp-halved (/ y 2) (+ n 1)) (exp-squared (exp-taylor y 1 1 1) n)))
+(def (exp-taylor y k term acc) (if (> k 8) acc ($let* ((t (fx6 (/ (* term y) k)))) (exp-taylor y (+ k 1) t (+ acc t)))))
+(def (exp-squared e n) (if (= n 0) (fx6 e) (exp-squared (fx6 (* e e)) (- n 1))))
+(def (softmax xs)
+  ($let* ((m (apply max xs))
+          (es (map (fn (x) (exp (- x m))) xs))
+          (z (sum es)))
+    (map (fn (e) (fx (/ e z))) es)))
+; copy row `from` of a table over row `to`: the lab's "duplicate keys"
+(def (copy-row M from to)
+  (map (fn (i) (if (= i to) (cons (car (at M i)) (row M from)) (at M i))) (range (length M))))
+(def (note kind info v) (yield (list ($quote %note) kind info v)))
+#+end_src
+
+** S = Q Kᵀ
+
+Each score is one query row times one key row: four products, added.
+
+#+name: scores
+#+begin_src vau
+(def (score Q K i j)
+  ($let* ((q (row Q i))
+          (k (row K j))
+          (s (sum (map * q k))))
+    (note ($quote score) (list 0 i j s q k (map * q k)) s)))
+
+(def (S-of Q K)
+  (map (fn (i) (map (fn (j) (score Q K i j)) (range T))) (range T)))
+#+end_src
+
+#+begin_view matrix :of score
+S = Q Kᵀ: rows i ask, columns j answer
+#+end_view
+
+** A = softmax(S / √d_h)
+
+Divide every score by √d_h = 2, then softmax along each row, so each row's weights add up to 1.
+
+#+name: weights
+#+begin_src vau
+(def (A-of S)
+  (map (fn (i)
+         ($let* ((w (softmax (map (fn (s) (/ s (sqrt d-h))) (at S i)))))
+           (note ($quote weights) (list 0 i (at S i) w) w)))
+       (range T)))
+#+end_src
+
+#+begin_view attention :head 0 :scale 2
+A: each row is position i's weights over j, and adds up to 1
+#+end_view
+
+The first row is =1 0 -1 3=. Halve it, exponentiate, and divide by the sum, and you get =0.21 0.13 0.08 0.58=.
+
+#+begin_src python :live
+import math
+
+scores = [1, 0, -1, 3]                  # row 1 of S
+scaled = [s / math.sqrt(4) for s in scores]
+top = max(scaled)                       # subtract the largest before exp
+exps = [math.exp(s - top) for s in scaled]
+total = sum(exps)
+shares = [e / total for e in exps]
+print([round(w, 3) for w in shares])
+#+end_src
+
+** Y = A V
+
+Each output row is the value rows blended by that row's weights.
+
+#+name: output
+#+begin_src vau
+(def (blend w V)
+  (if (null? w) (list 0 0 0 0)
+      (map + (map (fn (v) (* (car w) v)) (cdr (car V))) (blend (cdr w) (cdr V)))))
+
+(def (Y-of A V)
+  (map (fn (i) ($let* ((y (map fx (blend (at A i) V)))) (note ($quote y) (list i y) y)))
+       (range T)))
+#+end_src
+
+#+begin_view matrix :of y :cols y1 y2 y3 y4
+Y = A V: one row per position i
+#+end_view
+
+** Run it :run:
+
+#+name: attention
+#+begin_src vau :run
+(Y-of (A-of (S-of Q K)) V)
+#+end_src
+
+#+begin_watch
+(list i j)
+#+end_watch
+
+** Duplicate keys :run:
+
+From the lab: make position 3 a copy of position 1, keys and values both. Predict first: what happens to row 1 of A, which put 0.21 on position 1? Then run it and compare: each number shows what it was before.
+
+#+name: duplicate
+#+begin_src vau :run :was attention
+(Y-of (A-of (S-of Q (copy-row K 0 2))) (copy-row V 0 2))
+#+end_src
+
+You can also do this one number at a time: step the first run to the score for row 1, key 3, and try a different value there.

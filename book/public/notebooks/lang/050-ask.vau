@@ -1,0 +1,178 @@
+; ask, in the language: a run that says what it read. The machine of cek.vau
+; tells its trace hook (`tap`) every name it looks up, every pattern it
+; defines, every native it calls and every pair it takes apart; this file
+; listens for one run and answers an alist: ((value v) (steps n) (reads ...)
+; (writes ...) (holes ...) (halt h)). Slower than the native machine, by a
+; factor measured in test/lang/ask.test.mjs.
+
+; THE NONLOCAL FOOTPRINT. The frame chain a form is given is its local geometry
+; and the ground is the common tongue; what a run reaches outside its own frames
+; is the network this file meters, so a run reading only the ground has an empty
+; footprint. `reads-meet?` asks the within-geometry question, where a name IS the
+; structure; across two geometries it is the wrong question, the origin recorded
+; here being a kind and not the frame that answered.
+
+; ORIGIN is decided by frame identity, never by name: the chain's last frame
+; (parent ()) is the ground ('ground), a page frame is 'page, any other -- a
+; callee's formals, made by the run -- is 'local and left out of the answer;
+; none answering is 'absent: a hole is a read of absence an edit meets.
+
+; REFLECTION. Every lookup is noted, so `eval` in a captured environment or a
+; computed name reads exactly what it looks up. A frame taken apart as data (a
+; pair pattern matched against an environment or a frame, which is all `car` and
+; `cdr` are) reaches any binding: a whole-frame read, (%all . origin), that any
+; edit meets. Over-approximate: a needless re-run, never a missed one. Writes:
+; $define! notes each name its pattern binds; set-cdr! on a frame cell is the
+; whole-frame write; a set-cdr! on one binding pair is not seen, nor a frame cell
+; held from an earlier run: it is 'local.
+
+($define! all-sym ($quote %all))
+($define! cat
+  ($lambda (a b) ($if (null? a) b (cons (car a) (cat (cdr a) b)))))
+($define! pattern-names
+  ($lambda (p)
+    ($if (pair? p)
+      (cat (pattern-names (car p)) (pattern-names (cdr p)))
+      ($if ($or (null? p)
+             ($or (eq? p #ignore) ($or (number? p) (string? p))))
+        ()
+        (list p)))))
+($define! binds?
+  ($lambda (sym bindings)
+    ($if (null? bindings)
+      #f
+      ($if (eq? (car (car bindings)) sym) #t (binds? sym (cdr bindings))))))
+($define! owner
+  ($lambda (sym frame)
+    ($if (null? frame)
+      ()
+      ($if (binds? sym (cdr (car frame))) (car frame) (owner sym (cdr frame))))))
+($define! frame-cell?
+  ($lambda (x) ($if (pair? x) (eq? (car x) ($quote %f)) #f)))
+; the frame cell a taken-apart value exposes: itself, its first frame if it is
+; an environment, else ()
+($define! exposed
+  ($lambda (v)
+    ($if (frame-cell? v)
+      v
+      ($if (pair? v) ($if (frame-cell? (car v)) (car v) ()) ()))))
+($define! push-new!
+  ($lambda (acc e)
+    ($if (has-entry? e (cdr acc)) () (set-cdr! acc (cons e (cdr acc))))))
+($define! has-entry?
+  ($lambda (e es)
+    ($if (null? es)
+      #f
+      ($if ($and (eq? (car e) (car (car es)))
+             (eq? (cdr e) (cdr (car es))))
+        #t
+        (has-entry? e (cdr es))))))
+
+; the listener for one run: ground-cell and page-cells say what origin is
+($define! listener
+  ($lambda (ground-cell page-cells reads writes)
+    (($lambda (origin)
+       ($lambda (kind what env)
+         ($if (eq? kind ($quote read))
+           (push-new! reads
+             (cons what
+               (($lambda (c) ($if (null? c) ($quote absent) (origin c)))
+                (owner what env))))
+           ($if (eq? kind ($quote write))
+             (note-all! writes (pattern-names what) (origin (car env)))
+             ($if (eq? kind ($quote match))
+               (($lambda (c)
+                  ($if (null? c)
+                    ()
+                    (push-new! reads (cons all-sym (origin c)))))
+                (exposed what))
+               ($if (eq? kind ($quote native))
+                 ($if (eq? (car what) ($quote set-cdr!))
+                   ($if (frame-cell? (car (cdr what)))
+                     (push-new! writes
+                       (cons all-sym (origin (car (cdr what)))))
+                     ())
+                   ())
+                 ()))))))
+     ($lambda (c)
+       ($if (eq? c ground-cell)
+         ($quote ground)
+         ($if (named? c page-cells) ($quote page) ($quote local)))))))
+($define! note-all!
+  ($lambda (acc names o)
+    ($if (null? names)
+      ()
+      (progn (push-new! acc (cons (car names) o))
+        (note-all! acc (cdr names) o)))))
+
+($define! cells-above
+  ($lambda (env)
+    ($if (null? (cdr env)) () (cons (car env) (cells-above (cdr env))))))
+($define! keep-seen
+  ($lambda (es)
+    ($if (null? es)
+      ()
+      ($if (eq? (cdr (car es)) ($quote local))
+        (keep-seen (cdr es))
+        (cons (car es) (keep-seen (cdr es)))))))
+($define! field
+  ($lambda (a key)
+    ($if (eq? (car (car a)) key) (cadr (car a)) (field (cdr a) key))))
+
+($define! counted
+  ($lambda (s n budget)
+    ($if (done? s)
+      (cons s n)
+      ($if (= n budget) (cons s n) (counted (step s) (+ n 1) budget)))))
+($define! answer
+  ($lambda (end reads writes)
+    (($lambda (s n)
+       (list (list ($quote value) ($if (is? ($quote D) s) (cadr s) ()))
+         (list ($quote steps) n)
+         (list ($quote reads) (rev (keep-seen (cdr reads))))
+         (list ($quote writes) (rev (keep-seen (cdr writes))))
+         (list ($quote holes)
+           ($if (is? ($quote Y) s)
+             ($if ($if (pair? (cadr s))
+                    (eq? (car (cadr s)) ($quote unbound))
+                    #f)
+               (list (cadr (cadr s)))
+               ())
+             ()))
+         (list ($quote halt) ($if (is? ($quote D) s) () s))))
+     (car end)
+     (cdr end))))
+
+; (ask form env [budget]): form run as data in env, under the machine in the
+; language; env is a chain whose last frame is the ground
+($define! ask
+  ($lambda (form env . rest)
+    (($lambda (reads writes prev)
+       (progn (set-cdr! tap
+                (listener (last env) (cells-above env) reads writes))
+         (($lambda (end)
+            (progn (set-cdr! tap prev) (answer end reads writes)))
+          (counted (list ($quote E) form env (list ($quote halt)))
+            0
+            ($if (null? rest) 1000000 (car rest))))))
+     (cons () ())
+     (cons () ())
+     (cdr tap))))
+
+; does an edit (the names it defines) meet what a run read? by name; a
+; whole-frame read is met by any edit. The edit of nothing meets nothing.
+($define! reads-meet?
+  ($lambda (edited reads)
+    ($if (null? edited)
+      #f
+      ($if (null? reads)
+        #f
+        ($if ($or (eq? (car (car reads)) all-sym)
+               (named? (car (car reads)) edited))
+          #t
+          (reads-meet? edited (cdr reads)))))))
+; the halt-fix law: an edit that misses the run's reads cannot have changed it,
+; so its halt is resumed rather than re-run
+($define! replay-safe?
+  ($lambda (edit run)
+    ($if (reads-meet? edit (field run ($quote reads))) #f #t)))

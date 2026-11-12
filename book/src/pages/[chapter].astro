@@ -1,0 +1,24 @@
+---
+import { render } from 'astro:content';
+import Book from '../layouts/Book.astro';
+import { chapterUrl, chapters, url, type Chapter } from '../lib/book';
+import { mdxComponents } from '../lib/mdx-components';
+
+export async function getStaticPaths() {
+  const cs = await chapters();
+  return cs.map((c, i) => ({ params: { chapter: c.id }, props: { c, prev: cs[i - 1], next: cs[i + 1] } }));
+}
+interface Props { c: Chapter; prev?: Chapter; next?: Chapter }
+const { c, prev, next } = Astro.props;
+const { Content } = await render(c);
+---
+<Book title={c.data.title} description={c.data.description} noindex={c.data.draft}>
+  <p class="up">Up: <a href={url('/')}>Contents</a></p>
+  <p class="eyebrow">Chapter {c.data.number}{c.data.draft && ' · draft'}</p>
+  <h1>{c.data.title}</h1>
+  <div class="prose"><Content components={mdxComponents} /></div>
+  <nav class="backlinks">
+    {next && <p>Next: <a href={chapterUrl(next.id)}>{next.data.title}</a></p>}
+    {prev && <p>Previous: <a href={chapterUrl(prev.id)}>{prev.data.title}</a></p>}
+  </nav>
+</Book>

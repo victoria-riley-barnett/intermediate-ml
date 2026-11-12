@@ -1,0 +1,360 @@
+<figure data-atom="split-homology-leakage" data-source="admin/diagrams/split-homology-leakage.html" aria-label="One split changed, the held-out score followed: 4,380 gene sequences, random folds against folds cut by homology group" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 658" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="split-homology-leakage--split-title split-homology-leakage--split-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="split-homology-leakage--split-title">One split changed, the held-out score followed: 4,380 gene sequences, random folds against folds cut by homology group</title>
+        <desc id="split-homology-leakage--split-desc">Two panels over the same 4,380 5-mer count rows in seven gene families and the same multinomial naive Bayes classifier, differing only in which rows share a fold. Each panel is a grid of 28 homology-cluster columns, four per family, against seven fold rows; a mark means that cluster contributes rows to that fold's held-out set. In panel A the folds are drawn at random, every one of the 196 cells is filled and no cell holds more than 24% of its cluster, so each cluster sits partly in the fold and overwhelmingly in the training rows: held-out accuracy 0.9998. In panel B whole clusters are moved, 28 of the 196 cells are solid and each holds all of its cluster, so no cluster is ever on both sides: held-out accuracy 0.2978, fold by fold 0.1707, 0.1690, 0.4253, 0.3869, 0.4102, 0.2125, 0.3101; panel A scores 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.9984. Chance is 1/7 = 0.1429. Folds hold 625 to 626 rows in panel A and 587 to 654 in panel B, because the families are uneven; both means are unweighted over the seven folds. Panel B deals whole clusters to folds so that every fold holds four clusters from four different families. The model, the features, the seed and the row count are the same in both panels; the only thing that changed is the fold assignment.</desc>
+        <rect width="1280" height="658" fill="#f5f5f5"/>
+        <text x="120" y="66" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">A &middot; FOLDS DRAWN AT RANDOM</text>
+        <text x="620" y="66" font-size="40" font-family="'Geist Mono', ui-monospace, monospace" fill="#bf4520" text-anchor="end" font-weight="500">1.00</text>
+        <text x="620" y="88" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">MEAN HELD-OUT ACCURACY</text>
+        <text x="120" y="134" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">FOLD</text>
+        <text x="164" y="134" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">GENE FAMILY</text>
+        <text x="512" y="134" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">ACCURACY</text>
+        <text x="185.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">1</text>
+        <text x="234.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">2</text>
+        <text x="283.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">3</text>
+        <text x="332.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">4</text>
+        <text x="381.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">5</text>
+        <text x="430.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">6</text>
+        <text x="479.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">7</text>
+        <rect x="164.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="164.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="164.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="164.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="164.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="164.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="164.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="175.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="175.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="175.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="175.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="175.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="175.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="175.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="186.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="186.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="186.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="186.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="186.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="186.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="186.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="197.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="197.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="197.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="197.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="197.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="197.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="197.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="213.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="213.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="213.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="213.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="213.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="213.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="213.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="224.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="224.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="224.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="224.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="224.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="224.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="224.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="235.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="235.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="235.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="235.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="235.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="235.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="235.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="246.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="246.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="246.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="246.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="246.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="246.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="246.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="262.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="262.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="262.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="262.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="262.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="262.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="262.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="273.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="273.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="273.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="273.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="273.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="273.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="273.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="284.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="284.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="284.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="284.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="284.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="284.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="284.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="295.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="295.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="295.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="295.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="295.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="295.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="295.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="311.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="311.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="311.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="311.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="311.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="311.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="311.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="322.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="322.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="322.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="322.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="322.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="322.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="322.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="333.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="333.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="333.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="333.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="333.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="333.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="333.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="344.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="344.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="344.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="344.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="344.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="344.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="344.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="360.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="360.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="360.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="360.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="360.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="360.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="360.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="371.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="371.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="371.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="371.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="371.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="371.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="371.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="382.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="382.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="382.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="382.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="382.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="382.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="382.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="393.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="393.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="393.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="393.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="393.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="393.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="393.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="409.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="409.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="409.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="409.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="409.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="409.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="409.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="420.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="420.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="420.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="420.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="420.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="420.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="420.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="431.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="431.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="431.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="431.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="431.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="431.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="431.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="442.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="442.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="442.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="442.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="442.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="442.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="442.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="458.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="458.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="458.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="458.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="458.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="458.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="458.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="469.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="469.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="469.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="469.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="469.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="469.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="469.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="480.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="480.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="480.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="480.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="480.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="480.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="480.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="491.0" y="167.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="491.0" y="184.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="491.0" y="201.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="491.0" y="218.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="491.0" y="235.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="491.0" y="252.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <rect x="491.0" y="269.5" width="9" height="13" fill="#d5d5db" stroke="rgba(45,49,66,0.18)" stroke-width="0.8"/>
+        <line x1="164" y1="183.5" x2="500" y2="183.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="156" y="178" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">1</text>
+        <line x1="164" y1="200.5" x2="500" y2="200.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="156" y="195" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">2</text>
+        <line x1="164" y1="217.5" x2="500" y2="217.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="156" y="212" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">3</text>
+        <line x1="164" y1="234.5" x2="500" y2="234.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="156" y="229" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">4</text>
+        <line x1="164" y1="251.5" x2="500" y2="251.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="156" y="246" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">5</text>
+        <line x1="164" y1="268.5" x2="500" y2="268.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="156" y="263" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">6</text>
+        <line x1="164" y1="285.5" x2="500" y2="285.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="156" y="280" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">7</text>
+        <rect x="512.0" y="170.5" width="66.0" height="7" fill="#bf4520" stroke="none"/>
+        <text x="584" y="178" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">1.00</text>
+        <rect x="512.0" y="187.5" width="66.0" height="7" fill="#bf4520" stroke="none"/>
+        <text x="584" y="195" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">1.00</text>
+        <rect x="512.0" y="204.5" width="66.0" height="7" fill="#bf4520" stroke="none"/>
+        <text x="584" y="212" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">1.00</text>
+        <rect x="512.0" y="221.5" width="66.0" height="7" fill="#bf4520" stroke="none"/>
+        <text x="584" y="229" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">1.00</text>
+        <rect x="512.0" y="238.5" width="66.0" height="7" fill="#bf4520" stroke="none"/>
+        <text x="584" y="246" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">1.00</text>
+        <rect x="512.0" y="255.5" width="66.0" height="7" fill="#bf4520" stroke="none"/>
+        <text x="584" y="263" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">1.00</text>
+        <rect x="512.0" y="272.5" width="65.89439999999999" height="7" fill="#bf4520" stroke="none"/>
+        <text x="584" y="280" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">1.00</text>
+        <line x1="521.4" y1="162" x2="521.4" y2="288" stroke="rgba(45,49,66,0.45)" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="120" y="308" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">each cluster smeared over 7 folds: on both sides of every wall</text>
+        <text x="660" y="66" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" font-weight="500" letter-spacing="0.14em">B &middot; FOLDS CUT BY HOMOLOGY GROUP</text>
+        <text x="1160" y="66" font-size="40" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="end" font-weight="500">0.30</text>
+        <text x="1160" y="88" font-size="8.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end" letter-spacing="0.14em">MEAN HELD-OUT ACCURACY</text>
+        <text x="660" y="134" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">FOLD</text>
+        <text x="704" y="134" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">GENE FAMILY</text>
+        <text x="1052" y="134" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" letter-spacing="0.14em">ACCURACY</text>
+        <text x="725.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">1</text>
+        <text x="774.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">2</text>
+        <text x="823.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">3</text>
+        <text x="872.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">4</text>
+        <text x="921.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">5</text>
+        <text x="970.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">6</text>
+        <text x="1019.0" y="152" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle">7</text>
+        <rect x="704.0" y="167.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="715.0" y="184.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="726.0" y="201.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="737.0" y="218.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="753.0" y="184.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="764.0" y="201.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="775.0" y="218.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="786.0" y="235.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="802.0" y="201.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="813.0" y="218.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="824.0" y="235.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="835.0" y="252.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="851.0" y="218.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="862.0" y="235.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="873.0" y="252.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="884.0" y="269.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="900.0" y="235.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="911.0" y="252.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="922.0" y="269.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="933.0" y="167.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="949.0" y="252.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="960.0" y="269.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="971.0" y="167.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="982.0" y="184.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="998.0" y="269.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="1009.0" y="167.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="1020.0" y="184.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <rect x="1031.0" y="201.5" width="9" height="13" fill="#2d3142" stroke="none"/>
+        <line x1="704" y1="183.5" x2="1040" y2="183.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="696" y="178" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">1</text>
+        <line x1="704" y1="200.5" x2="1040" y2="200.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="696" y="195" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">2</text>
+        <line x1="704" y1="217.5" x2="1040" y2="217.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="696" y="212" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">3</text>
+        <line x1="704" y1="234.5" x2="1040" y2="234.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="696" y="229" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">4</text>
+        <line x1="704" y1="251.5" x2="1040" y2="251.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="696" y="246" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">5</text>
+        <line x1="704" y1="268.5" x2="1040" y2="268.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="696" y="263" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">6</text>
+        <line x1="704" y1="285.5" x2="1040" y2="285.5" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="696" y="280" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end">7</text>
+        <rect x="1052.0" y="170.5" width="11.26829268292683" height="7" fill="#2d3142" stroke="none"/>
+        <text x="1124" y="178" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">0.17</text>
+        <rect x="1052.0" y="187.5" width="11.154929577464788" height="7" fill="#2d3142" stroke="none"/>
+        <text x="1124" y="195" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">0.17</text>
+        <rect x="1052.0" y="204.5" width="28.06779661016949" height="7" fill="#2d3142" stroke="none"/>
+        <text x="1124" y="212" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">0.43</text>
+        <rect x="1052.0" y="221.5" width="25.532110091743117" height="7" fill="#2d3142" stroke="none"/>
+        <text x="1124" y="229" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">0.39</text>
+        <rect x="1052.0" y="238.5" width="27.071542130365657" height="7" fill="#2d3142" stroke="none"/>
+        <text x="1124" y="246" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">0.41</text>
+        <rect x="1052.0" y="255.5" width="14.026359143327841" height="7" fill="#2d3142" stroke="none"/>
+        <text x="1124" y="263" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">0.21</text>
+        <rect x="1052.0" y="272.5" width="20.4633730834753" height="7" fill="#2d3142" stroke="none"/>
+        <text x="1124" y="280" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">0.31</text>
+        <line x1="1061.4" y1="162" x2="1061.4" y2="288" stroke="rgba(45,49,66,0.45)" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="660" y="308" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75">each cluster whole in 1 fold: never on both sides</text>
+        <line x1="120" y1="364" x2="1160" y2="364" stroke="rgba(45,49,66,0.2)" stroke-width="1"/>
+        <text x="120" y="388" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MODEL</text>
+        <text x="208" y="388" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">n = 4,380 synthetic sequences, identical in both panels &#183; 7 families of 560&#8211;700 &#183; 28 clusters of 106&#8211;217 &#183; 1024 5-mer counts &#183; NB alpha = 1 &#183; seed 7</text>
+        <line x1="120" y1="412" x2="1160" y2="412" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="436" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">MARKS</text>
+        <rect x="206.0" y="426.0" width="9" height="12" fill="#bf4520" stroke="none"/>
+        <text x="228" y="437" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the score the leak produced</text>
+        <rect x="405.2" y="426.0" width="9" height="12" fill="#2d3142" stroke="none"/>
+        <text x="427.2" y="437" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">a whole cluster in that fold</text>
+        <rect x="610.0" y="426.0" width="9" height="12" fill="#d5d5db" stroke="none"/>
+        <text x="632.0" y="437" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">part of it in that fold</text>
+        <rect x="786.8" y="433.0" width="26" height="7" fill="#2d3142" stroke="none"/>
+        <text x="826.8" y="437" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">accuracy on that fold</text>
+        <line x1="970.4" y1="424" x2="970.4" y2="445" stroke="rgba(45,49,66,0.45)" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="992.4" y="437" font-size="10.5" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">chance, 1/7</text>
+        <line x1="120" y1="460" x2="1160" y2="460" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="484" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">SYMBOLS</text>
+        <text x="120" y="510" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">family</text>
+        <text x="190" y="510" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">one of the 7 gene labels</text>
+        <text x="470" y="510" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cluster</text>
+        <text x="540" y="510" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">rows sharing one ancestor</text>
+        <text x="120" y="534" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">fold</text>
+        <text x="190" y="534" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">the rows held out together</text>
+        <text x="470" y="534" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">accuracy</text>
+        <text x="540" y="534" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">correct &#247; rows in the fold</text>
+        <text x="120" y="558" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">1/7</text>
+        <text x="190" y="558" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">chance, 0.1429</text>
+        <text x="470" y="558" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">n</text>
+        <text x="540" y="558" font-size="11" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">4,380 rows, 256 windows each</text>
+        <line x1="120" y1="582" x2="720" y2="582" stroke="rgba(45,49,66,0.1)" stroke-width="1"/>
+        <text x="120" y="606" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">a cluster in more than one fold lies on both sides of the wall; the score is then recall</text>
+        <text x="120" y="622" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580">synthetic families are simpler than real homology: read the direction, not a factor</text>
+        <line x1="760" y1="476" x2="760" y2="570" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="792" y="484" font-size="9.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" font-weight="500" letter-spacing="0.14em">SCIKIT-LEARN</text>
+        <text x="792" y="508" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cv = GroupKFold(7)</text>
+        <text x="1002" y="508" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># one fold per cluster</text>
+        <text x="792" y="523" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cv.split(X, y, groups=cl)</text>
+        <text x="1002" y="523" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># cl = the cluster</text>
+        <text x="792" y="538" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">MultinomialNB(alpha=1)</text>
+        <text x="1002" y="538" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># the one model</text>
+        <text x="792" y="553" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142">cross_val_score(m, X, y, cv)</text>
+        <text x="1002" y="553" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"># 1.00 vs 0.30</text>
+      </svg>
+
+</figure>

@@ -1,0 +1,365 @@
+; The primary view: the source as ONE document, and the document is an env.
+; The root is an outline with an env (the ground its parent), each entry an
+; outline with an env of its own, and what an entry holds is what that env
+; binds: a scope its entries, a closure its body forms. A row is opened by
+; applying it, as a closure is, so nothing is flattened; a row is made only
+; when asked for (pm-entry). What is drawn is a window walked from `top`,
+; so a key costs the screen and the depth, never the size of the source.
+; A PATH is names from the root, the ground being (^). A row is
+; (path kind depth value level open); a closure's entries are its body forms.
+; A STATE is (flips cursor top): everything OPEN but the ground, a flip the
+; path turned the other way; (cdr root), the ground, is a row when a scope.
+;
+;   (primary-state [root])          nothing flipped, the cursor on root's first row; no root: #f
+;   (primary-rows root state)       the first 1000 rows as (path kind depth), from the top: for tests
+;   (primary-html root state)       div.primary, pm-window rows from top, each row.row [cursor] [open] [shadowed],
+;                                   data-act="at:<index from top>", data-path, data-depth, data-dist (fade, cap 9), title=the hider
+;   (primary-key root state key)    a key is a name in `keymap` (099-keys.vau); (primary-at ... i) the cursor on row i
+;   (primary-scroll root state n)   the window a page down (n > 0, if there is more) or up (n < 0); the cursor stays
+;   (primary-find root state name)  unfold the ancestors of the first definition of name (find-def, 095); none: unchanged
+;   (cursor-path state) (cursor-kind root state) (cursor-label root state)  "/lang/core" or "/ground": the scope the prompt is in
+;   (cursor-env root state)         where the prompt evaluates: a scope row its scope, a closure row the env it was MADE in, else that of whatever holds it
+;   (primary-eval-form root state form)  evaluated IN (cursor-env ...) itself, not a fork. 098 uses entries-at, env-at, pm-resolve
+;
+; SHADOWING. A row is shadowed when a scope NEARER the cursor on the chain
+; (its scope, its ancestors, the ground) binds the same name; the nearest hider wins.
+($define! pm-mark ($quote ^))
+($define! pm-nth
+  ($lambda (l i)
+    ($if (null? l) () ($if (= i 0) (car l) (pm-nth (cdr l) (- i 1))))))
+($define! pm-len ($lambda (l) ($if (null? l) 0 (+ 1 (pm-len (cdr l))))))
+($define! pm-take
+  ($lambda (l n)
+    ($if (null? l)
+      ()
+      ($if (= n 0) () (cons (car l) (pm-take (cdr l) (- n 1)))))))
+($define! pm-init
+  ($lambda (l)
+    ($if (null? (cdr l)) () (cons (car l) (pm-init (cdr l))))))
+($define! pm-snoc
+  ($lambda (l x)
+    ($if (null? l) (list x) (cons (car l) (pm-snoc (cdr l) x)))))
+($define! pm-imap
+  ($lambda (f l i)
+    ($if (null? l) () (cons (f i (car l)) (pm-imap f (cdr l) (+ i 1))))))
+($define! pm-name
+  ($lambda (n) ($if (number? n) (number->string n) (symbol->string n))))
+($define! pm-gpath?
+  ($lambda (p) ($if (null? p) #f (eq? (car p) pm-mark))))
+($define! pm-path-eq
+  ($lambda (a b)
+    ($if (null? a)
+      (null? b)
+      ($if (null? b)
+        #f
+        ($if (eq? (car a) (car b)) (pm-path-eq (cdr a) (cdr b)) #f)))))
+($define! pm-has-path
+  ($lambda (ps p)
+    ($if (null? ps)
+      #f
+      ($if (pm-path-eq (car ps) p) #t (pm-has-path (cdr ps) p)))))
+($define! pm-add-path
+  ($lambda (ps p) ($if (pm-has-path ps p) ps (cons p ps))))
+($define! pm-del-path
+  ($lambda (ps p)
+    ($if (null? ps)
+      ()
+      ($if (pm-path-eq (car ps) p)
+        (pm-del-path (cdr ps) p)
+        (cons (car ps) (pm-del-path (cdr ps) p))))))
+
+; ---- environments. A closure is (%c op ptree eparam body senv), a $lambda (%c ap <that>)
+($define! pm-op
+  ($lambda (c)
+    ($if (eq? (car (cdr c)) ($quote ap)) (pm-op (car (cdr (cdr c)))) c)))
+($define! pm-made-in ($lambda (c) (pm-nth (pm-op c) 5)))
+($define! pm-step
+  ($lambda (v name) ($if (scope? v) (value-in (cdr (car v)) name) ())))
+($define! pm-resolve*
+  ($lambda (v path)
+    ($if (null? path) v (pm-resolve* (pm-step v (car path)) (cdr path)))))
+($define! pm-resolve
+  ($lambda (root path)
+    ($if (pm-gpath? path)
+      (pm-resolve* (cdr root) (cdr path))
+      (pm-resolve* root path))))
+($define! pm-form
+  ($lambda (c i)
+    (($lambda (src) ($if (null? src) () (pm-nth (cadr src) i)))
+     (op-source c))))
+($define! pm-env-from
+  ($lambda (env path)
+    ($if (null? path)
+      env
+      (($lambda (v)
+         ($cond ((scope? v) (pm-env-from v (cdr path)))
+           ((tagged-c? v) (pm-made-in v))
+           (#t env)))
+       (pm-step env (car path))))))
+($define! env-at
+  ($lambda (root path)
+    ($if (pm-gpath? path)
+      (pm-env-from (cdr root) (cdr path))
+      (pm-env-from root path))))
+($define! pm-form-list
+  ($lambda (c)
+    (($lambda (src) ($if (null? src) () (cadr src))) (op-source c))))
+; Siblings are bare (name . value) pairs: a kind is worked out for the one entry asked about, not its whole scope.
+($define! pm-fpairs
+  ($lambda (fs i)
+    ($if (null? fs)
+      ()
+      (cons (cons i (car fs)) (pm-fpairs (cdr fs) (+ i 1))))))
+($define! pm-bs
+  ($lambda (v)
+    ($cond ((scope? v) (rev (cdr (car v))))
+      ((tagged-c? v) (pm-fpairs (pm-form-list v) 0))
+      (#t ()))))
+($define! pm-ent-of
+  ($lambda (pv b)
+    ($cond ((null? pv)
+            (list (car b)
+              ($if (eq? (car b) pm-mark)
+                ($quote ground)
+                (kind-of (cdr b)))
+              (cdr b)))
+      ((tagged-c? pv) (list (car b) ($quote form) (cdr b)))
+      (#t (list (car b) (kind-of (cdr b)) (cdr b))))))
+($define! pm-kids
+  ($lambda (v) (map ($lambda (b) (pm-ent-of v b)) (pm-bs v))))
+($define! entries-at
+  ($lambda (root path)
+    (map ($lambda (k) (list (car k) (cadr k)))
+      (pm-kids (pm-resolve root path)))))
+($define! pm-expandable?
+  ($lambda (kind)
+    ($or (eq? kind ($quote scope))
+      ($or (eq? kind ($quote closure)) (eq? kind ($quote ground))))))
+
+; ---- the chain of the cursor's scope, nearest first: (label path scope) ... then the ground
+($define! pm-label
+  ($lambda (p)
+    (string-append ($if (pm-gpath? p) "/ground" "/lang")
+      (join (map ($lambda (n) (string-append "/" (pm-name n)))
+              ($if (pm-gpath? p) (cdr p) p))))))
+($define! pm-chain-up
+  ($lambda (v p rest acc)
+    (($lambda (acc2)
+       ($if (null? rest)
+         acc2
+         (($lambda (nv)
+            ($if (scope? nv)
+              (pm-chain-up nv (pm-snoc p (car rest)) (cdr rest) acc2)
+              acc2))
+          (pm-step v (car rest)))))
+     ($if (scope? v) (cons (list (pm-label p) p v) acc) acc))))
+($define! pm-chain
+  ($lambda (root cpath)
+    ($if (pm-gpath? cpath)
+      (pm-chain-up (cdr root) (list pm-mark) (cdr cpath) ())
+      (pm-chain-up root
+        ()
+        cpath
+        ($if (scope? (cdr root))
+          (list (list "/ground" (list pm-mark) (cdr root)))
+          ())))))
+; the chain scopes nearer than the one at spath; () if spath is not on it
+($define! pm-before
+  ($lambda (chain spath acc)
+    ($if (null? chain)
+      ()
+      ($if (pm-path-eq (cadr (car chain)) spath)
+        (rev acc)
+        (pm-before (cdr chain) spath (cons (car chain) acc))))))
+($define! pm-hider
+  ($lambda (hs name)
+    ($if (null? hs)
+      ""
+      ($if (oh-has (cdr (car (caddr (car hs)))) name)
+        (car (car hs))
+        (pm-hider (cdr hs) name)))))
+
+; ---- a row. The top level is the ground, then the root's entries; a path of one name is on it.
+($define! pm-top
+  ($lambda (root)
+    (($lambda (g)
+       ($if (scope? g)
+         (cons (cons pm-mark g) (pm-bs root))
+         (pm-bs root)))
+     (cdr root))))
+($define! pm-sibs
+  ($lambda (root path)
+    ($if (null? (cdr path))
+      (pm-top root)
+      (pm-bs (pm-resolve root (pm-init path))))))
+($define! pm-by-name
+  ($lambda (es name)
+    ($if (null? es)
+      ()
+      ($if (eq? (car (car es)) name)
+        (car es)
+        (pm-by-name (cdr es) name)))))
+($define! pm-after
+  ($lambda (es name)
+    ($if (null? es)
+      ()
+      ($if (eq? (car (car es)) name) (cdr es) (pm-after (cdr es) name)))))
+($define! pm-before-of
+  ($lambda (es name prev)
+    ($if (null? es)
+      ()
+      ($if (eq? (car (car es)) name)
+        prev
+        (pm-before-of (cdr es) name (car es))))))
+($define! pm-entry
+  ($lambda (root path)
+    ($if (null? path)
+      ()
+      (($lambda (parent)
+         (($lambda (b) ($if (null? b) () (pm-ent-of parent b)))
+          (pm-by-name ($if (null? (cdr path))
+                        (pm-top root)
+                        (pm-bs parent))
+            (last path))))
+       ($if (null? (cdr path)) () (pm-resolve root (pm-init path)))))))
+($define! pm-level
+  ($lambda (path)
+    ($if (pm-gpath? path)
+      (($lambda (n) ($if (< n -1) -1 n)) (- (pm-len path) 3))
+      (- (pm-len path) 1))))
+; Everything is open but the ground until `hh` folds the tree; then flips are the paths explicitly opened.
+($define! pm-fold-all-mark (list ($quote %fold-all)))
+($define! pm-folded-all?
+  ($lambda (st) (pm-has-path (car st) pm-fold-all-mark)))
+($define! pm-open-path?
+  ($lambda (st path)
+    ($if (pm-folded-all? st)
+      (pm-has-path (car st) path)
+      ($if (pm-has-path (car st) path)
+        (pm-gpath? path)
+        (not (pm-gpath? path))))))
+($define! pm-flip
+  ($lambda (st path)
+    (list (($if (pm-has-path (car st) path) pm-del-path pm-add-path)
+           (car st)
+           path)
+      (cadr st)
+      (caddr st))))
+($define! pm-ensure
+  ($lambda (st path) ($if (pm-open-path? st path) st (pm-flip st path))))
+($define! pm-mk
+  ($lambda (st path ent)
+    (list path
+      (cadr ent)
+      (- (pm-len path) 1)
+      (caddr ent)
+      (pm-level path)
+      ($and (pm-expandable? (cadr ent)) (pm-open-path? st path)))))
+($define! pm-f3 ($lambda (r) (car (cdr (cdr (cdr r))))))
+($define! pm-f4 ($lambda (r) (pm-f3 (cdr r))))
+($define! pm-f5 ($lambda (r) (pm-f3 (cdr (cdr r)))))
+
+; ---- moving: all local. next is the first entry of an open row, else the next sibling, else the parent's next; prev the other way.
+($define! pm-down
+  ($lambda (st path ent)
+    (($lambda (ks) ($if (null? ks) () (pm-snoc path (car (car ks)))))
+     ($if (pm-open-path? st path)
+       ($if (pm-expandable? (cadr ent)) (pm-bs (caddr ent)) ())
+       ()))))
+($define! pm-skip
+  ($lambda (root path)
+    (($lambda (nx)
+       ($if (null? nx)
+         ($if (null? (cdr path)) () (pm-skip root (pm-init path)))
+         (pm-snoc (pm-init path) (car (car nx)))))
+     (pm-after (pm-sibs root path) (last path)))))
+($define! pm-next
+  ($lambda (root st path)
+    ($if (null? path)
+      ()
+      (($lambda (d) ($if (null? d) (pm-skip root path) d))
+       (pm-down st path (pm-entry root path))))))
+($define! pm-deepest
+  ($lambda (root st path)
+    (($lambda (ks)
+       ($if (null? ks)
+         path
+         (pm-deepest root st (pm-snoc path (car (last ks))))))
+     (($lambda (ent)
+        ($if (pm-open-path? st path)
+          ($if (pm-expandable? (cadr ent)) (pm-bs (caddr ent)) ())
+          ()))
+      (pm-entry root path)))))
+($define! pm-prev
+  ($lambda (root st path)
+    ($if (null? path)
+      ()
+      (($lambda (pe)
+         ($if (null? pe)
+           ($if (null? (cdr path)) () (pm-init path))
+           (pm-deepest root st (pm-snoc (pm-init path) (car pe)))))
+       (pm-before-of (pm-sibs root path) (last path) ())))))
+($define! pm-walk
+  ($lambda (step root st path n)
+    ($if (= n 0)
+      path
+      (($lambda (p)
+         ($if (null? p) path (pm-walk step root st p (- n 1))))
+       (step root st path)))))
+($define! pm-forward
+  ($lambda (root st path n) (pm-walk pm-next root st path n)))
+($define! pm-back
+  ($lambda (root st path n) (pm-walk pm-prev root st path n)))
+; A window is read as a zipper: each open level a frame (path parent-value
+; siblings-to-come), nearest first, so the next row is a step, not a lookup.
+; Resolving every prefix from the root instead costs the square of the depth,
+; and a window in a deep document asks for it on every key.
+($define! pm-zframes
+  ($lambda (root path)
+    ($if (null? path)
+      ()
+      (pm-zframes* (list (car path)) (pm-resolve root (list (car path))) (cdr path)
+        (list (list () () (pm-after (pm-top root) (car path))))))))
+($define! pm-zframes*
+  ($lambda (pre pv rest acc)          ; acc: frames so far, the nearest level first
+    ($if (null? rest)
+      acc
+      (($lambda (name)
+         (pm-zframes* (pm-snoc pre name) (pm-step pv name) (cdr rest)
+           (cons (list pre pv (pm-after (pm-bs pv) name)) acc)))
+       (car rest)))))
+($define! pm-zpop
+  ($lambda (frames)
+    ($if (null? frames)
+      ()
+      (($lambda (f)
+         ($if (null? (caddr f))
+           (pm-zpop (cdr frames))
+           (list (pm-snoc (car f) (car (car (caddr f))))
+             (pm-ent-of (cadr f) (car (caddr f)))
+             (cons (list (car f) (cadr f) (cdr (caddr f))) (cdr frames)))))
+       (car frames)))))
+($define! pm-zstep
+  ($lambda (st path ent frames)
+    (($lambda (ks)
+       ($if (null? ks)
+         (pm-zpop frames)
+         (list (pm-snoc path (car (car ks)))
+           (pm-ent-of (caddr ent) (car ks))
+           (cons (list path (caddr ent) (cdr ks)) frames))))
+     ($if ($and (pm-expandable? (cadr ent)) (pm-open-path? st path))
+       (pm-bs (caddr ent))
+       ()))))
+($define! pm-zrows
+  ($lambda (st z n)
+    ($if ($or (null? z) (= n 0))
+      ()
+      (cons (pm-mk st (car z) (cadr z))
+        (pm-zrows st (pm-zstep st (car z) (cadr z) (caddr z)) (- n 1))))))
+($define! pm-rows-from
+  ($lambda (root st path n)
+    (($lambda (ent)
+       ($if (null? ent)
+         ()
+         (pm-zrows st (list path ent (pm-zframes root path)) n)))
+     ($if (null? path) () (pm-entry root path)))))

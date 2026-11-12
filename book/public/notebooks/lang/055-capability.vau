@@ -1,0 +1,60 @@
+; capabilities: what a run was allowed to touch, against what ask (050) saw
+; it touch. A capability is a name the page holds: a form handed a page and
+; told which names it may read and write is held to it by the run, not by a
+; type. The ground's names are always readable; a page name, a write to any
+; frame, a hole or a whole-frame read must be declared by name, or by %all.
+;
+; HARD, EAGER, SHALLOW in Shutt's sense: a violating run is refused, decided
+; from the run, against a list of names; a reach inside the contour stands.
+;
+;   (capability-failures run reads writes)  run is ask's answer, reads and
+;                          writes the names allowed; () or failures, each a
+;                          (problem contract "capability" (kind name) origin)
+;   (ask-within form env reads writes [budget])  ask, then (value failures),
+;                          plus (halt run) when the run did not finish
+;
+; Needs ask (050) and contract (035).
+
+(def (cap-fail kind name origin)
+  (list ($quote problem)
+    ($quote contract)
+    "capability"
+    (list kind name)
+    origin))
+(def (cap-ok? name origin allowed)
+  (if (eq? origin ($quote ground)) #t (named? name allowed)))
+(def (cap-scan kind entries allowed)
+  (if (null? entries)
+    ()
+    (with rest (cap-scan kind (cdr entries) allowed)
+      (if (cap-ok? (car (car entries)) (cdr (car entries)) allowed)
+        rest
+        (cons (cap-fail kind (car (car entries)) (cdr (car entries)))
+          rest)))))
+; a write is allowed by name whatever frame it lands in, so the ground is no
+; exception: it is the language, and nothing rewrites it unasked
+(def (cap-scan-writes entries allowed)
+  (if (null? entries)
+    ()
+    (with rest (cap-scan-writes (cdr entries) allowed)
+      (if (named? (car (car entries)) allowed)
+        rest
+        (cons (cap-fail ($quote write)
+                (car (car entries))
+                (cdr (car entries)))
+          rest)))))
+(def (append2 a b) (if (null? a) b (cons (car a) (append2 (cdr a) b))))
+
+(def (capability-failures run reads writes)
+  (append2 (cap-scan ($quote read) (field run ($quote reads)) reads)
+    (cap-scan-writes (field run ($quote writes)) writes)))
+
+(def (ask-within form env reads writes . budget)
+  (with run (if (null? budget) (ask form env) (ask form env (car budget)))
+    (list (field run ($quote value))
+      (append2 (capability-failures run reads writes)
+        (if (null? (field run ($quote halt)))
+          ()
+          (list (cap-fail ($quote halt)
+                  ($quote run)
+                  ($quote unfinished))))))))

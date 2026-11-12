@@ -1,0 +1,469 @@
+#+title: One encoder block, small enough to read
+#+course: CSC 411 · machine learning architectures · slide XI
+
+Every number in this block has a name, so each one is something you can say out loud.
+
+* One encoder block (pre-norm) :card:
+
+** The block
+
+#+begin_diagram :title encoder block (pre-norm)
+box x | x | io | embed | embed
+box ln1 | LN | g | norm | norm:1
+box mha | Multi-Head Attention | w+ | attention | score weights head attn | | Wq-1 Wk-1 Wv-1 Wq-2 Wk-2 Wv-2 Wo
+box add1 | ⊕ | add | norm | resid:1
+box ln2 | LN | g | norm | norm:2
+box ffn | Feed Forward | w | ffn | ffn | | W1 W2
+box add2 | ⊕ | add | norm | resid:2
+box out | x2 | io | encoder | resid:2
+flow x ln1 mha add1 ln2 ffn add2 out
+skip x add1 x
+skip add1 add2 x1
+#+end_diagram
+
+MODEL  T = 7 positions · d = 11 named features · 2 heads · d_h = 2 · B = 1. Pre-norm, as on the slide and as PyTorch's =norm_first=True=: each sub-layer reads LN of the stream, and its result is added back to the stream.
+
+#+attr: :beside
+| term          | equation                                   |
+|---------------+--------------------------------------------|
+| layer norm    | LN(x) = (x − μ) / σ · γ + β, with γ = 1, β = 0 |
+| attention     | x1 = x + MHA(LN(x))                        |
+| feed-forward  | x2 = x1 + FFN(LN(x1))                      |
+| FFN           | FFN(x) = ReLU(x W1 + b1) W2 + b2           |
+| one head      | Q = X W_Q, K = X W_K, V = X W_V; A = softmax over j (Q Kᵀ / √d_h); Y = A V |
+
+#+begin_src python :caption the same block in PyTorch
+import torch, torch.nn.functional as F
+
+def block(x, Wq, Wk, Wv, Wo, W1, b1, W2, b2):
+    h = F.layer_norm(x, x.shape[-1:])          # LN, gamma = 1, beta = 0
+    heads = [F.scaled_dot_product_attention(h @ Wq[i], h @ Wk[i], h @ Wv[i],
+                                            scale=1 / 2**0.5)   # d_h = 2
+             for i in range(2)]
+    x1 = x + torch.cat(heads, -1) @ Wo         # x1 = x + MHA(LN(x))
+    h1 = F.layer_norm(x1, x1.shape[-1:])
+    return x1 + torch.relu(h1 @ W1 + b1) @ W2 + b2   # x2 = x1 + FFN(LN(x1))
+
+# nn.TransformerEncoderLayer(d_model, nhead, dim_feedforward, norm_first=True)
+# is this same order; it ties d_h to d_model / nhead, which named features can't.
+#+end_src
+
+| symbol | in plain words |
+|--------+----------------|
+| x      | the stream: one row of 11 named features per word |
+| LN(x)  | layer norm: each row shifted to mean 0 and scaled to spread 1 |
+| i, j   | the word asking (query position) and the word asked (key position) |
+| Q      | query; LN(x) W_Q; what i looks for |
+| K      | key; LN(x) W_K; what j offers |
+| V      | value; LN(x) W_V; what j passes on |
+| A      | weights; softmax over j of Q Kᵀ / √d_h; each row sums to 1 |
+| x1     | the stream after attention: x plus what the heads wrote, through W_O |
+| x2     | the stream after the feed-forward: the block's output |
+| d, d_h | 11 features in the stream; each head is 2 wide |
+| T      | 7 positions, one per word |
+
+** The sentence :data:
+
+Seven words. Every word gets a row of named features.
+
+#+name: data
+#+begin_src vau
+(def features ($quote (animate noun verb pronoun state function acts described subject pos-sin pos-cos)))
+(def tokens ($quote (the cat sat because it was tired)))
+(def n 7)
+(def dk 2)
+(def heads ($quote (0 1)))
+#+end_src
+
+#+begin_view tokens
+#+end_view
+
+What each word is before it reads its neighbours. Edit a cell and the next number the run produces will use it.
+
+#+name: embedding
+| word    | animate | noun | verb | pronoun | state | function | acts | described | subject | pos-sin | pos-cos |
+|---------+---------+------+------+---------+-------+----------+------+-----------+---------+---------+---------|
+| the     | 0       | 0    | 0    | 0       | 0     | 1        | 0    | 0         | 0       | 0       | 0       |
+| cat     | 1       | 1    | 0    | 0       | 0     | 0        | 0    | 0         | 0       | 0       | 0       |
+| sat     | 0       | 0    | 1    | 0       | 0     | 0        | 0    | 0         | 0       | 0       | 0       |
+| because | 0       | 0    | 0    | 0       | 0     | 1        | 0    | 0         | 0       | 0       | 0       |
+| it      | 0       | 1    | 0    | 1       | 0     | 0        | 0    | 0         | 0       | 0       | 0       |
+| was     | 0       | 0    | 0.5  | 0       | 0     | 0.5      | 0    | 0         | 0       | 0       | 0       |
+| tired   | 0       | 0    | 0    | 0       | 1     | 0        | 0    | 0         | 0       | 0       | 0       |
+
+A small position signal, a quarter of sin and cos of the word's place, written down to three places.
+
+#+attr: :folded
+#+name: positions
+| i | pos-sin | pos-cos |
+|---+---------+---------|
+| 0 | 0       | 0.25    |
+| 1 | 0.21    | 0.135   |
+| 2 | 0.227   | -0.104  |
+| 3 | 0.035   | -0.247  |
+| 4 | -0.189  | -0.163  |
+| 5 | -0.24   | 0.071   |
+| 6 | -0.07   | 0.24    |
+
+** Arithmetic :step-over:
+
+The arithmetic the model is made of. The numbers here are exact (whole numbers and fractions), so =fx= rounds to three places, and =exp= and =sqrt= are written out: a Taylor series and Newton's method. The step keys pass over this part.
+
+#+begin_src vau :step over :folded
+(def (fx x) (/ (round (* x 1000)) 1000))
+(def (fx6 x) (/ (round (* x 1000000)) 1000000))
+
+(def (at xs i) (if (= i 0) (car xs) (at (cdr xs) (- i 1))))
+(def (range n) (range-from 0 n))
+(def (range-from i n) (if (< i n) (cons i (range-from (+ i 1) n)) ()))
+(def (sum xs) (if (null? xs) 0 (+ (car xs) (sum (cdr xs)))))
+(def (zeros k) (if (= k 0) () (cons 0 (zeros (- k 1)))))
+(def (index-of xs x) (if (equal? (car xs) x) 0 (+ 1 (index-of (cdr xs) x))))
+(def (argmax xs) (index-of xs (apply max xs)))
+
+; the row of a table whose first element is key, or () when there is none
+(def (row-of table key)
+  (if (null? table) ()
+      (equal? (car (car table)) key) (car table)
+      (row-of (cdr table) key)))
+
+; the number a vector holds for a named feature
+(def (feat x f) (at x (index-of features f)))
+
+; the four weight tables of head h, h = 0 or 1
+(def (Wq h) (at (list Wq-1 Wq-2) h))
+(def (Wk h) (at (list Wk-1 Wk-2) h))
+(def (Wv h) (at (list Wv-1 Wv-2) h))
+
+; the 11-vector for a word, and the position's two numbers padded out to 11
+(def (E w) (cdr (row-of embedding w)))
+(def (P i) (append (zeros 9) (cdr (row-of positions i))))
+
+; exp, for x <= 0: halve until |y| <= 1/2, Taylor series, square back up
+(def (exp x)
+  (if (< x -20) 0 (exp-halved (fx6 x) 0)))
+(def (exp-halved y halvings)
+  (if (> (abs y) 1/2)
+      (exp-halved (/ y 2) (+ halvings 1))
+      (exp-squared (exp-taylor y 1 1 1) halvings)))
+(def (exp-taylor y k term acc)
+  (if (> k 8) acc
+      ($let* ((t (fx6 (/ (* term y) k))))
+        (exp-taylor y (+ k 1) t (+ acc t)))))
+(def (exp-squared e halvings)
+  (if (= halvings 0) (fx6 e) (exp-squared (fx6 (* e e)) (- halvings 1))))
+
+; sqrt by Newton's method on rationals, rounded each step
+(def (sqrt a)
+  (if (> a 0) (sqrt-newton a (/ (+ a 1) 2) 12) 0))
+(def (sqrt-newton a x k)
+  (if (= k 0) x
+      (sqrt-newton a (fx6 (/ (+ x (/ a x)) 2)) (- k 1))))
+
+; the sum, over the rows of a sparse input-keyed table, of (x[feature] * weights)
+(def (project x W)
+  (map fx (project-rows x W (zeros (- (length (car W)) 1)))))
+(def (project-rows x W acc)
+  (if (null? W) acc
+      (project-rows x (cdr W)
+        (map + acc (map (fn (w) (* (feat x (car (car W))) w)) (cdr (car W)))))))
+
+(def (dot a b) (fx (sum (map * a b))))
+
+(def (softmax xs)
+  ($let* ((m (apply max xs))
+          (es (map (fn (v) (exp (fx6 (- v m)))) xs))
+          (z (sum es)))
+    (map (fn (e) (fx (/ e z))) es)))
+
+; sum of w[j] * vs[j]
+(def (weighted-sum w vs)
+  (map fx (weighted-rows w vs (zeros (length (car vs))))))
+(def (weighted-rows w vs acc)
+  (if (null? w) acc
+      (weighted-rows (cdr w) (cdr vs)
+        (map + acc (map (fn (v) (* (car w) v)) (car vs))))))
+
+; the 4 head outputs, concatenated, through Wo: one number per feature
+(def (out-proj hs)
+  ($let* ((cat (apply append hs)))
+    (map (fn (f)
+           (fx (sum (map * cat (cdr-or-zeros (row-of Wo f) (length cat))))))
+         features)))
+(def (cdr-or-zeros row k) (if (null? row) (zeros k) (cdr row)))
+
+(def (layer-norm x)
+  ($let* ((d (length x))
+          (mu (/ (sum x) d))
+          (dev (map (fn (v) (fx (- v mu))) x))
+          (var (fx6 (+ (/ (sum (map (fn (v) (fx6 (* v v))) dev)) d) 1/100000)))
+          (sd (sqrt var)))
+    (map (fn (v) (fx (/ v sd))) dev)))
+
+; hidden = relu(x W1 + b1), out = hidden W2 + b2; answers (hidden out)
+(def (mlp W1 b1 W2 b2 x)
+  ($let* ((pre (map + (project x W1) b1))
+          (hidden (map (fn (v) (if (> v 0) v 0)) pre)))
+    (list hidden
+          (map + b2
+               (map (fn (f)
+                      (fx (sum (map * hidden (cdr-or-zeros (row-of W2 f) (length hidden))))))
+                    features)))))
+
+(def (vadd x y) (map + x y))
+
+; a trace event that is also a place to stop: (note kind info v) asks the host to go on with v, and answers what the
+; host gives back. The host gives v back -- unless you fork there with another value.
+(def (note kind info v) (yield (list ($quote %note) kind info v)))
+#+end_src
+
+** Embed :stage-0:
+
+A word's row is its embedding plus its position signal in the last two columns.
+
+#+name: embed
+#+begin_src vau
+(def (embed i)
+  ($let* ((v (vadd (E (at tokens i)) (P i))))
+    (note ($quote embed) (list i v) v)))
+#+end_src
+
+#+begin_view matrix :of embed
+x: one row per word
+#+end_view
+
+** LN, then multi-head attention :stage-1:
+
+Each sub-layer reads the stream through a layer norm: every row shifted to mean 0 and scaled to spread 1. Zero features become slightly negative, so the weights below are smaller than they would be on raw rows.
+
+#+name: norm
+#+begin_src vau
+; PRE-norm: each sub-layer reads LN(x) and its result is ADDED to the un-normalised x.
+; which = 1 before attention, 2 before the feed-forward; i = the token
+(def (pre-norm which i x)
+  ($let* ((v (layer-norm x)))
+    (note ($quote norm) (list which i v) v)))
+
+; the residual stream after a sub-layer: x + sublayer(LN(x)); which = 1 is x1 (after attention), 2 is x2 (after the feed-forward)
+(def (add-resid which i x y)
+  ($let* ((v (vadd x y)))
+    (note ($quote resid) (list which i v) v)))
+#+end_src
+
+#+begin_view matrix :of norm :which 1
+LN(x): what attention reads
+#+end_view
+
+Each word asks a question (its query), every word offers an answer (its key), and the word takes a blend of the others' values, weighted by how well the answers fit. Two heads ask two different questions. The slider sets =temperature=; moving it re-runs what reads it. The card at the bottom of the page drops the =√d_h= scaling and runs the block without it, so you can see which words change their mind before you accept the change.
+
+#+begin_ui
+(slider temperature 1/4 2 1/4 1)
+#+end_ui
+
+#+name: attention
+#+begin_src vau
+; X here is the pre-normalised rows LN(x), one per token
+(def (weights X h i)
+  ($let* ((q (project (at X i) (Wq h)))
+          (scores (map (fn (j)
+                         ($let* ((k (project (at X j) (Wk h)))
+                                 (raw (/ (dot q k) (* temperature (sqrt dk)))))
+                           (note ($quote score) (list h i j raw q k (map * q k)) raw)))
+                       (range n)))
+          (w (softmax scores)))
+    (note ($quote weights) (list h i scores w) w)))
+
+(def (attend X h i)
+  ($let* ((v (weighted-sum (weights X h i)
+                           (map (fn (j) (project (at X j) (Wv h)))
+                                (range n)))))
+    (note ($quote head) (list h i v) v)))
+
+(def (attention X i)
+  ($let* ((a (out-proj (map (fn (h) (attend X h i)) heads))))
+    (note ($quote attn) (list i a) a)))
+#+end_src
+
+*** Head 1: who is "it"?
+
+#+begin_view attention :head 0
+A, head 1: rows ask, columns answer
+#+end_view
+
+#+attr: :folded :rows features
+#+name: Wq-1
+| feature | seeks animate | seeks noun |
+|---------+---------------+------------|
+| pronoun | 0.75          | 0.5        |
+
+#+attr: :folded :rows features
+#+name: Wk-1
+| feature | offers animate | offers noun |
+|---------+----------------+-------------|
+| animate | 1              | 0           |
+| noun    | 0              | 0.5         |
+
+#+attr: :folded :rows features
+#+name: Wv-1
+| feature | animal | thing |
+|---------+--------+-------|
+| animate | 1      | 0     |
+| noun    | 0      | 1     |
+
+*** Head 2: what happened to it?
+
+#+begin_view attention :head 1
+A, head 2: rows ask, columns answer
+#+end_view
+
+#+attr: :folded :rows features
+#+name: Wq-2
+| feature | seeks action | seeks state |
+|---------+--------------+-------------|
+| noun    | 0.75         | 0           |
+| pronoun | -0.75        | 0.75        |
+
+#+attr: :folded :rows features
+#+name: Wk-2
+| feature | offers action | offers state |
+|---------+---------------+--------------|
+| verb    | 1             | 0            |
+| state   | 0             | 1            |
+
+#+attr: :folded :rows features
+#+name: Wv-2
+| feature | action | state |
+|---------+--------+-------|
+| verb    | 1      | 0     |
+| state   | 0      | 1     |
+
+*** Heads joined, and added back
+
+W_O writes the heads' outputs into the word's own feature columns: head 1's =animal= lands in =animate=, head 2's =action= and =state= land in =acts= and =described=. Then x1 = x + that.
+
+#+name: Wo
+| feature   | h1 animal | h1 thing | h2 action | h2 state |
+|-----------+-----------+----------+-----------+----------|
+| animate   | 1         | 0        | 0         | 0        |
+| acts      | 0         | 0        | 1         | 0        |
+| described | 0         | 0        | 0         | 1        |
+
+#+begin_view matrix :of attn
+MHA(LN(x)): what attention adds to each word
+#+end_view
+
+#+begin_view matrix :of resid :which 1
+x1 = x + MHA(LN(x))
+#+end_view
+
+** LN, then feed-forward :stage-2:
+
+Two hidden neurons look at each word on its own, through another layer norm. *doer* fires for an animate word that acts; *one described* fires for an animate word that has a state. Both write into =subject=. Here *doer* fires for "cat" and for "it" (which head 1 filled with cat's animacy), and *one described* fires for "it" once head 2 has brought in "tired".
+
+#+begin_view matrix :of norm :which 2
+LN(x1): what the feed-forward reads
+#+end_view
+
+#+name: ffn
+#+begin_src vau
+(def b1 ($quote (-1/2 -1)))
+(def b2 ($quote (0 0 0 0 0 0 0 0 0 0 0)))
+(def (ffn i x)
+  ($let* ((r (mlp W1 b1 W2 b2 x)))
+    (note ($quote ffn) (list i (car r) (car (cdr r))) (car (cdr r)))))
+#+end_src
+
+#+begin_view ffn
+ReLU(x W1 + b1): the hidden neurons
+#+end_view
+
+#+attr: :folded :rows features
+#+name: W1
+| feature   | doer | one-described |
+|-----------+------+---------------|
+| animate   | 1    | 0             |
+| acts      | 0.5  | 0             |
+| described | 0    | 1             |
+
+#+name: W2
+| feature | doer | one-described |
+|---------+------+---------------|
+| subject | 3    | 5             |
+
+** The encoder block :run:
+
+LN, attention, add; LN, feed-forward, add; for every word. The run below walks the whole block: step it with the buttons on the result, or from the diagram at the top.
+
+#+name: encoder
+#+begin_src vau
+(def (encoder X)
+  ($let* ((N1 (map (fn (i) (pre-norm 1 i (at X i))) (range n)))
+          (A (map (fn (i) (add-resid 1 i (at X i) (attention N1 i)))
+                  (range n)))
+          (N2 (map (fn (i) (pre-norm 2 i (at A i))) (range n)))
+          (F (map (fn (i) (add-resid 2 i (at A i) (ffn i (at N2 i))))
+                  (range n))))
+    F))
+#+end_src
+
+#+begin_src vau :run :view reads
+(encoder (map embed (range n)))
+#+end_src
+
+#+begin_view matrix :of resid :which 2
+x2: the block's output, one row per word
+#+end_view
+
+#+begin_watch
+(at tokens i)
+#+end_watch
+
+** Stop early with call/cc :run:
+
+=return= is the rest of the computation, held as a value. The scan calls it as soon as head 1 is sure about some word, and everything after is skipped.
+
+#+begin_src vau
+; X = the embedded rows; attention reads LN(x), so normalise them first (silently: no notes)
+(def (first-sure h X)
+  (call/cc (fn (k)
+    (with return (continuation->applicative k)
+      ($sequence
+        (map (fn (i)
+               ($let* ((w (weights (map layer-norm X) h i)))
+                 (if (> (apply max w) 3/5)
+                     (return (list (at tokens i) ($quote reads) (at tokens (argmax w))))
+                     0)))
+             (range n))
+        ($quote none))))))
+#+end_src
+
+#+begin_src vau :run
+(first-sure 0 (map embed (range n)))
+#+end_src
+
+** A proposal :agent:
+
+Asked to "try it without the √d_h scaling", a proposal arrives with the attention block changed. It has already run in a copy of this block, so you see what changes before you accept it.
+
+#+begin_proposal :replaces attention :title drop the √d_h scaling
+; X here is the pre-normalised rows LN(x), one per token
+(def (weights X h i)
+  ($let* ((q (project (at X i) (Wq h)))
+          (scores (map (fn (j)
+                         ($let* ((k (project (at X j) (Wk h)))
+                                 (raw (/ (dot q k) temperature)))
+                           (note ($quote score) (list h i j raw q k (map * q k)) raw)))
+                       (range n)))
+          (w (softmax scores)))
+    (note ($quote weights) (list h i scores w) w)))
+
+(def (attend X h i)
+  ($let* ((v (weighted-sum (weights X h i)
+                           (map (fn (j) (project (at X j) (Wv h)))
+                                (range n)))))
+    (note ($quote head) (list h i v) v)))
+
+(def (attention X i)
+  ($let* ((a (out-proj (map (fn (h) (attend X h i)) heads))))
+    (note ($quote attn) (list i a) a)))
+#+end_proposal

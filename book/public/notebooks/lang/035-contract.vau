@@ -1,0 +1,121 @@
+; contracts, in the language: (contract name pred), a readable name and an
+; applicative from a value to a boolean. No type language sits beside the
+; language, so to check is to run the predicate; a contract is a $lambda.
+;
+; A failure is data, never a stop: (problem contract name where value),
+; where is () for a bare check, (arg i) or (result) in a guard. What a
+; contract passes comes back as it came, so a check sits anywhere in a
+; pipeline; contract-failed? tells a failure from a value.
+;
+; (contract name pred) (check c v) (satisfies? c v)
+; c-any c-number c-string c-pair c-null    the machine's own predicates
+; (c-and a b) (c-or a b) (c-not c) (c-list-of c) (c-pair-of a b) (c-eq v)   built from them
+; (check-all cs v)               every failure of v, in order: () if none
+; (guard ins out f)              an applicative like f: each argument checked against ins, the result against out, f
+;                                called with its arguments as values, never evaluated again; the first failure answers
+; Needs core and cek (cadr, map).
+
+($define! contract
+  ($lambda (name pred) (list ($quote contract) name pred)))
+($define! contract?
+  ($lambda (c) ($if (pair? c) (eq? (car c) ($quote contract)) #f)))
+($define! contract-name cadr)
+($define! contract-pred ($lambda (c) (car (cddr c))))
+
+($define! contract-fail
+  ($lambda (c where v)
+    (list ($quote problem) ($quote contract) (contract-name c) where v)))
+($define! contract-failed?
+  ($lambda (x)
+    ($if (pair? x)
+      ($if (eq? (car x) ($quote problem))
+        ($if (pair? (cdr x)) (eq? (cadr x) ($quote contract)) #f)
+        #f)
+      #f)))
+
+($define! satisfies? ($lambda (c v) ((contract-pred c) v)))
+($define! check-at
+  ($lambda (c where v)
+    ($if (satisfies? c v) v (contract-fail c where v))))
+($define! check ($lambda (c v) (check-at c () v)))
+
+; string-append takes two
+($define! sa3 ($lambda (a b c) (string-append a (string-append b c))))
+($define! check-all
+  ($lambda (cs v)
+    ($if (null? cs)
+      ()
+      (($lambda (r rest) ($if (contract-failed? r) (cons r rest) rest))
+       (check (car cs) v)
+       (check-all (cdr cs) v)))))
+($define! c-any (contract "any" ($lambda (v) #t)))
+($define! c-number (contract "number" number?))
+($define! c-string (contract "string" string?))
+($define! c-pair (contract "pair" pair?))
+($define! c-null (contract "null" null?))
+($define! c-eq ($lambda (x) (contract "eq" ($lambda (v) (eq? v x)))))
+($define! c-and
+  ($lambda (a b)
+    (contract (sa3 (contract-name a) " and " (contract-name b))
+      ($lambda (v) ($and (satisfies? a v) (satisfies? b v))))))
+($define! c-or
+  ($lambda (a b)
+    (contract (sa3 (contract-name a) " or " (contract-name b))
+      ($lambda (v) ($or (satisfies? a v) (satisfies? b v))))))
+($define! c-not
+  ($lambda (c)
+    (contract (string-append "not " (contract-name c))
+      ($lambda (v) (not (satisfies? c v))))))
+($define! all-satisfy?
+  ($lambda (c l)
+    ($if (pair? l)
+      ($and (satisfies? c (car l)) (all-satisfy? c (cdr l)))
+      (null? l))))
+($define! c-list-of
+  ($lambda (c)
+    (contract (string-append "list of " (contract-name c))
+      ($lambda (v) (all-satisfy? c v)))))
+($define! c-pair-of
+  ($lambda (a b)
+    (contract (sa3 (string-append "pair of " (contract-name a))
+                " and "
+                (contract-name b))
+      ($lambda (v)
+        ($and (pair? v)
+          ($and (satisfies? a (car v)) (satisfies? b (cdr v))))))))
+
+; the first failure among args, as (arg i); () if every one passes or ins runs out
+($define! first-arg-failure
+  ($lambda (ins args i)
+    ($if ($and (pair? ins) (pair? args))
+      (($lambda (r)
+         ($if (contract-failed? r)
+           r
+           (first-arg-failure (cdr ins) (cdr args) (+ i 1))))
+       (check-at (car ins) (list ($quote arg) i) (car args)))
+      ())))
+($define! same-length?
+  ($lambda (a b)
+    ($if (pair? a)
+      ($if (pair? b) (same-length? (cdr a) (cdr b)) #f)
+      (null? b))))
+($define! quote-all
+  ($lambda (vs) (map ($lambda (v) (list $quote v)) vs)))
+
+($define! guard
+  ($lambda (ins out f)
+    (wrap ($vau args
+            env
+            ($if (same-length? ins args)
+              (($lambda (bad)
+                 ($if (null? bad)
+                   (check-at out
+                     (list ($quote result))
+                     (eval (cons f (quote-all args)) env))
+                   bad))
+               (first-arg-failure ins args 0))
+              (list ($quote problem)
+                ($quote contract)
+                "arity"
+                (list ($quote arg-count))
+                args))))))

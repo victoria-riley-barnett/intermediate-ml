@@ -1,0 +1,44 @@
+; A cell: ($cell N form...) evaluates its forms in order in the CURRENT
+; environment, like a begin, and answers the last value. Not a begin: it tells
+; the host where it starts and where it ends, with call/cc and yield.
+;
+;   (yield (cell N after))         at entry; AFTER is the page past this cell
+;   (yield (done N value empty?))  at the end
+;
+; The host answers a yield by going on -- a resume that does not fork, so the
+; page's environments stay the ones the cells share -- and between the two
+; yields owns the cell: budget, holes, answer. A cell that stops on its own
+; (spent budget, its own yield) is one the host does not go on in: it applies
+; AFTER, and the page carries on with the next cell, definitions made before
+; the stop still in their environments. A failing cell is a hole, not a stop.
+;
+; %only is the last cell to run: past it a cell answers () and yields nothing;
+; -1 (here) is no limit; a host sets one by defining %only in the page's base env.
+;
+; Load: core.vau only, plus call/cc and yield from the machine; pair with scope.vau.
+
+($define! %only -1)
+(def (cell-off? n env)
+  (with only (eval ($quote %only) env)
+    (if (< only 0) #f (< only n))))
+(def (cell-forms forms env)
+  (if (null? (cdr forms))
+    (eval (car forms) env)
+    (with _ (eval (car forms) env) (cell-forms (cdr forms) env))))
+; chosen before the host says go, so the steps it counts are the cell's own
+(def (cell-thunk forms env)
+  (if (null? forms)
+    (fn () ())
+    (if (null? (cdr forms))
+      (fn () (eval (car forms) env))
+      (fn () (cell-forms forms env)))))
+; the host answers the second yield with the value it was handed: the answer
+(def (cell-run n go empty after)
+  (yield (list ($quote cell) n after))
+  (yield (list ($quote done) n (go) empty)))
+($define! $cell
+  ($vau (n . forms) env
+    (call/cc ($lambda (after)
+               (if (cell-off? n env)
+                 ()
+                 (cell-run n (cell-thunk forms env) (null? forms) after))))))

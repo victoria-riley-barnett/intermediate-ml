@@ -1,0 +1,101 @@
+; The Report's environmental family, §6.7-§6.8: the names 025-library and
+; 010-core do not already hold (§6.7.1 $binds?, §6.7.4-6 $let, §6.7.2
+; get-current-environment and §6.8.1 $set! live there).
+;
+; An environment here is a list of frames -- a pair -- so eval would read
+; one as a combination. target-of restores the Report's reading: an operand
+; already an environment is that environment, anything else is evaluated in
+; the dynamic environment. Without it $let-safe cannot be written the
+; Report's way.
+; Needs 010-core (get-current-environment, $lambda, $let, $sequence),
+; 020-cek (new-frame, env?, map), 025-library.
+
+; ---- §4.9 make-environment. No parents: a new frame whose parent is the
+; dynamic environment, so the caller's names are visible and nothing is yet
+; bound; one: a child of it. A frame has one parent, so two is a type problem.
+($define! make-environment
+  (wrap ($vau parents e
+    ($cond ((null? parents) (new-frame e))
+      ((null? (cdr parents))
+       ($if (env? (car parents)) (new-frame (car parents)) (problem ($quote type) (list (car parents)) ())))
+      (#t (problem ($quote type) parents ()))))))
+
+; ---- §6.7.3 make-kernel-standard-environment. This layer is evaluated in
+; the ground environment, so a nullary compound combiner defined here has
+; ground as its static environment; calling it makes a child of ground with
+; no local bindings, which is what the body's (get-current-environment) sees.
+($define! make-kernel-standard-environment
+  ($lambda () (get-current-environment)))
+
+; ---- the Report's reading of an environment operand (see the header)
+($define! target-of
+  ($lambda (exp env) ($if (env? exp) exp (eval exp env))))
+
+; ---- §6.7.7 $let-redirect. Both environments are literal: the binding
+; expressions are the operand list of a combination evaluated in env, so
+; they see the dynamic environment; the $lambda they are handed to was
+; evaluated in the target, so its free names and the body's frame are the
+; target's. A pair binding travels in the operand list, not through apply.
+($define! $let-redirect
+  ($vau (exp bindings . body) env
+    (eval (cons (eval (cons $lambda
+                        (cons (map car bindings) body))
+                      (target-of exp env))
+            (map cadr bindings))
+      env)))
+
+; ---- §6.7.8 $let-safe: $let-redirect into a fresh standard environment, so
+; the body's names mean what the ground says whatever the caller shadowed.
+; The environment is made at expansion and spliced in as a value: hence
+; target-of.
+($define! $let-safe
+  ($vau (bindings . body) env
+    (eval (cons $let-redirect
+            (cons (make-kernel-standard-environment)
+              (cons bindings body)))
+      env)))
+
+; ---- §6.7.9 $remote-eval: both operands unevaluated, o run as a tail
+; context in the environment e names, so the environment is a run-time value.
+($define! $remote-eval
+  ($vau (o e) d (eval o (target-of e d))))
+
+; ---- §6.7.10 $bindings->environment. The body form is
+; (get-current-environment), so the answer is the frame holding the
+; bindings, not the empty parent make-environment made.
+($define! $bindings->environment
+  ($vau bindings denv
+    (eval (list $let-redirect
+            (make-environment)
+            bindings
+            (list get-current-environment))
+      denv)))
+
+; ---- §6.8.2 $provide!. The body runs in a frame of its own and only the
+; named bindings come out: $define! binds fresh cells in the dynamic
+; environment, which is the export. A symbol the body never made is a hole.
+; The answer is #inert, not $define!'s empty answer.
+($define! $provide!
+  ($vau (symbols . body) env
+    ($sequence
+      (eval (list $define!
+                  symbols
+                  (list $let
+                        ()
+                        (cons $sequence body)
+                        (cons list symbols)))
+        env)
+      #inert)))
+
+; ---- §6.8.3 $import!. The list of values is quoted into the $define!
+; operand: a value that is itself a pair must not be read back as a form
+; when $define! evaluates its second operand.
+($define! $import!
+  ($vau (exp . symbols) env
+    ($sequence
+      (eval (list $define!
+                  symbols
+                  (list $quote
+                    (eval (cons list symbols) (target-of exp env))))
+        env)
+      #inert)))

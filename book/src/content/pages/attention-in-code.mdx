@@ -1,0 +1,25 @@
+---
+title: Attention in ten lines
+description: The whole operation in NumPy, one line per step, with no loop over positions.
+frame: transformation
+---
+
+```python
+import numpy as np
+
+def softmax(S):
+    S = S - S.max(axis=-1, keepdims=True)
+    E = np.exp(S)
+    return E / E.sum(axis=-1, keepdims=True)
+
+def attention(X, Wq, Wk, Wv, Wo):
+    Q, K, V = X @ Wq, X @ Wk, X @ Wv      # n x dk, n x dk, n x dv
+    S = Q @ K.T / np.sqrt(Q.shape[-1])    # n x n
+    A = softmax(S)                        # n x n, rows sum to 1
+    H = A @ V                             # n x dv
+    return H @ Wo                         # n x d
+```
+
+The three projections are the <Ref to="queries-keys-values">three roles</Ref>, one matrix multiply each, and they are the only places training acts on the comparison. `Q @ K.T` holds all $n^2$ pairwise scores, every position against every other, which is where the reach across the whole sequence comes from. Dividing by the square root of `Q.shape[-1]` is the <Ref to="scaled-scores">variance correction</Ref>. Subtracting each row's maximum before exponentiating changes nothing, because a softmax ignores a constant shift within a row, but it prevents overflow. `A @ V` is the weighted average, and it is the only step where information moves between positions. `H @ Wo` rejoins the heads when the width is split.
+
+For <Ref to="multi-head-attention">several heads</Ref>, split the width into $h$ blocks, run the middle four lines on each block with its own weights, concatenate along the feature axis, and multiply by $W_O$.

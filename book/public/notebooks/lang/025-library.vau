@@ -1,0 +1,176 @@
+; The Report's library, as far as it is derivation: what R-1RK specifies and nothing below 025
+; binds. Needs 010-core ($let, $sequence, $cond) and 020-cek (find, none, set-cdr!, tagged?,
+; t-c), in the machine's own vocabulary. Layers above build on it -- 026/027/028 use $let,
+; $cond, $set!, 031 walks frames with cell-of -- and nothing below does, so it grows without
+; disturbing them. A page wanting the standard names must load it.
+;
+; Not here, needing what the machine lacks: a numeric tower (§12, one kind of number -- 029),
+; ports (§15 -- 033), promises (§9 -- 031, 032). #inert (§4.5) is here: a kernel literal, and
+; the forms answering it (no-clause $cond, empty $sequence, a mutator).
+
+; ---- §4.1.1 boolean?, §4.4.1 symbol?, §4.8.1 environment?, §4.8.2 ignore?
+($define! boolean? ($lambda (x) ($or (eq? x #t) (eq? x #f))))
+($define! ignore? ($lambda (x) (eq? x #ignore)))
+($define! inert? ($lambda (x) (eq? x #inert)))
+($define! symbol?
+  ($lambda (x)
+    ($if (pair? x)
+      #f
+      ($if (null? x) #f ($if (number? x) #f ($if (string? x) #f (not ($or (ignore? x) (inert? x)))))))))
+($define! %frame-tag ($quote %f))
+($define! frame? ($lambda (x) ($and (pair? x) (eq? (car x) %frame-tag))))
+($define! environment? ($lambda (e) ($if (pair? e) (frame? (car e)) #f)))
+
+; ---- §4.10 combiner?, operative?, applicative?
+; A combiner is a pair tagged %c with a kind in cadr. A continuation is tagged the same way and
+; is NOT one (R-1RK 7.2.1); kinds ap and nat are the applicatives, every other kind an operative
+; handing its operands over unevaluated.
+($define! combiner?
+  ($lambda (x)
+    ($and (tagged? x)
+      ($and ($if (pair? (cdr x)) (symbol? (cadr x)) #f) (not (eq? (cadr x) ($quote cont)))))))
+($define! applicative?
+  ($lambda (x) ($and (combiner? x) ($or (eq? (cadr x) ($quote ap)) (eq? (cadr x) ($quote nat))))))
+($define! operative? ($lambda (x) ($and (combiner? x) (not (applicative? x)))))
+
+; ---- §6.1 the booleans: the applicatives take any number; the operatives
+; short-circuit into tail position, and a non-boolean is not signalled.
+($define! not? ($lambda (x) ($if x #f #t)))
+($define! and?
+  ($lambda xs
+    ($if (null? xs) #t ($if (car xs) (apply and? (cdr xs)) #f))))
+($define! or?
+  ($lambda xs
+    ($if (null? xs) #f ($if (car xs) #t (apply or? (cdr xs))))))
+($define! $and?
+  ($vau xs env
+    ($if (null? xs)
+      #t
+      ($if (null? (cdr xs))
+        (eval (car xs) env)
+        ($if (eval (car xs) env) (eval (cons $and? (cdr xs)) env) #f)))))
+($define! $or?
+  ($vau xs env
+    ($if (null? xs)
+      #f
+      ($if (null? (cdr xs))
+        (eval (car xs) env)
+        ($if (eval (car xs) env) #t (eval (cons $or? (cdr xs)) env))))))
+
+; ---- $when, $unless: not R-1RK's. $if with one arm, the other #inert; the
+; body is $sequence's, so it runs in tail position in the caller's env.
+($define! $when
+  ($vau (test . body) env
+    ($if (eval test env) (eval (cons $sequence body) env) #inert)))
+($define! $unless
+  ($vau (test . body) env
+    ($if (eval test env) #inert (eval (cons $sequence body) env))))
+
+; ---- §5.5.1 apply: the combiner takes VALUES, so each is quoted back into a
+; form and evaluated; one that does not read back (closure, environment) fails.
+($define! apply
+  ($lambda (combiner args . rest)
+    (eval (cons combiner (map ($lambda (a) (list $quote a)) args))
+      ($if (null? rest) (get-current-environment) (car rest)))))
+
+; ---- §6.3.1 length, §6.3.2 list-ref, §6.3.8 finite-list?, §6.3.9 countable-list?
+; list-kind: finite (ends on nil), improper (ends elsewhere) or cyclic, by tortoise and hare --
+; a cycle met in time linear in the list, a list that ends walked once; three questions, one answer.
+($define! list-kind
+  ($lambda (slow fast)
+    ($cond ((null? fast) ($quote finite))
+      ((not (pair? fast)) ($quote improper))
+      ((null? (cdr fast)) ($quote finite))
+      ((not (pair? (cdr fast))) ($quote improper))
+      (#t ($let ((slow (cdr slow)) (fast (cdr (cdr fast))))
+            ($if (eq? slow fast) ($quote cyclic) (list-kind slow fast)))))))
+($define! finite-list? ($lambda (l) (eq? (list-kind l l) ($quote finite))))
+($define! countable-list? ($lambda (l) (not (eq? (list-kind l l) ($quote improper)))))
+; the Report gives a cyclic list +infinity as its length, which the one kind of number cannot be: it signals instead
+($define! count-pairs
+  ($lambda (l n) ($if (pair? l) (count-pairs (cdr l) (+ n 1)) n)))
+($define! length
+  ($lambda (l)
+    ($if (finite-list? l) (count-pairs l 0) (problem ($quote type) (list (list-kind l l)) ()))))
+($define! list-ref
+  ($lambda (l k)
+    ($if (pair? l)
+      ($if (= k 0) (car l) (list-ref (cdr l) (- k 1)))
+      (problem ($quote range) (list l k) ()))))
+($define! list-tail ($lambda (l k) ($if (= k 0) l (list-tail (cdr l) (- k 1)))))
+
+; ---- §6.6.1 equal?: eq? first, then the same shape atom by atom. Combiner?
+; and environment? are tested before the walk, not for speed: both are pairs
+; carrying a cycle (#t is a combiner), so a walk never ends. Same object only.
+($define! equal?
+  ($lambda (a b)
+    ($cond ((eq? a b) #t)
+      ((pair? a)
+       ($if (pair? b)
+         ($if (combiner? a)
+           #f
+           ($if (combiner? b)
+             #f
+             ($if (environment? a)
+               #f
+               ($if (environment? b)
+                 #f
+                 ($and (equal? (car a) (car b)) (equal? (cdr a) (cdr b)))))))
+         #f))
+      ((pair? b) #f)
+      (#t #f))))
+
+; ---- §6.7.1 $binds?: symbols arrive unevaluated; find answers a value, so $set! needs the cell here.
+($define! cell-in
+  ($lambda (sym bs)
+    ($if (null? bs) () ($if (eq? sym (car (car bs))) (car bs) (cell-in sym (cdr bs))))))
+($define! cell-of
+  ($lambda (sym fr)
+    ($if (null? fr)
+      ()
+      ($if (pair? (cell-in sym (cdr (car fr))))
+        (cell-in sym (cdr (car fr)))
+        (cell-of sym (cdr fr))))))
+($define! visible? ($lambda (sym fr) (pair? (cell-of sym fr))))
+($define! all-visible?
+  ($lambda (symbols fr)
+    ($if (null? symbols)
+      #t
+      ($if (visible? (car symbols) fr) (all-visible? (cdr symbols) fr) #f))))
+($define! $binds?
+  ($vau (exp . symbols) env (all-visible? symbols (eval exp env))))
+
+; ---- §6.7.4 $let*, §6.7.5 $letrec, §6.7.6 $letrec*
+($define! $let*
+  ($vau (bindings . body) env
+    ($if (null? bindings)
+      (eval (cons $sequence body) env)
+      (eval (list $let
+              (list (car bindings))
+              (cons $let* (cons (cdr bindings) body)))
+        env))))
+; $letrec is ($let () ($define! (names...) (list inits...)) . body): every name exists before any initialiser runs.
+($define! $letrec
+  ($vau (bindings . body) env
+    (eval (cons $let
+            (cons ()
+              (cons (list $define! (let-names bindings ()) (cons list (let-values bindings ())))
+                body)))
+      env)))
+; $letrec* is $letrec without the nesting: one frame, so an initialiser cannot see a later name but a body can.
+($define! rec-defines
+  ($lambda (bindings body)
+    ($if (null? bindings)
+      body
+      (cons (list $define! (car (car bindings)) (car (cdr (car bindings))))
+        (rec-defines (cdr bindings) body)))))
+($define! $letrec*
+  ($vau (bindings . body) env
+    (eval (cons $let (cons () (rec-defines bindings body))) env)))
+
+; ---- §6.8.1 $set!: the Report's derivation, no cell walk: a $define!
+; combination in the environment exp1 names, with eval's unwrapped value
+; spliced in as the operator -- an environment does not read back. Inert.
+($define! $set!
+  ($vau (exp1 formals exp2) env
+    (eval (list $define! formals (list (unwrap eval) exp2 env)) (eval exp1 env))))

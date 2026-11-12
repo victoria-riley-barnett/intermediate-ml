@@ -1,0 +1,213 @@
+; view of a machine state: the second half of 070-view.vau, which says
+; what a message is.
+;
+; (view v) answers a message for v, a value or a machine state:
+;   (D v), or anything else  a value: the head printed, the kids its parts
+;   (Y out k)      stopped: the head is out printed, e.g. (unbound who), then
+;                  a kid per frame of k, ending at the environment
+;   (Y (problem budget . N) k)  spent budget: the limit, and to resume
+;   (E x env k) (R v k) (C f operands env k)  like a stop, control as head
+; (view-state s) and (view-value v) are the halves. The language cannot ask
+; the machine's status, so a value that looks like a state is taken for one.
+
+; ---- continuations: each frame kind said as the source it still evaluates
+($define! v-cont?
+  ($lambda (k)
+    ($if (pair? k)
+      ($if (v-sym? (car k))
+        (named? (car k) ($quote (halt opev args seq def mat)))
+        #f)
+      #f)))
+($define! v-last
+  ($lambda (l)
+    ($if (pair? l) ($if (pair? (cdr l)) (v-last (cdr l)) (car l)) ())))
+($define! v-shows ($lambda (l) (map show l)))
+; the name an operator goes by: the first frame outward that binds it, the
+; whole frame searched; the newest two hundred missed `cons` under a library
+($define! v-binding-name
+  ($lambda (v bs)
+    ($cond ((not (pair? bs)) ())
+      ((not (pair? (car bs))) (v-binding-name v (cdr bs)))
+      ((eq? (cdr (car bs)) v) (car (car bs)))
+      ((v-wraps? (cdr (car bs)) v) (car (car bs)))
+      (#t (v-binding-name v (cdr bs))))))
+($define! v-wraps?
+  ($lambda (b v) ($if (v-closure? b) (eq? (v-nth b 2) v) #f)))
+($define! v-name-of
+  ($lambda (v env n)
+    ($cond ((not (v-env? env)) ())
+      ((v-sym? v) ())
+      ((>= n v-frames) ())
+      ((not (pair? env)) ())
+      (#t (($lambda (found)
+             ($if (null? found) (v-name-of v (cdr env) (+ n 1)) found))
+           (v-binding-name v (v-items (cdr (car env)))))))))
+($define! v-sentence ($lambda (head form kids) (list head form kids)))
+
+; one frame said: (head form kids); form is the source once inner fills it
+($define! v-frame
+  ($lambda (k inner)
+    (($lambda (kind f)
+       ($cond ((eq? kind ($quote opev))
+               (v-sentence (string-append "waiting to learn what "
+                             (string-append inner
+                               (string-append " is, to call it on "
+                                 (show (car f)))))
+                 (string-append "("
+                   (string-append (v-join (cons inner
+                                            (v-shows (v-items (car f))))
+                                    " ")
+                     ")"))
+                 ($lambda ()
+                   (list (v-value "operands" (car f) 0 ())
+                     (v-env "in" (cadr f) 0 ())))))
+         ((eq? kind ($quote args))
+          (($lambda (form)
+             (v-sentence (string-append "waiting to give "
+                           (string-append inner
+                             (string-append " a value for the call "
+                               form)))
+               form
+               ($lambda ()
+                 (list (v-value "operator" (car f) 0 ())
+                   (v-value "still to evaluate" (cadr f) 0 ())
+                   (v-value "already evaluated" (caddr f) 0 ())
+                   (v-env "in" (cadddr f) 0 ())))))
+           (string-append "("
+             (string-append (v-join (v-append (cons (($lambda (n)
+                                                       ($if (null? n)
+                                                         (show (car f))
+                                                         (show n)))
+                                                     (v-name-of (car f)
+                                                       (cadddr f)
+                                                       0))
+                                                (rev (v-shows (v-items (caddr f)))))
+                                      (cons inner
+                                        (v-shows (v-items (cadr f)))))
+                              " ")
+               ")"))))
+         ((eq? kind ($quote seq))
+          (v-sentence (string-append "waiting to finish "
+                        (string-append inner
+                          (string-append ", and then to run "
+                            (show (car f)))))
+            (string-append "("
+              (string-append (v-join (cons inner
+                                       (v-shows (v-items (car f))))
+                               " ")
+                ")"))
+            ($lambda ()
+              (list (v-value "rest" (car f) 0 ())
+                (v-env "in" (cadr f) 0 ())))))
+         ((eq? kind ($quote def))
+          (v-sentence (string-append "waiting for the value that "
+                        (string-append (show (car f))
+                          (string-append " will be defined as: " inner)))
+            (string-append "($define! "
+              (string-append (show (car f))
+                (string-append " " (string-append inner ")"))))
+            ($lambda ()
+              (list (v-value "pattern" (car f) 0 ())
+                (v-env "in" (cadr f) 0 ())))))
+         ((eq? kind ($quote mat))
+          (v-sentence (string-append "waiting for "
+                        (string-append inner
+                          (string-append ", to see whether it fits "
+                            (show (car f)))))
+            (string-append "($match? "
+              (string-append (show (car f))
+                (string-append " " (string-append inner ")"))))
+            ($lambda ()
+              (list (v-value "pattern" (car f) 0 ())
+                (v-env "in" (cadr f) 0 ())))))
+         (#t (v-sentence ($if (v-sym? kind) (symbol->string kind) "?")
+               inner
+               ($lambda () ())))))
+     (car k)
+     (cdr k))))
+; the frames, innermost first; the halt frame ends the chain
+($define! v-chain
+  ($lambda (k inner)
+    ($if (v-cont? k)
+      ($if (eq? (car k) ($quote halt))
+        ()
+        (($lambda (s)
+           (cons (message (car s) (caddr s))
+             (v-chain (v-last (cdr k)) (cadr s))))
+         (v-frame k inner)))
+      ())))
+
+; ---- the states
+($define! v-budget?
+  ($lambda (a)
+    ($if (v-tag? a ($quote problem))
+      ($if (pair? (cdr a)) (eq? (cadr a) ($quote budget)) #f)
+      #f)))
+($define! v-hole-of
+  ($lambda (a)
+    ($if (v-tag? a ($quote unbound))
+      ($if (pair? (cdr a)) (show (cadr a)) "…")
+      "…")))
+($define! v-stop
+  ($lambda (head a k)
+    ($if (v-budget? a)
+      (($lambda (h) (message h ($lambda () (list (v-leaf h)))))
+       (string-append "ran out of steps (limit "
+         (string-append (show (cddr a))
+           "); resume with more to continue")))
+      (($lambda (hole)
+         (message head
+           ($lambda ()
+             (v-append ($if (string=? hole "…")
+                         ()
+                         (list (v-leaf (string-append hole
+                                         " is not defined, so the machine is waiting for a value for it"))))
+               (v-chain k hole)))))
+       (v-hole-of a)))))
+
+($define! view-value
+  ($lambda (v)
+    (message (show v) ($lambda () (open (v-value "" v 0 ()))))))
+($define! v-length-is?
+  ($lambda (l n)
+    ($if (null? l)
+      (= n 0)
+      ($if (pair? l) ($if (= n 0) #f (v-length-is? (cdr l) (- n 1))) #f))))
+($define! v-state?
+  ($lambda (s)
+    ($cond ((not (pair? s)) #f)
+      ((eq? (car s) ($quote D)) (v-length-is? s 2))
+      ((eq? (car s) ($quote Y))
+       ($and ($or (v-length-is? s 3) (v-length-is? s 4))
+         ($or (v-cont? (caddr s))
+           ($or (v-tag? (cadr s) ($quote unbound))
+             (number? (cadddr s))))))  ; (Y out k site): a stop may name the hole it waits at
+      ((eq? (car s) ($quote R))
+       ($and (v-length-is? s 3) (v-cont? (caddr s))))
+      ((eq? (car s) ($quote E))
+       ($and (v-length-is? s 4) (v-cont? (cadddr s))))
+      ((eq? (car s) ($quote C))
+       ($and (v-length-is? s 5) (v-cont? (car (cddr (cddr s))))))
+      (#t #f))))
+($define! view-state
+  ($lambda (s)
+    (($lambda (kind)
+       ($cond ((eq? kind ($quote D)) (view-value (cadr s)))
+         ((eq? kind ($quote Y))
+          (v-stop (show (cadr s)) (cadr s) (caddr s)))
+         ((eq? kind ($quote R))
+          (v-stop (string-append "returning " (show (cadr s)))
+            ()
+            (caddr s)))
+         ((eq? kind ($quote E))
+          (v-stop (string-append "evaluating " (show (cadr s)))
+            ()
+            (cadddr s)))
+         (#t (v-stop (string-append "calling "
+                       (string-append (show (cadr s))
+                         (string-append " on " (show (caddr s)))))
+               ()
+               (car (cddr (cddr s)))))))
+     (car s))))
+($define! view
+  ($lambda (v) ($if (v-state? v) (view-state v) (view-value v))))

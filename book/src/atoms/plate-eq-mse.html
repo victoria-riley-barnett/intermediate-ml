@@ -1,0 +1,80 @@
+<figure data-atom="eq-mse" data-source="admin/diagrams/eq-mse.html" aria-label="Mean squared error" style="margin:0;padding:0;background:#f5f5f5;color:#2d3142;font-family:'Geist',system-ui,sans-serif;border-radius:3px;overflow:hidden">
+<svg viewBox="0 0 1280 752" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eq-mse-title eq-mse-desc" style="display:block;width:100%;height:auto;max-width:100%">
+        <title id="eq-mse-title">Mean squared error</title>
+        <desc id="eq-mse-desc">Mean squared error over four rows, and the derivative it hands back. The equation is MSE of w equals one over n times the sum over i of (w times x_i plus b minus y_i) squared. The four rows are four grid points of the week-02 lab's controlled regression, written to one decimal, with the noise set to zero: x_i = 0.8, 3.3, 6.7, 10.0, and y_i = 3x_i + 7, so y_i = 9.4, 16.9, 27.1, 37.0. The bias is held at b = 7.000, its true value, and n = 4. At w = 2.600 the four errors are -0.320, -1.320, -2.680, -4.000; their squares are 0.1024, 1.7424, 7.1824, 16.0000, which sum to 25.0272, and the mean of the squares is 6.2568. The same errors weighted by x_i are -0.2560, -4.3560, -17.9560, -40.0000, summing to -62.5680; times two over n that is -31.284, the slope of the loss with respect to w. The slope is -31.284 at w = 2.600, 0.000 at w = 3.000 and 31.284 at w = 3.400, so its sign orders the three candidates before any step is taken. The annotated step of 0.3128 is a chosen step size of 0.010 times the slope, not a derived one, and it lands at w = 2.9128, short of the bottom. The loss is 6.2568 at w = 2.600 and at w = 3.400 and 0.0000 at w = 3.000: because the four rows lie exactly on the line y = 3x + 7, the bottom is exactly at w = 3.000. That is a property of this one-parameter model with no noise on its data, not a claim that squared error has one minimum in general.</desc>
+        <defs>
+          <marker id="eq-mse-arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><polygon points="0 0, 9 4, 0 8" fill="#2d3142"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <text x="120" y="124" font-size="30" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan fill="#bf4520" dy="0">MSE(w)</tspan><tspan dy="0"> = (1/n) Σ</tspan><tspan font-size="19" dy="8">i</tspan><tspan dy="-8"> (w·x</tspan><tspan font-size="19" dy="8">i</tspan><tspan dy="-8"> + b − y</tspan><tspan font-size="19" dy="8">i</tspan><tspan dy="-8">)</tspan><tspan font-size="19" dy="-10">2</tspan></text>
+        <text x="120" y="152" font-size="13" font-family="'Geist', system-ui, sans-serif" fill="#5a6580">n counts rows, not parameters; only w moves</text>
+        <line x1="120" y1="172" x2="1160" y2="172" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">SYMBOL</tspan></text>
+        <text x="200" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">NAME</tspan></text>
+        <text x="380" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WHAT IT IS</tspan></text>
+        <text x="940" y="204" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">IN THE EXAMPLE</tspan></text>
+        <line x1="120" y1="218" x2="1160" y2="218" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="246" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">MSE(w)</tspan></text>
+        <text x="200" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the loss</text>
+        <text x="380" y="246" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — one score for all four rows, at one choice of w</text>
+        <text x="940" y="246" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">6.2568</tspan></text>
+        <text x="120" y="272" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">w</tspan></text>
+        <text x="200" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the parameter</text>
+        <text x="380" y="272" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — the slope the model chooses; b is held fixed</text>
+        <text x="940" y="272" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">2.600</tspan></text>
+        <text x="120" y="298" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">x</tspan><tspan font-size="9" dy="4">i</tspan><tspan dy="-4">, y</tspan><tspan font-size="9" dy="4">i</tspan></text>
+        <text x="200" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">one row</text>
+        <text x="380" y="298" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">two numbers, fixed by the data: the input and the measurement</text>
+        <text x="940" y="298" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">i = 1: (0.8, 9.4)</tspan></text>
+        <text x="120" y="324" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">b</tspan></text>
+        <text x="200" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">the bias</text>
+        <text x="380" y="324" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">number — held at its true value, as the lab holds it</text>
+        <text x="940" y="324" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">7.000</tspan></text>
+        <text x="120" y="350" font-size="15" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">i, n</tspan></text>
+        <text x="200" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#2d3142">index, count</text>
+        <text x="380" y="350" font-size="12" font-family="'Geist', system-ui, sans-serif" fill="#4f5d75">i runs over the four rows; n = 4 divides the sum</text>
+        <text x="940" y="350" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">n = 4</tspan></text>
+        <line x1="120" y1="372" x2="1160" y2="372" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="120" y="406" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">WORKED · x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> = (0.8, 3.3, 6.7, 10.0) · y</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> = 3x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> + 7.000, NOISE 0 · b = 7.000 · n = 4 · STEP SIZE 0.010, CHOSEN</tspan></text>
+        <line x1="140.0" y1="432.0" x2="140.0" y2="648.0" stroke="#4f5d75" stroke-width="1.4"/>
+        <line x1="140.0" y1="648.0" x2="470.0" y2="648.0" stroke="#4f5d75" stroke-width="1.4"/>
+        <polyline points="140.0,441.4 142.1,446.6 144.1,451.6 146.2,456.6 148.2,461.6 150.3,466.4 152.4,471.2 154.4,476.0 156.5,480.7 158.6,485.3 160.6,489.8 162.7,494.3 164.8,498.7 166.8,503.1 168.9,507.4 170.9,511.6 173.0,515.8 175.1,519.9 177.1,523.9 179.2,527.9 181.2,531.8 183.3,535.6 185.4,539.4 187.4,543.1 189.5,546.8 191.6,550.4 193.6,553.9 195.7,557.3 197.8,560.7 199.8,564.0 201.9,567.3 203.9,570.5 206.0,573.6 208.1,576.7 210.1,579.7 212.2,582.6 214.2,585.5 216.3,588.3 218.4,591.1 220.4,593.7 222.5,596.4 224.6,598.9 226.6,601.4 228.7,603.8 230.8,606.2 232.8,608.5 234.9,610.7 236.9,612.8 239.0,614.9 241.1,617.0 243.1,619.0 245.2,620.9 247.2,622.7 249.3,624.5 251.4,626.2 253.4,627.8 255.5,629.4 257.6,630.9 259.6,632.4 261.7,633.8 263.8,635.1 265.8,636.3 267.9,637.5 269.9,638.7 272.0,639.7 274.1,640.7 276.1,641.7 278.2,642.5 280.2,643.4 282.3,644.1 284.4,644.8 286.4,645.4 288.5,645.9 290.6,646.4 292.6,646.8 294.7,647.2 296.8,647.5 298.8,647.7 300.9,647.9 302.9,648.0 305.0,648.0 307.1,648.0 309.1,647.9 311.2,647.7 313.2,647.5 315.3,647.2 317.4,646.8 319.4,646.4 321.5,645.9 323.6,645.4 325.6,644.8 327.7,644.1 329.8,643.4 331.8,642.5 333.9,641.7 335.9,640.7 338.0,639.7 340.1,638.7 342.1,637.5 344.2,636.3 346.2,635.1 348.3,633.8 350.4,632.4 352.4,630.9 354.5,629.4 356.6,627.8 358.6,626.2 360.7,624.5 362.8,622.7 364.8,620.9 366.9,619.0 368.9,617.0 371.0,614.9 373.1,612.8 375.1,610.7 377.2,608.5 379.2,606.2 381.3,603.8 383.4,601.4 385.4,598.9 387.5,596.4 389.6,593.7 391.6,591.1 393.7,588.3 395.8,585.5 397.8,582.6 399.9,579.7 401.9,576.7 404.0,573.6 406.1,570.5 408.1,567.3 410.2,564.0 412.2,560.7 414.3,557.3 416.4,553.9 418.4,550.4 420.5,546.8 422.6,543.1 424.6,539.4 426.7,535.6 428.8,531.8 430.8,527.9 432.9,523.9 434.9,519.9 437.0,515.8 439.1,511.6 441.1,507.4 443.2,503.1 445.3,498.7 447.3,494.3 449.4,489.8 451.4,485.3 453.5,480.7 455.6,476.0 457.6,471.2 459.7,466.4 461.8,461.6 463.8,456.6 465.9,451.6 467.9,446.6 470.0,441.4" fill="none" stroke="#2d3142" stroke-width="1.8"/>
+        <text x="128" y="452" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="end"><tspan dy="0">MSE</tspan></text>
+        <text x="478" y="652" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"><tspan dy="0">w</tspan></text>
+        <text x="140.0" y="666" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle"><tspan dy="0">1.5</tspan></text>
+        <text x="305.0" y="666" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle"><tspan dy="0">3.0</tspan></text>
+        <text x="470.0" y="666" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="middle"><tspan dy="0">4.5</tspan></text>
+        <text x="132.0" y="652" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#5a6580" text-anchor="end"><tspan dy="0">0</tspan></text>
+        <text x="310" y="474" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" text-anchor="middle"><tspan dy="0">MSE(w)</tspan></text>
+        <line x1="261.0" y1="633.3" x2="295.4" y2="633.3" stroke="#2d3142" stroke-width="1.6" marker-end="url(#eq-mse-arrow)"/>
+        <text x="278.2" y="612" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142" text-anchor="middle"><tspan dy="0">step 0.3128</tspan></text>
+        <circle cx="261.0" cy="633.3" r="4" fill="#f5f5f5" stroke="#2d3142" stroke-width="1.6"/>
+        <circle cx="305.0" cy="648.0" r="4" fill="#f5f5f5" stroke="#2d3142" stroke-width="1.6"/>
+        <circle cx="349.0" cy="633.3" r="4" fill="#f5f5f5" stroke="#2d3142" stroke-width="1.6"/>
+        <text x="560" y="444" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">w</tspan></text>
+        <text x="640" y="444" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">w·x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> + b − y</tspan><tspan font-size="7" dy="3">i</tspan></text>
+        <text x="960" y="444" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">MSE</tspan></text>
+        <text x="1060" y="444" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">dMSE/dw</tspan></text>
+        <line x1="560" y1="456" x2="1160" y2="456" stroke="rgba(45,49,66,0.20)" stroke-width="1"/>
+        <text x="560" y="486" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">2.600</tspan></text>
+        <text x="640" y="486" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(−0.320, −1.320, −2.680, −4.000)</tspan></text>
+        <text x="960" y="486" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">6.2568</tspan></text>
+        <text x="1060" y="486" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">−31.284</tspan></text>
+        <text x="560" y="518" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">3.000</tspan></text>
+        <text x="640" y="518" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(0.000, 0.000, 0.000, 0.000)</tspan></text>
+        <text x="960" y="518" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">0.0000</tspan></text>
+        <text x="1060" y="518" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">0.000</tspan></text>
+        <text x="560" y="550" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">3.400</tspan></text>
+        <text x="640" y="550" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">(0.320, 1.320, 2.680, 4.000)</tspan></text>
+        <text x="960" y="550" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">6.2568</tspan></text>
+        <text x="1060" y="550" font-size="14" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">31.284</tspan></text>
+        <rect x="548" y="463" width="612" height="32" rx="3" fill="none" stroke="#bf4520" stroke-width="1.2"/>
+        <text x="560" y="586" font-size="10" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75" letter-spacing="0.14em"><tspan dy="0">THE SAME FOUR ERRORS, REDUCED TWICE · W = </tspan><tspan dy="0">2.600</tspan></text>
+        <text x="560" y="610" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">Σ(w·x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> + b − y</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3">)</tspan><tspan font-size="8" dy="-4">2</tspan><tspan dy="4"> = </tspan><tspan dy="0">0.1024 + 1.7424 + 7.1824 + 16.0000</tspan><tspan dy="0"> = 25.0272</tspan></text>
+        <text x="560" y="634" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">Σ x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3">(w·x</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3"> + b − y</tspan><tspan font-size="7" dy="3">i</tspan><tspan dy="-3">) = </tspan><tspan dy="0">−0.2560 + (−4.3560) + (−17.9560) + (−40.0000)</tspan><tspan dy="0"> = −62.5680</tspan></text>
+        <text x="560" y="658" font-size="12" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">MSE = 25.0272/4 = 6.2568</tspan><tspan dy="0">   ·   </tspan><tspan dy="0">dMSE/dw = 2·(−62.5680)/4 = −31.284</tspan></text>
+        <text x="120" y="700" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#2d3142"><tspan dy="0">the 2 is the square; the 1/4 is the mean — the slope carries both</tspan></text>
+        <text x="120" y="722" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#4f5d75"><tspan dy="0">four rows on one line put the only bottom at w = 3.000 — this model, not losses in general</tspan></text>
+      </svg>
+
+</figure>

@@ -1,0 +1,83 @@
+; Structural editing: a form is a value, so changing it is a function, not
+; a keystroke. Nothing here reads or writes text — a span is the text
+; tree's business (ide/ast.mjs) — and nothing here mutates: every answer
+; is a new form that shares what it did not change.
+;
+;   (form-at f p)            (found value): #t and the element at the path, or #f and ()
+;   (form-has? f p)          whether the path leads anywhere
+;   (form-put f p v)         the element at the path replaced; a path that leads nowhere leaves it as it was
+;   (form-wrap f p head)     the element at the path replaced by (head element); head is a form, so a symbol wraps in a call
+;   (form-unwrap f p)        the element at the path replaced by its first element; not a pair, or empty, leaves it as it was
+;   (form-rename f from to)  every symbol eq? to from replaced by to, at any depth; strings and numbers untouched
+;   (form-text f [width])    the form as source text (pretty, 098), so a rewrite can be written back
+;
+; A PATH is element indices from the outside in: (0) the first element,
+; (0 2) its third. An element is one reader value: a list element, plus the
+; dotted tail of an improper list as the last — how ide/ast.mjs counts a
+; (form) node's children, so a path means the same on both trees; a closure
+; or cycle inside does not read back (098). Needs core, cek, view (070), item (098).
+
+($define! ed-n
+  ($lambda (f) ($if (pair? f) (+ 1 (ed-n (cdr f))) ($if (null? f) 0 1))))
+($define! ed-nth
+  ($lambda (f i)
+    ($cond ((pair? f) ($if (= i 0) (car f) (ed-nth (cdr f) (- i 1))))
+      ((null? f) ())
+      (#t ($if (= i 0) f ())))))
+
+($define! ed-put
+  ($lambda (f i v)
+    ($cond ((pair? f)
+            ($if (= i 0)
+              (cons v (cdr f))
+              (cons (car f) (ed-put (cdr f) (- i 1) v))))
+      ((null? f) f)
+      (#t ($if (= i 0) v f)))))
+
+($define! ed-has?
+  ($lambda (f p)
+    ($cond ((null? p) #t)
+      ((< (car p) (ed-n f)) (ed-has? (ed-nth f (car p)) (cdr p)))
+      (#t #f))))
+($define! ed-find
+  ($lambda (f p)
+    ($if (null? p)
+      f
+      ($if (< (car p) (ed-n f)) (ed-find (ed-nth f (car p)) (cdr p)) ()))))
+
+($define! form-has? ($lambda (f p) (ed-has? f p)))
+($define! form-at
+  ($lambda (f p)
+    ($if (ed-has? f p) (list #t (ed-find f p)) (list #f ()))))
+($define! form-put
+  ($lambda (f p v)
+    ($if (null? p)
+      v
+      ($if (ed-has? f p)
+        (ed-put f (car p) (form-put (ed-nth f (car p)) (cdr p) v))
+        f))))
+($define! form-wrap
+  ($lambda (f p head)
+    ($if (null? p)
+      (list head f)
+      ($if (ed-has? f p)
+        (ed-put f (car p) (form-wrap (ed-nth f (car p)) (cdr p) head))
+        f))))
+($define! form-unwrap
+  ($lambda (f p)
+    ($if (ed-has? f p)
+      (($lambda (v) ($if (pair? v) (form-put f p (car v)) f))
+       (ed-find f p))
+      f)))
+
+; every atom through `g`; pairs are fresh, so this edit shares nothing with the original
+($define! ed-map
+  ($lambda (f g)
+    ($cond ((pair? f) (cons (ed-map (car f) g) (ed-map (cdr f) g)))
+      ((null? f) ())
+      (#t (g f)))))
+($define! form-rename
+  ($lambda (f from to) (ed-map f ($lambda (v) ($if (eq? v from) to v)))))
+
+($define! form-text
+  ($lambda (f . rest) (pretty f ($if (null? rest) 72 (car rest)))))
