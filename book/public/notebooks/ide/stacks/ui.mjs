@@ -63,6 +63,7 @@ async function boot(opts = {}) {
   build();
   refresh();
   wire();
+  if (STUDENT) mountProbe();
   // a notebook opens with its outputs in place: run each cell once the page has painted, so the numbers are
   // already there to read and Run is for trying something else
   setTimeout(() => {
@@ -267,6 +268,71 @@ function accept(card, b) {
   toast(`accepted: ${b.args.title ?? 'the proposal'} is now the ${target.name} block, applied live`);
 }
 
+// ---------------------------------------------------------------- the panel a reader keeps beside the page
+// A notebook shows the state of the run next to the page, not wherever you happened to scroll. This is that pane:
+// where the run is, the names it has now, and a line to evaluate in the frame it is paused in.
+function mountProbe() {
+  if (document.getElementById('probe')) return;
+  const el = document.createElement('aside');
+  el.id = 'probe';
+  el.className = 'probe';
+  el.innerHTML = `<div class="probe-h"><b id="probe-name"></b><span id="probe-where"></span></div>
+    <div class="probe-now" id="probe-now"></div>
+    <div class="probe-names" id="probe-names"></div>
+    <form class="probe-repl" id="probe-repl" autocomplete="off"><input id="probe-in" aria-label="Evaluate an expression where the run is paused" spellcheck="false" placeholder="evaluate…"><button class="btn" type="submit">↵</button></form>
+    <ol class="probe-out" id="probe-out"></ol>`;
+  document.body.appendChild(el);
+  const form = el.querySelector('#probe-repl');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = el.querySelector('#probe-in');
+    const text = input.value.trim();
+    if (!text) return;
+    const r = S.sel ?? [...S.runsOf.values()].flat().at(-1);
+    const out = el.querySelector('#probe-out');
+    let shown;
+    if (!r) shown = { text: 'no run yet', bad: true };
+    else { const got = r.eval(text); shown = got.error ? { text: got.error, bad: true } : { text: pretty(got.text) }; }
+    out.insertAdjacentHTML('afterbegin', `<li class="${shown.bad ? 'bad' : ''}"><span class="f">${esc(text)}</span><span class="v">${esc(shown.text)}</span></li>`);
+    while (out.children.length > 6) out.lastElementChild.remove();
+    input.value = '';
+  });
+  S.probe = el;
+}
+function drawProbe() {
+  const el = S.probe;
+  if (!el) return;
+  const r = S.sel ?? [...S.runsOf.values()].flat().filter((x) => !x.parent).at(-1);
+  const name = el.querySelector('#probe-name'), where = el.querySelector('#probe-where'), now = el.querySelector('#probe-now'), names = el.querySelector('#probe-names');
+  if (!r) { name.textContent = 'Nothing running'; where.textContent = ''; now.textContent = ''; names.innerHTML = ''; return; }
+  const b = S.blocks.get(r.blockId);
+  name.textContent = b?.name ?? b?.args?.title ?? 'this cell';
+  where.textContent = r.done ? 'finished' : `number ${seen(r)}`;
+  const st = r.state?.() ?? null;
+  const last = [...r.events].filter((e) => e.idx <= r.idx).at(-1);
+  now.innerHTML = last ? `<span class="k">${esc(SAYS[last.kind] ?? last.kind)}</span> ${esc(summarise(last))}` : `<span class="k">${esc(st?.label ?? 'start')}</span>`;
+  // the names it has now: a call's own frame while paused, otherwise what the card holds
+  const frame = st?.chain?.find((f) => f.kind === 'local');
+  const pairs = frame?.names?.length
+    ? frame.names.map((x) => [x.name, x.value])
+    : r.done ? r.names().filter((n) => !/^%/.test(n))
+        .map((n) => [n, r.eval(n).text ?? ''])
+        .filter(([, v]) => v && !/^<function|^#<|^id-/.test(v))   // definitions and handles are not data
+        .slice(0, 8) : [];
+  names.innerHTML = pairs.length
+    ? `<b>${esc(frame?.label ?? 'in scope')}</b>${pairs.slice(0, 8).map(([k, v]) => `<div><span>${esc(k)}</span><code>${esc(pretty(String(v)).slice(0, 34))}</code></div>`).join('')}`
+    : `<span class="k">nothing in scope yet</span>`;
+}
+const SAYS = { tokens: 'the words', score: 'one score', weights: 'a row of weights', head: 'a head writes back', attn: 'attention, added on', norm: 'the row, normalised', resid: 'the stream, added up', embed: 'a word, embedded', ffn: 'the feed-forward', y: 'the output', predict: 'the prediction' };
+const summarise = (e) => {
+  if (e.kind === 'weights') return `row ${e.info[1] + 1} of A`;
+  if (e.kind === 'score') return `${num(e.info[3])}`;
+  if (e.kind === 'tokens') return e.info.join(' ');
+  if (e.kind === 'resid' || e.kind === 'norm') return `position ${e.info[1] + 1}`;
+  if (Array.isArray(e.info?.[1])) return '';
+  return String(e.info?.[1] ?? '');
+};
+
 // ---------------------------------------------------------------- drawing the buffer
 function highlight(text, marks) {
   const segs = [];
@@ -384,6 +450,7 @@ function blockShell(b, card) {
 function refresh({ light = false } = {}) {
   const r = S.sel;
   S.now = r ? r.now() : null;
+  if (STUDENT) drawProbe();
   for (const b of S.blocks.values()) {
     const card = S.cardOf.get(b.id);
     if (b.type === 'src') { if (isVau(b)) { if (STUDENT) { if (b.args.run) drawResult(b, card); } else drawSrc(b, card); } }
