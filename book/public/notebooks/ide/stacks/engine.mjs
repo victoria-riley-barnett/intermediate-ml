@@ -468,6 +468,8 @@ export async function makeEngine({ kernel, layers }) {
     };
     // back to the previous visible state: replay from a checkpoint, remembering the last visible index before here
     r.back = () => backTo(r.idx, visible);
+    // the previous note: the unit a reader can see (a score, a row of weights), not one machine transition
+    r.backNote = () => backTo(r.idx, isNote);
     const visibleValue = (s, ctx) => x.car(s) === sym.R && visible(s, ctx);
     const backTo = (target, pred) => {
       if (target <= r.checks[0].idx) return;
@@ -492,6 +494,10 @@ export async function makeEngine({ kernel, layers }) {
     };
     // to the next note of one of these kinds (any, if none), natively
     r.toEvent = (kinds = null) => {
+      // sitting on a note already: step past it, or "next" would hand back the same one
+      if (r.events.some((e) => e.idx === r.idx && (!kinds || kinds.includes(e.kind)))) {
+        if (r.tiny() !== 'hit') return r.done ? 'end' : 'stop';
+      }
       for (let guard = 0; guard < 100000; guard++) {
         const res = r.breaks.size ? walk((s2) => isNote(s2)) : drive(1e9, true);
         if (res !== 'hit' && res !== 'note') return res;

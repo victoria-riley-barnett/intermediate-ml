@@ -27,7 +27,16 @@ const pretty = (t) => String(t ?? '').replace(/(^|[\s(])(-?\d+)\/(\d+)(?=[\s)]|$
 // start({org, lessons, student, file}): draw a lesson into the page's #doc. With no org it reads ?lesson= from lessons/.
 export async function start(opts = {}) {
   if (opts.student !== undefined) STUDENT = opts.student;
-  if (STUDENT) { document.body.classList.add('student'); for (const [k, v] of Object.entries(PLAIN)) ACTIONS[k].label = v; }
+  if (STUDENT) {
+    document.body.classList.add('student');
+    for (const [k, v] of Object.entries(PLAIN)) ACTIONS[k].label = v;
+    // one click, one number: a state a debugger finds interesting can be thousands of transitions away,
+    // and a reader sees nothing while it passes. Notes are what a reader can see.
+    ACTIONS.step.go = (r) => r.toEvent(null);
+    ACTIONS.step.title = 'The next number (→)';
+    ACTIONS.back.go = (r) => r.backNote();
+    ACTIONS.back.title = 'The previous number (←)';
+  }
   return boot(opts);
 }
 async function boot(opts = {}) {
@@ -95,8 +104,10 @@ function newRun(b, { select = true } = {}) {
 const runsOfCard = (card) => S.engine.runs.filter((r) => r.cardId === card.id);
 const blockOfRun = (r) => S.blocks.get(r.blockId);
 const wasEvents = (r) => S.wasOf.get(r.id) ?? (r.parent ? r.parent.events : null);
+// how many numbers the reader has seen: the notes recorded up to where the run is
+const seen = (r) => r.events.filter((e) => e.idx <= r.idx && e.kind !== 'tokens').length;
 
-const PLAIN = { back: '◀ back', step: 'step ▶', score: 'next score', row: 'next row', end: 'run to the end', fork: 'try a different value here' };
+const PLAIN = { back: '◀ back', step: 'next number ▶', score: 'next score', row: 'next row', end: 'run to the end', fork: 'try a different value here' };
 const ACTIONS = {
   back: { label: '◀', title: 'Back one step (←)', go: (r) => r.back() },
   step: { label: '▶', title: 'One step (→)', go: (r) => r.step() },
@@ -290,9 +301,17 @@ function build() {
   if (!STUDENT) h = `<div class="kw">${kw}</div>${h}`;
   h += d.intro.map((b) => blockShell(b, d.cards[0] ?? null)).join('');
   for (const c of d.cards) {
-    h += `<section class="card" data-card="${c.id}"><div class="h1card"><span class="stars">*</span><span class="ttl">${esc(c.title)}</span><span class="env-chip">card · an environment ↑ stack ↑ ground${c.tags.length ? ` · :${esc(c.tags.join(':'))}:` : ''}</span></div>`;
+    // a page reads as a page: real headings, sections always open, no fold buttons
+    h += STUDENT
+      ? `<section class="card" data-card="${c.id}"><h2 class="card-title">${esc(c.title)}</h2>`
+      : `<section class="card" data-card="${c.id}"><div class="h1card"><span class="stars">*</span><span class="ttl">${esc(c.title)}</span><span class="env-chip">card · an environment ↑ stack ↑ ground${c.tags.length ? ` · :${esc(c.tags.join(':'))}:` : ''}</span></div>`;
     h += `<div class="body">${shells(c.intro, c)}`;
     for (const s of c.sections) {
+      if (STUDENT) {
+        const lv = Math.min(1 + s.level, 6);   // a `**` section under an h2 card is an h3
+        h += `<section class="sec" id="sec-${s.id}" data-sec="${s.id}"><h${lv} class="sec-h">${esc(s.title)}</h${lv}><div class="body">${shells(s.blocks, c)}</div></section>`;
+        continue;
+      }
       const open = isOpen(s.id, true);
       h += `<section class="sec" id="sec-${s.id}" data-sec="${s.id}" data-folded="${open ? 0 : 1}"><button class="h l${Math.min(s.level, 3)}" data-fold="${s.id}" aria-expanded="${open}"><span class="stars">${'*'.repeat(s.level)}</span><span class="ttl">${esc(s.title)}</span><span class="fold">${open ? '' : '…'}</span><span class="tagline">${s.tags.length ? `:${esc(s.tags.join(':'))}:` : ''}</span></button><div class="body">${shells(s.blocks, c)}</div></section>`;
     }
@@ -327,7 +346,11 @@ function shells(blocks, card) {
 }
 const pyHighlight = (t) => esc(t).replace(/(#[^\n]*)/g, '<span class="t-c">$1</span>').replace(/\b(import|from|as|def|return|for|in|with|torch|nn|F)\b/g, '<span class="t-k">$1</span>').replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="t-n">$1</span>');
 function blockShell(b, card) {
-  if (b.type === 'prose') return `<p class="prose" data-b="${b.id}">${card ? inline(b.text, card) : esc(b.text)}</p>`;
+  if (b.type === 'prose') {
+    // a line that states the shape of the model is a caption, not a paragraph
+    const model = /^MODEL\b/.test(b.text);
+    return `<p class="prose${model ? ' model' : ''}" data-b="${b.id}">${card ? inline(b.text, card) : esc(b.text)}</p>`;
+  }
   if (b.type === 'src' && !isVau(b) && b.args.live) return `<div class="src py live" data-b="${b.id}" data-pylive="${b.id}"></div>`;
   if (b.type === 'src' && !isVau(b)) {
     if (STUDENT) return `<div class="src py" data-b="${b.id}"><div class="src-h"><span class="nm">${esc(b.args.caption ?? 'Python')}</span></div><pre class="code">${pyHighlight(b.text)}\n</pre></div>`;
@@ -417,9 +440,10 @@ function drawResult(b, card) {
     ? `<div class="forkbox">${STUDENT ? 'go on from here with this value instead' : 'resume the rest of the computation with'} <input value="${esc(S.forking.value)}" data-forkin="${r.id}" aria-label="the value to resume with"> <button class="btn pri" data-forkgo="${r.id}">fork</button><button class="btn" data-forkno="1">cancel</button>${r.parent ? '' : '<span class="lab">the old run keeps its own value</span>'}</div>` : '';
   const stop = r.stop && !r.done ? `<div class="stopq">stopped: ${esc(r.stop.printed)} · go on with <input data-answer="${r.id}" placeholder="a value, e.g. 0" aria-label="the value to go on with"> <button class="btn pri" data-answergo="${r.id}">answer</button></div>` : '';
   const views = b.args.view === 'reads' ? readsView({ ...S.data.get(card.id), events: r.events.filter((e) => e.idx <= r.idx) }) : '';
-  el.innerHTML = `<div class="row"><span class="lab">${STUDENT ? 'this run' : `#+results: ${selected ? 'selected' : 'click to select'}`}</span><span class="branches">${chips}</span></div>
+  const many = chips.split('</button>').length > 2;
+  el.innerHTML = `<div class="row">${STUDENT ? (many ? `<span class="branches">${chips}</span>` : '') : `<span class="lab">#+results: ${selected ? 'selected' : 'click to select'}</span><span class="branches">${chips}</span>`}</div>
     <div class="row">${(STUDENT ? ['back', 'step', 'score', 'row', 'end', 'fork'] : ['back', 'step', 'over', 'out', 'score', 'row', 'end', 'fork']).map(btn).join('')}<button class="btn" data-act="restart" data-run="${r.id}" title="A new run from the first state">${STUDENT ? 'start over' : '⟲'}</button></div>
-    <div class="val">${r.done ? (STUDENT ? where : `value · ${where}`) : `${STUDENT ? 'step' : 'state'} ${r.idx.toLocaleString('en-US')}${where ? ` · ${where}` : ''}`}</div>${forkbox}${stop}${views}`;
+    <div class="val">${r.done ? (STUDENT ? where : `value · ${where}`) : `${STUDENT ? `number ${seen(r)}` : `state ${r.idx.toLocaleString('en-US')}`}${where ? ` · ${where}` : ''}`}</div>${forkbox}${stop}${views}`;
   el.dataset.resrun = r.id;
 }
 function tableShape(b, card) {
@@ -577,12 +601,12 @@ function drawDiagramBlock(b, card) {
   const sel = S.dsel.get(b.id) ?? null;
   el.className = 'blk dgm';
   const r = st.r;
-  const ctl = r ? `<div class="row dg-ctl">${['back', 'step', 'score', 'row', 'end'].filter((k) => k !== 'score' || st.d.boxes.size).map((k) => `<button class="btn${k === 'step' ? ' pri' : ''}" data-act="${k}" data-run="${r.id}" title="${esc(ACTIONS[k].title)}">${ACTIONS[k].label}</button>`).join('')}<span class="lab">${r.done ? 'finished' : `step ${r.idx.toLocaleString('en-US')}`} · ${esc(blockOfRun(r)?.name ?? r.label)}</span></div>` : '';
+  const ctl = r ? `<div class="row dg-ctl">${['back', 'step', 'score', 'row', 'end'].filter((k) => k !== 'score' || st.d.boxes.size).map((k) => `<button class="btn${k === 'step' ? ' pri' : ''}" data-act="${k}" data-run="${r.id}" title="${esc(ACTIONS[k].title)}">${ACTIONS[k].label}</button>`).join('')}<span class="lab">${r.done ? 'finished' : STUDENT ? `number ${seen(r)}` : `step ${r.idx.toLocaleString('en-US')} · ${esc(blockOfRun(r)?.name ?? r.label)}`}</span></div>` : '';
   S.headCount = new Set(st.events.filter((e) => e.kind === 'weights').map((e) => e.info[0])).size;
   el.innerHTML = `${STUDENT
-    ? `<div class="blk-h"><b>${esc(b.args.title ?? 'diagram')}</b></div>`
+    ? ''
     : `<div class="blk-h"><b>${esc(b.args.title ?? 'diagram')}</b> <span>· click a box to see its numbers; the lit box is the step you are on</span><span class="r"><button class="btn" data-dedit="${b.id}">${S.open.has(`${b.id}:text`) ? 'hide the text' : 'the text'}</button></span></div>`}
-    ${ctl}<div class="dg-wrap">${drawDiagram(st.d, { ...st, selected: sel })}</div>${sel ? diagramDetail(b, card, st, sel) : ''}
+    ${STUDENT ? '' : ctl}<div class="dg-wrap">${drawDiagram(st.d, { ...st, selected: sel })}</div>${STUDENT ? ctl : ''}${STUDENT && r && !r.done && !st.events.length ? '<div class="dg-wait">computing the first number…</div>' : ''}${sel ? diagramDetail(b, card, st, sel) : ''}
     ${!STUDENT && S.open.has(`${b.id}:text`) ? `<textarea class="code dg-text" data-dtext="${b.id}" spellcheck="false" wrap="off" rows="${b.text.split('\n').length + 1}">${esc(b.text)}</textarea>` : ''}`;
 }
 function diagramDetail(b, card, st, sel) {

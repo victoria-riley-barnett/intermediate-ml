@@ -146,7 +146,7 @@ export function mountLive(el, block, { cardId = 'card', onStep = null, onNotes =
   };
   const paint = () => { pre.innerHTML = `${highlight(ta.value, marks())}\n`; fit(); };
   v.paint = paint;
-  const status = (text, cls = '') => { st.className = `st ${cls}`; st.textContent = text; };
+  const status = (text, cls = '') => { st.className = `st ${cls}`; st.textContent = plain && !cls ? '' : text; };
 
   ta.addEventListener('input', () => { v.dirty = ta.value !== v.text || v.dirty; el.classList.toggle('dirty', v.dirty); status('edited · ⌘↵ runs it', 'mod'); paint(); });
   ta.addEventListener('keydown', (e) => {

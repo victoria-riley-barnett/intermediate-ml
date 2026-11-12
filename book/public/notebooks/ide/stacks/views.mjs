@@ -25,6 +25,8 @@ function matrix({ rows, cols, tokens, view, sel, cur, wasRows }) {
     h += `<tr class="${cur === i ? 'cur' : ''}"><th class="rl">${esc(t)}</th>`;
     if (!r) h += cols.map(() => '<td class="e">·</td>').join('');
     else h += r.vec.map((v, c) => {
+      // a cell the run has not reached yet is blank, not zero: zero is a number a student would read
+      if (v === undefined || (Array.isArray(v) && !v.length)) return '<td class="e">·</td>';
       const was = wasRows?.[i]?.vec?.[c];
       const ghost = was !== undefined && Math.abs(was - v) > 0.005 ? `<span class="was">was ${num(was)}</span>` : '';
       const s = sel && sel.view === view && sel.i === i && sel.c === c;
@@ -56,7 +58,7 @@ export function renderView(block, ctx) {
       for (const e of events) if (e.kind === 'score' && e.info[0] === Number(a.head ?? 0)) { (rows[e.info[1]] ??= { vec: tokens.map(() => undefined) }).vec[e.info[2]] = e.info[3] * scale; }
       for (const e of ctx.was ?? []) if (e.kind === 'score' && e.info[0] === Number(a.head ?? 0)) { (wasRows[e.info[1]] ??= { vec: [] }).vec[e.info[2]] = e.info[3] * scale; }
       const done = rows.filter(Boolean).length;
-      const body = done ? matrix({ rows: rows.map((r) => r && { vec: r.vec.map((v) => v ?? 0) }), cols: tokens, tokens, view: block.id, sel: ctx.sel, cur: curI, wasRows: ctx.was ? wasRows : null }) : `<div class="empty">not computed yet: ${ctx.plain ? 'step the run to fill this in' : 'step the run below'}</div>`;
+      const body = done ? matrix({ rows: rows.map((r) => r && { vec: r.vec }), cols: tokens, tokens, view: block.id, sel: ctx.sel, cur: curI, wasRows: ctx.was ? wasRows : null }) : (ctx.plain ? '<div class="empty"></div>' : '<div class="empty">not computed yet: step the run below</div>');
       return `<div class="view">${head(caption || 'S', `<span class="lab">${done}/${tokens.length} rows</span>`)}<div class="scroll">${body}</div></div>`;
     }
     const cols = a.cols ? String(a.cols).split(/\s+/) : features;
@@ -68,7 +70,7 @@ export function renderView(block, ctx) {
     });
     const rows = pick(events), was = ctx.was ? pick(ctx.was) : null;
     const filled = rows.filter(Boolean).length;
-    const body = filled ? matrix({ rows, cols, tokens, view: block.id, sel: ctx.sel, cur: curI, wasRows: was }) : `<div class="empty">not computed yet: ${ctx.plain ? 'step the run to fill this in' : 'step the run below, or press “next row”'}</div>`;
+    const body = filled ? matrix({ rows, cols, tokens, view: block.id, sel: ctx.sel, cur: curI, wasRows: was }) : (ctx.plain ? '<div class="empty"></div>' : `<div class="empty">not computed yet: step the run below, or press “next row”</div>`);
     return `<div class="view">${head(caption || of, `<span class="lab">${filled}/${tokens.length} rows</span>`)}<div class="scroll">${body}</div>${explainFor(block, ctx)}</div>`;
   }
   if (kind === 'attention') {
