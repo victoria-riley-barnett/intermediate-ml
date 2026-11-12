@@ -306,7 +306,9 @@ function drawProbe() {
   const name = el.querySelector('#probe-name'), where = el.querySelector('#probe-where'), now = el.querySelector('#probe-now'), names = el.querySelector('#probe-names');
   if (!r) { name.textContent = 'Nothing running'; where.textContent = ''; now.textContent = ''; names.innerHTML = ''; return; }
   const b = S.blocks.get(r.blockId);
-  name.textContent = b?.name ?? b?.args?.title ?? 'this cell';
+  const card = S.cardOf.get(r.blockId);
+  const sec = card?.sections.find((x) => x.blocks.includes(b));
+  name.textContent = b?.name ?? sec?.title ?? card?.title ?? 'this cell';
   where.textContent = r.done ? 'finished' : `number ${seen(r)}`;
   const st = r.state?.() ?? null;
   const last = [...r.events].filter((e) => e.idx <= r.idx).at(-1);
